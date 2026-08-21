@@ -35,8 +35,8 @@
   - **Status:** Implemented (Enhanced)
   - **Description:** Real-time AI triage priority queue featuring interactive severity filter tabs (`ALL`, `CRITICAL`, `MODERATE`, `LOW`), dynamic pending action count counter, severity badges with status pulse dots, hazard distance telemetry tags (e.g. `BOULDER @ 340m`), confidence percentage bars, camera source badges, assigned safety agent tags, row selection handler (`onSelectIncident`), empty state component, and interactive `[APPROVE ACTION]` action buttons with `EXECUTING` and `APPROVED / RESOLVED` status transitions. Fully compliant with Light-Blue Mintlify design guidelines (strictly 4px button border radii, zero pill buttons).
 - **`DecisionLogModal.tsx` (`src/components/Auditor/DecisionLogModal.tsx`):**
-  - **Status:** Implemented
-  - **Description:** Drawer modal displaying 4-step explainable AI decision timeline, SHA-256 cryptographic seal, raw JSON inspection, and RDSO compliance dossier export.
+  - **Status:** Implemented (Enhanced)
+  - **Description:** Complete explainable AI drawer modal with dual view switcher (4-Step Process Timeline vs Raw Telemetry JSON), SHA-256 digital verification seal banner, timestamped agent decision stages (YOLOv11 Vision $\to$ Kinematic Telemetry $\to$ RDSO Kavach EBD Physics $\to$ Actuation Gate), safety outcome resolution summary, keyboard `Escape` & backdrop dismissal, quick JSON clipboard copy, and one-click export of downloadable official RDSO Section 14B Safety Compliance Dossiers. Strictly follows Light-Blue Mintlify design system (strictly 4px button border radii, zero pill buttons, 24px container radius).
 
 ### 3. Developer 1 & Core Modules
 - **Navbar & Page Routing:** `src/components/Navbar.tsx`, `src/app/page.tsx`
