@@ -1,9 +1,10 @@
 'use client';
 
 // src/components/Overview/IncidentQueue.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../Common/Card';
 import { MOCK_INCIDENTS } from '@/lib/mockData';
+import { fetchIncidentQueue } from '@/lib/apiClient';
 import { IncidentRecord, SeverityCategory } from '@/types/apiContracts';
 
 interface IncidentQueueProps {
@@ -14,13 +15,26 @@ interface IncidentQueueProps {
 }
 
 export const IncidentQueue: React.FC<IncidentQueueProps> = ({
-  incidents = MOCK_INCIDENTS,
+  incidents: initialIncidents = MOCK_INCIDENTS,
   selectedIncidentId,
   onSelectIncident,
   onApproveAction
 }) => {
+  const [incidentsList, setIncidentsList] = useState<IncidentRecord[]>(initialIncidents);
   const [activeSeverityFilter, setActiveSeverityFilter] = useState<'ALL' | SeverityCategory>('ALL');
   const [localStatusMap, setLocalStatusMap] = useState<Record<string, IncidentRecord['status']>>({});
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchIncidentQueue('all', 'all').then((data) => {
+      if (isMounted && data && data.length > 0) {
+        setIncidentsList(data);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleApprove = (e: React.MouseEvent, incidentId: string) => {
     e.stopPropagation();
@@ -35,12 +49,12 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
     }
   };
 
-  const filteredIncidents = incidents.filter((item) => {
+  const filteredIncidents = incidentsList.filter((item) => {
     if (activeSeverityFilter === 'ALL') return true;
     return item.severityCategory === activeSeverityFilter;
   });
 
-  const pendingCount = incidents.filter(
+  const pendingCount = incidentsList.filter(
     (item) => (localStatusMap[item.incidentId] || item.status) === 'PENDING_APPROVAL'
   ).length;
 
@@ -77,7 +91,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
           </div>
 
           <div className="text-[11px] text-slate-400 font-mono hidden sm:block">
-            Showing {filteredIncidents.length} of {incidents.length} anomalies
+            Showing {filteredIncidents.length} of {incidentsList.length} anomalies
           </div>
         </div>
 

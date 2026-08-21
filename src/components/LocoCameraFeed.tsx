@@ -1,9 +1,10 @@
 // src/components/LocoCameraFeed.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from './Common/Card';
-import { DeploymentMode } from '@/types/apiContracts';
+import { DeploymentMode, WeatherCondition, TacticalCameraAngle } from '@/types/apiContracts';
+import { getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
 
 export interface TacticalScenario {
   id: string;
@@ -72,6 +73,10 @@ interface LocoCameraFeedProps {
   brakePressureBar: number;
   deploymentMode: DeploymentMode;
   activeStage: number;
+  weatherCondition?: WeatherCondition;
+  onWeatherChange?: (weather: WeatherCondition) => void;
+  cameraAngle?: TacticalCameraAngle;
+  onCameraAngleChange?: (angle: TacticalCameraAngle) => void;
 }
 
 export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
@@ -84,18 +89,46 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
   currentSpeedKmh,
   brakePressureBar,
   deploymentMode,
-  activeStage
+  activeStage,
+  weatherCondition = 'DRY',
+  onWeatherChange,
+  cameraAngle = 'FORWARD_CAB',
+  onCameraAngleChange
 }) => {
+  const [internalWeather, setInternalWeather] = useState<WeatherCondition>(weatherCondition);
+  const [internalAngle, setInternalAngle] = useState<TacticalCameraAngle>(cameraAngle);
+
+  const activeWeather = onWeatherChange ? weatherCondition : internalWeather;
+  const activeAngle = onCameraAngleChange ? cameraAngle : internalAngle;
+
+  const handleWeatherSelect = (w: WeatherCondition) => {
+    if (onWeatherChange) onWeatherChange(w);
+    else setInternalWeather(w);
+  };
+
+  const handleAngleSelect = (a: TacticalCameraAngle) => {
+    if (onCameraAngleChange) onCameraAngleChange(a);
+    else setInternalAngle(a);
+  };
+
   const isEmergency = brakeState === 'EMERGENCY_SOLENOID_ACTUATED';
   const isStopped = currentSpeedKmh === 0 && isEmergency;
+  const weatherInfo = getWeatherFrictionParams(activeWeather);
+
+  // Video URL based on tactical angle
+  const videoUrls: Record<TacticalCameraAngle, string> = {
+    FORWARD_CAB: 'https://assets.mixkit.co/videos/preview/mixkit-train-passing-through-a-green-landscape-42211-large.mp4',
+    OHE_PANTOGRAPH: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-cargo-train-running-on-tracks-42214-large.mp4',
+    BOGIE_UNDERCARRIAGE: 'https://assets.mixkit.co/videos/preview/mixkit-cargo-train-running-on-railroad-tracks-42215-large.mp4'
+  };
 
   return (
     <Card
-      title={`Loco-Cab Forward Vision Camera Feed (Cab #204 — ${currentScenario.trainId})`}
+      title={`Tactical Multi-Sensor Telemetry & Vision Feed (Cab #204 — ${currentScenario.trainId})`}
       className="mb-6"
     >
       {/* Scenario Switcher Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-[#D0DFEE]">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-[#D0DFEE]">
         <div className="flex items-center space-x-2">
           <span className="text-xs font-bold text-[#0F172A]">TACTICAL SCENARIO:</span>
           <div className="flex flex-wrap gap-1">
@@ -138,11 +171,98 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
         </div>
       </div>
 
+      {/* Sub-Toolbar: Multi-Angle Sensor Feeds & Environmental Friction Selector */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 pb-3 border-b border-[#D0DFEE]">
+        {/* Camera Angle Selector */}
+        <div className="flex items-center space-x-2">
+          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider font-mono">Camera Angle:</span>
+          <div className="flex space-x-1 bg-[#F0F6FC] p-0.5 border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
+            <button
+              onClick={() => handleAngleSelect('FORWARD_CAB')}
+              className={`px-2.5 py-1 text-[11px] font-mono font-semibold transition-all ${
+                activeAngle === 'FORWARD_CAB' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+            >
+              🎥 Forward Cab
+            </button>
+            <button
+              onClick={() => handleAngleSelect('OHE_PANTOGRAPH')}
+              className={`px-2.5 py-1 text-[11px] font-mono font-semibold transition-all ${
+                activeAngle === 'OHE_PANTOGRAPH' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+            >
+              ⚡ OHE Pantograph
+            </button>
+            <button
+              onClick={() => handleAngleSelect('BOGIE_UNDERCARRIAGE')}
+              className={`px-2.5 py-1 text-[11px] font-mono font-semibold transition-all ${
+                activeAngle === 'BOGIE_UNDERCARRIAGE' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+            >
+              🛤️ Undercarriage
+            </button>
+          </div>
+        </div>
+
+        {/* Environmental Weather Simulator */}
+        <div className="flex items-center justify-start md:justify-end space-x-2">
+          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider font-mono">Weather / Track:</span>
+          <div className="flex space-x-1 bg-[#F0F6FC] p-0.5 border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
+            <button
+              onClick={() => handleWeatherSelect('DRY')}
+              className={`px-2 py-1 text-[11px] font-mono font-medium transition-all ${
+                activeWeather === 'DRY' ? 'bg-amber-100 text-amber-900 font-bold border border-amber-300 shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+              title="Clear dry track (mu = 0.134)"
+            >
+              ☀️ Dry
+            </button>
+            <button
+              onClick={() => handleWeatherSelect('WET_MONSOON')}
+              className={`px-2 py-1 text-[11px] font-mono font-medium transition-all ${
+                activeWeather === 'WET_MONSOON' ? 'bg-blue-100 text-blue-900 font-bold border border-blue-300 shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+              title="Heavy Monsoon slippage (mu = 0.095, +35% stopping distance)"
+            >
+              🌧️ Monsoon
+            </button>
+            <button
+              onClick={() => handleWeatherSelect('DENSE_FOG')}
+              className={`px-2 py-1 text-[11px] font-mono font-medium transition-all ${
+                activeWeather === 'DENSE_FOG' ? 'bg-slate-200 text-slate-900 font-bold border border-slate-400 shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+              title="Severe Winter Fog (mu = 0.115, sight limited)"
+            >
+              🌫️ Fog
+            </button>
+            <button
+              onClick={() => handleWeatherSelect('NIGHT_IR')}
+              className={`px-2 py-1 text-[11px] font-mono font-medium transition-all ${
+                activeWeather === 'NIGHT_IR' ? 'bg-purple-100 text-purple-900 font-bold border border-purple-300 shadow-xs' : 'text-slate-600 hover:bg-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+              title="Night Vision Infrared (Thermal Spectral)"
+            >
+              🌙 IR Night
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Main Video & HUD Viewport */}
-      <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 min-h-[420px] flex items-center justify-center shadow-inner">
+      <div className={`relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 min-h-[420px] flex items-center justify-center shadow-inner ${
+        activeWeather === 'NIGHT_IR' ? 'filter hue-rotate-90 saturate-200 contrast-125' : activeWeather === 'DENSE_FOG' ? 'contrast-75 brightness-95' : ''
+      }`}>
         {/* Real Train Cab Video Stream */}
         <video
-          src="https://assets.mixkit.co/videos/preview/mixkit-train-passing-through-a-green-landscape-42211-large.mp4"
+          key={activeAngle}
+          src={videoUrls[activeAngle]}
           autoPlay
           loop
           muted
@@ -150,48 +270,75 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
           className="w-full h-[420px] object-cover opacity-90"
         />
 
+        {/* Environmental Rain Overlay */}
+        {activeWeather === 'WET_MONSOON' && (
+          <div className="absolute inset-0 pointer-events-none bg-blue-900/15 backdrop-blur-[0.5px]" />
+        )}
+        {/* Environmental Fog Overlay */}
+        {activeWeather === 'DENSE_FOG' && (
+          <div className="absolute inset-0 pointer-events-none bg-slate-200/25 backdrop-blur-[1px]" />
+        )}
+
         {/* HTML5 Overlay Grid & Crosshairs */}
         <div className="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-        {/* Dynamic Bounding Box Overlay for Selected Hazard */}
-        <div
-          className={`absolute border-2 transition-all flex flex-col justify-between shadow-lg ${
-            currentScenario.hazardClass === 'CATTLE'
-              ? 'border-amber-400 bg-amber-500/20'
-              : 'border-red-500 bg-red-500/20'
-          } ${activeStage >= 1 ? 'ring-4 ring-red-400/50 animate-pulse' : ''}`}
-          style={{
-            top: currentScenario.boxStyle.top,
-            left: currentScenario.boxStyle.left,
-            width: currentScenario.boxStyle.width,
-            height: currentScenario.boxStyle.height,
-            borderRadius: '4px'
-          }}
-        >
+        {/* Dynamic Bounding Box Overlay for Selected Hazard (Only on Forward Cab) */}
+        {activeAngle === 'FORWARD_CAB' && (
           <div
-            className={`text-white text-[10px] font-mono font-bold px-1.5 py-0.5 w-max rounded-t-sm shadow ${
-              currentScenario.hazardClass === 'CATTLE' ? 'bg-amber-600' : 'bg-red-600'
-            }`}
+            className={`absolute border-2 transition-all flex flex-col justify-between shadow-lg ${
+              currentScenario.hazardClass === 'CATTLE'
+                ? 'border-amber-400 bg-amber-500/20'
+                : 'border-red-500 bg-red-500/20'
+            } ${activeStage >= 1 ? 'ring-4 ring-red-400/50 animate-pulse' : ''}`}
+            style={{
+              top: currentScenario.boxStyle.top,
+              left: currentScenario.boxStyle.left,
+              width: currentScenario.boxStyle.width,
+              height: currentScenario.boxStyle.height,
+              borderRadius: '4px'
+            }}
           >
-            {currentScenario.badgeLabel}
+            <div
+              className={`text-white text-[10px] font-mono font-bold px-1.5 py-0.5 w-max rounded-t-sm shadow ${
+                currentScenario.hazardClass === 'CATTLE' ? 'bg-amber-600' : 'bg-red-600'
+              }`}
+            >
+              {currentScenario.badgeLabel}
+            </div>
+            <div className="text-[9px] font-mono text-white/90 bg-black/75 px-1 py-0.5 rounded-b-sm flex justify-between">
+              <span>{currentScenario.hazardClass}</span>
+              <span className="text-emerald-300 font-bold">{Math.round(currentScenario.confidence * 100)}% CONF</span>
+            </div>
           </div>
-          <div className="text-[9px] font-mono text-white/90 bg-black/75 px-1 py-0.5 rounded-b-sm flex justify-between">
-            <span>{currentScenario.hazardClass}</span>
-            <span className="text-emerald-300 font-bold">{Math.round(currentScenario.confidence * 100)}% CONF</span>
+        )}
+
+        {/* Pantograph / Catenary HUD Annotation (When OHE Angle selected) */}
+        {activeAngle === 'OHE_PANTOGRAPH' && (
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 border border-cyan-400 bg-cyan-500/20 p-2 text-cyan-200 font-mono text-xs rounded" style={{ borderRadius: '4px' }}>
+            ⚡ CATENARY CONTACT: 25.4 kV AC | WIRE TENSION: 10.2 kN (NORMAL)
           </div>
-        </div>
+        )}
+
+        {/* Bogie / Undercarriage HUD Annotation (When Undercarriage selected) */}
+        {activeAngle === 'BOGIE_UNDERCARRIAGE' && (
+          <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 border border-emerald-400 bg-emerald-500/20 p-2 text-emerald-200 font-mono text-xs rounded" style={{ borderRadius: '4px' }}>
+            🛤️ AXLE VIBRATION: 1.8 mm/s RMS | WHEEL FLANGE TEMP: 42°C (NOMINAL)
+          </div>
+        )}
 
         {/* HUD Telemetry Overlay (Top Left) */}
-        <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-xs border border-white/20 p-3.5 text-white font-mono text-xs space-y-1.5 shadow-2xl rounded" style={{ borderRadius: '4px' }}>
+        <div className="absolute top-4 left-4 bg-black/85 backdrop-blur-xs border border-white/20 p-3.5 text-white font-mono text-xs space-y-1.5 shadow-2xl rounded" style={{ borderRadius: '4px' }}>
           <div className="flex items-center space-x-2 border-b border-white/10 pb-1">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-emerald-400 font-bold tracking-tight">CAM: LOCO-CAB-FRONT-VANDB-204</span>
+            <span className="text-emerald-400 font-bold tracking-tight">
+              {activeAngle === 'FORWARD_CAB' ? 'CAM: LOCO-CAB-FRONT-VANDB-204' : activeAngle === 'OHE_PANTOGRAPH' ? 'CAM: OHE-PANTOGRAPH-ROOF-01' : 'CAM: BOGIE-OPTICAL-AXLE-04'}
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] pt-0.5">
             <div>SPEED: <span className="text-amber-300 font-bold text-sm">{currentSpeedKmh}</span> KM/H</div>
             <div>BRAKE CYL: <span className="text-cyan-300 font-bold text-sm">{brakePressureBar.toFixed(1)}</span> BAR</div>
             <div>DISTANCE: <span className="text-red-300 font-bold">{currentScenario.distanceMeters}</span> M</div>
-            <div>MASS: <span className="text-slate-300">1400 T</span></div>
+            <div>CONDITIONS: <span className="text-yellow-200 font-bold">{weatherInfo.label}</span></div>
           </div>
           <div className="border-t border-white/10 pt-1 flex items-center justify-between text-[11px]">
             <span>SOLENOID STATE:</span>
@@ -207,13 +354,16 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
         </div>
 
         {/* Speed & Brake Status Gauge (Top Right) */}
-        <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-xs border border-white/20 p-3 text-right font-mono text-xs rounded shadow-2xl" style={{ borderRadius: '4px' }}>
+        <div className="absolute top-4 right-4 bg-black/85 backdrop-blur-xs border border-white/20 p-3 text-right font-mono text-xs rounded shadow-2xl" style={{ borderRadius: '4px' }}>
           <div className="text-[10px] text-slate-400 uppercase tracking-wider">Kinematic Status</div>
           <div className={`text-base font-bold ${isStopped ? 'text-red-400' : isEmergency ? 'text-amber-400' : 'text-emerald-400'}`}>
             {isStopped ? '🛑 FULL STOP (SAFE)' : isEmergency ? '⚠️ DECELERATING (EBD ACTIVE)' : '🟢 CRUISING (CLEAR)'}
           </div>
           <div className="text-[10px] text-slate-400 mt-1">
-            Friction: <span className="text-white font-bold">μ = 0.134</span> | Grade: <span className="text-white font-bold">+0.002</span>
+            Friction: <span className="text-white font-bold">μ = {weatherInfo.frictionCoefficient}</span> | Grade: <span className="text-white font-bold">+0.002</span>
+          </div>
+          <div className="text-[9px] text-amber-300 font-bold mt-0.5">
+            {weatherInfo.riskFactor}
           </div>
         </div>
 

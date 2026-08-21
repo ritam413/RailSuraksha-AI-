@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DeploymentMode } from '@/types/apiContracts';
+import { isAudioMuted, toggleAudioMute, subscribeAudioMute } from '@/lib/audioAlerts';
 
 interface NavbarProps {
   activeTab: 'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY';
@@ -18,6 +19,28 @@ export const Navbar: React.FC<NavbarProps> = ({
   onModeToggle
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [backendOnline, setBackendOnline] = useState<boolean>(false);
+  const [muted, setMuted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMuted(isAudioMuted());
+    const unsubscribe = subscribeAudioMute((val) => setMuted(val));
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/health', { method: 'GET' });
+        setBackendOnline(res.ok);
+      } catch {
+        setBackendOnline(false);
+      }
+    };
+    checkStatus();
+    const statusInterval = setInterval(checkStatus, 8000);
+    return () => clearInterval(statusInterval);
+  }, []);
 
   useEffect(() => {
     const updateClock = () => {
@@ -108,9 +131,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <span className="text-slate-300">|</span>
             <span className="text-[10px] font-mono text-slate-500">OP-402</span>
+            <span className="text-slate-300">|</span>
+            <span
+              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 border ${
+                backendOnline
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-slate-100 text-slate-600 border-slate-200'
+              }`}
+              style={{ borderRadius: '4px' }}
+              title={backendOnline ? 'FastAPI Backend running on port 8000' : 'Backend offline, using local simulation'}
+            >
+              {backendOnline ? 'API: ONLINE' : 'API: LOCAL SIM'}
+            </span>
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Audio Alerts Synthesizer Toggle */}
+            <button
+              onClick={() => toggleAudioMute()}
+              title={muted ? 'Audio Alerts: Muted (Click to Unmute)' : 'Audio Alerts: Active (Click to Mute)'}
+              className={`px-2.5 py-1.5 text-xs font-mono font-semibold border flex items-center space-x-1.5 transition-all ${
+                !muted
+                  ? 'bg-[#E6F0FA] text-[#2B7FFF] border-[#2B7FFF]/40 hover:bg-[#D0DFEE]'
+                  : 'bg-slate-100 text-slate-400 border-slate-300 hover:bg-slate-200'
+              }`}
+              style={{ borderRadius: '4px' }}
+            >
+              <span>{muted ? '🔇' : '🔊'}</span>
+              <span className="hidden sm:inline">{muted ? 'AUDIO OFF' : 'AUDIO ON'}</span>
+            </button>
+
             <button
               onClick={() => onModeToggle(deploymentMode === 'ADVISORY' ? 'AUTONOMOUS' : 'ADVISORY')}
               className={`px-3 py-1.5 text-xs font-bold border transition-all ${

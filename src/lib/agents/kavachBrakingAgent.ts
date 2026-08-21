@@ -1,7 +1,4 @@
-// src/lib/agents/kavachBrakingAgent.ts
-// Kavach Emergency Braking Distance (EBD) Physics Agent
-
-import { EbdCalculationResult } from '@/types/apiContracts';
+import { EbdCalculationResult, WeatherCondition } from '@/types/apiContracts';
 
 export interface BrakingInputs {
   trainId: string;
@@ -10,6 +7,49 @@ export interface BrakingInputs {
   frictionCoefficient?: number; // default steel rail mu = 0.134
   gradientPercent?: number;     // default G = 0.002
   reactionTimeSeconds?: number;// default t_reaction = 2.0s
+  weatherCondition?: WeatherCondition;
+}
+
+/**
+ * Returns RDSO-standard adjusted friction coefficient and reaction buffer based on atmospheric conditions
+ */
+export function getWeatherFrictionParams(weather: WeatherCondition): {
+  frictionCoefficient: number;
+  reactionTimeMultiplier: number;
+  label: string;
+  riskFactor: string;
+} {
+  switch (weather) {
+    case 'WET_MONSOON':
+      return {
+        frictionCoefficient: 0.095, // Hydroplaning risk on wet steel rail
+        reactionTimeMultiplier: 1.25,
+        label: 'Monsoon Heavy Rain',
+        riskFactor: 'HIGH SLIPPAGE (+35% Stopping Distance)',
+      };
+    case 'DENSE_FOG':
+      return {
+        frictionCoefficient: 0.115, // Dew/moisture on cold rail
+        reactionTimeMultiplier: 1.4,
+        label: 'Severe Winter Fog',
+        riskFactor: 'LIMITED SIGHT DISTANCE (220m HUD Cap)',
+      };
+    case 'NIGHT_IR':
+      return {
+        frictionCoefficient: 0.130,
+        reactionTimeMultiplier: 1.1,
+        label: 'Night Vision IR',
+        riskFactor: 'THERMAL SPECTRAL ENHANCED',
+      };
+    case 'DRY':
+    default:
+      return {
+        frictionCoefficient: 0.134,
+        reactionTimeMultiplier: 1.0,
+        label: 'Clear Dry Track',
+        riskFactor: 'OPTIMAL ADHESION',
+      };
+  }
 }
 
 /**
@@ -17,14 +57,19 @@ export interface BrakingInputs {
  * D_stop = (V^2 / (2 * g * (mu + G))) + (V * t_reaction)
  */
 export function calculateKavachEbd(inputs: BrakingInputs): EbdCalculationResult {
+  const weatherParams = inputs.weatherCondition ? getWeatherFrictionParams(inputs.weatherCondition) : null;
+  const effectiveFriction = weatherParams ? weatherParams.frictionCoefficient : (inputs.frictionCoefficient ?? 0.134);
+  const effectiveReactionTime = weatherParams ? (1.96 * weatherParams.reactionTimeMultiplier) : (inputs.reactionTimeSeconds ?? 1.96);
+
   const {
     trainId,
     velocityKmh,
     obstacleDistanceMeters,
-    frictionCoefficient = 0.134,
     gradientPercent = 0.002,
-    reactionTimeSeconds = 1.96
   } = inputs;
+
+  const frictionCoefficient = effectiveFriction;
+  const reactionTimeSeconds = effectiveReactionTime;
 
   const g = 9.81; // Acceleration due to gravity (m/s^2)
   const vMs = (velocityKmh * 1000) / 3600; // Convert km/h to m/s

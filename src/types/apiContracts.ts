@@ -3,6 +3,8 @@
 
 export type DeploymentMode = 'ADVISORY' | 'AUTONOMOUS';
 export type SeverityCategory = 'CRITICAL' | 'MODERATE' | 'LOW';
+export type WeatherCondition = 'DRY' | 'WET_MONSOON' | 'DENSE_FOG' | 'NIGHT_IR';
+export type TacticalCameraAngle = 'FORWARD_CAB' | 'OHE_PANTOGRAPH' | 'BOGIE_UNDERCARRIAGE';
 
 export interface TrackBlockCircuit {
   circuitId: string;

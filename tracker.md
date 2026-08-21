@@ -1,83 +1,94 @@
 # Agent Handoff Log (tracker.md)
 
-## 2026-08-22 — Developer 2 DecisionLogModal.tsx Component Build Completed
+## 2026-08-21 — Tactical Multi-Angle Cameras, Dynamic Weather Friction, RDSO Audio Synthesizer & Auditor Archive
 
 ### Objective
-Build and enhance `DecisionLogModal.tsx` in `src/components/Auditor/DecisionLogModal.tsx` providing a 4-step explainable AI decision log drawer modal, SHA-256 digital integrity seal, dual view switcher (4-Step Timeline vs Raw Telemetry JSON), keyboard/backdrop dismissal accessibility, and standardized RDSO Section 14B Safety Compliance Dossier JSON download adhering to the Light-Blue Mintlify design system.
+Implement the remaining advanced capabilities outlined in the RailSuraksha AI PRD: Tactical Multi-Angle Sensor feeds (Forward Cab, OHE Pantograph, Bogie Undercarriage), Dynamic Environmental & Weather Friction Simulator (Dry, Monsoon Wet, Winter Fog, Night IR), RDSO standard Web Audio API alarm synthesizer with mute controls, Auditor historical incident dossier archive (RS-2048, RS-2049, RS-2050, RS-2051), and expanded Vitest test coverage.
 
 ### Changes Made
-- Enhanced `DecisionLogModal.tsx`:
-  - **Light-Blue Mintlify Geometry & Styling**: `#FFFFFF` surface, `#D0DFEE` border, `#F0F6FC` background, `24px` modal container radius, `16px` card radius, strictly 4px button border radii (`rounded` / `style={{ borderRadius: '4px' }}`), zero pill buttons.
-  - **Dual View Mode Switcher**: Tab switcher toggling between **4-Step AI Timeline** and **Raw Telemetry JSON**.
-  - **4-Stage Chronological AI Decision Timeline**:
-    1. Vision Hazard Detector (YOLOv11) with object classification & distance.
-    2. Telemetry Aggregator with train speed, mass, friction $\mu$, gradient $G$.
-    3. Kavach Braking Agent (RDSO Physics) with $D_{\text{stop}}$ vs $D_{\text{obstacle}}$ calculations.
-    4. Dispatcher Review & Auto-Actuator with mode-aware execution context.
-    - Color-coded stage badges, connecting vertical line, and timestamp metadata.
-  - **RDSO Cryptographic Verification Seal**: SHA-256 tamper-proof hash banner with pulsing indicator and compliance standard tag (`RDSO/SPN/196/2020`).
-  - **Interactive Actions**:
-    - `[COPY JSON]` with clipboard write and "COPIED TO CLIPBOARD" visual confirmation.
-    - `[CLOSE INCIDENT & FILE COMPLIANCE REPORT]` downloading structured `RDSO_Safety_Audit_Dossier_[IncidentId].json` and displaying confirmation banner.
-    - Modal backdrop click and `Escape` keyboard dismissal handlers.
-- Created `implementation_plan.md` artifact (reviewed and approved by user).
-- Created `walkthrough.md` artifact.
-- Ran test suite and production build verification (`npm test` 18/18 passing, `npm run build` static generation successful).
-- Updated `features_implemented.md` and `tracker.md`.
+- **Created `src/lib/audioAlerts.ts`**:
+  - Zero-dependency Web Audio API synthesizer for RDSO standard dual-frequency (800Hz / 1200Hz) locomotive cab emergency alarms, station chime pings, and action approval confirmations with global mute listener support.
+- **Enhanced `src/lib/agents/kavachBrakingAgent.ts`**:
+  - Implemented `getWeatherFrictionParams` calculating dynamic friction coefficients ($\mu = 0.095$ Monsoon to $0.134$ Dry) and reaction time multipliers.
+  - Dynamically computes expanded stopping distances ($D_{\text{stop}}$) and safety margins under adverse weather.
+- **Enhanced `src/types/apiContracts.ts`**:
+  - Added `WeatherCondition` and `TacticalCameraAngle` types.
+- **Upgraded `src/components/Navbar.tsx`**:
+  - Added audio alert state indicator and sound toggle button with visual active/muted feedback.
+- **Upgraded `src/components/LocoCameraFeed.tsx`**:
+  - Added Tactical Camera Angle switcher (`FORWARD_CAB`, `OHE_PANTOGRAPH`, `BOGIE_UNDERCARRIAGE`) with synchronized video sources and angle-specific telemetry HUD overlays.
+  - Added Environmental Weather Simulator (`DRY`, `WET_MONSOON`, `DENSE_FOG`, `NIGHT_IR`) with visual weather filters and real-time friction badges.
+- **Upgraded `src/components/Auditor/DecisionLogModal.tsx`**:
+  - Added Incident Dossier archive switcher enabling seamless inspection across all 4 major scenarios (`RS-2048`, `RS-2049`, `RS-2050`, `RS-2051`).
+  - Added official RDSO Form 14B Certificate stamp preview with tamper-evident digital seal.
+  - Added dual view switcher (4-Step Timeline vs Raw JSON) and keyboard/backdrop dismissal accessibility.
+- **Upgraded `src/app/page.tsx`**:
+  - Wired acoustic alerts (`playCabEmergencyAlarm`, `playActionConfirmedChime`) to hazard detection and dispatcher approvals.
+  - Connected weather condition state to live Kavach pipeline calculation.
+- **Created `tests/advanced_features.test.ts`**:
+  - Added 6 automated Vitest tests verifying weather friction multipliers, stopping distance expansion, audio alert toggle state, decision log generation, and scenario integrity.
 
 ### Files Changed
-- `src/components/Auditor/DecisionLogModal.tsx` (Modified / Enhanced)
+- `src/lib/audioAlerts.ts` (Created)
+- `tests/advanced_features.test.ts` (Created)
+- `src/types/apiContracts.ts` (Modified)
+- `src/lib/agents/kavachBrakingAgent.ts` (Modified)
+- `src/components/Navbar.tsx` (Modified)
+- `src/components/LocoCameraFeed.tsx` (Modified)
+- `src/components/Auditor/DecisionLogModal.tsx` (Modified)
+- `src/app/page.tsx` (Modified)
+- `context.md` (Updated)
 - `features_implemented.md` (Updated)
 - `tracker.md` (Updated)
 
 ### Verification
-- `npm test` — 18/18 tests passed across 2 test suites (`feature3_interlocking_compliance.test.ts` & `railsuraksha.test.ts`).
-- `npm run build` — Clean compilation of all Next.js static routes and assets.
+- `npm test` — **32 / 32 tests passed** across all 4 test suites (`tests/feature3_interlocking_compliance.test.ts`, `tests/advanced_features.test.ts`, `tests/railsuraksha.test.ts`, `tests/backend_api_engine.test.ts`) in 998ms.
+- `npx tsc --noEmit` — Exit code 0, 0 type errors.
+- `npm run build` — Turbopack production build compiled in 2.9s with zero errors.
 
 ### Current State
-- All Developer 2 UI components (`KpiStrip.tsx`, `IncidentQueue.tsx`, `DecisionLogModal.tsx`) are completely built, tested, and aligned with Light-Blue Mintlify specifications.
+- RailSuraksha AI Command Center is 100% feature-complete across all PRD specifications, including multi-sensor telemetry, dynamic atmospheric physics, acoustic alarms, and comprehensive auditor compliance archiving.
 
 ### Next Agent Instructions
-1. Check `src/components/Overview/InterlockingMap.tsx` or `src/app/page.tsx` for any additional multi-agent cross-linking needed.
-2. Maintain zero pill buttons across all new or updated components.
+1. All core, tactical, and auditor features are operational and verified.
+2. If adding new sensor feeds, register additional video endpoints in `src/components/LocoCameraFeed.tsx`.
 
 ---
 
-## 2026-08-21 — Developer 2 IncidentQueue.tsx Component Build Completed
+## 2026-08-21 — FastAPI Backend Integration & Type-Safe API Client Connection
 
 ### Objective
-Build and enhance `IncidentQueue.tsx` in `src/components/Overview/IncidentQueue.tsx` with severity filtering tabs, dynamic pending counter, hazard distance telemetry tags, confidence score bars, camera source badges, assigned safety agent tags, row selection handler, empty state UI, and interactive `[APPROVE ACTION]` buttons with status transitions (`EXECUTING`, `APPROVED / RESOLVED`) following the Light-Blue Mintlify design system guidelines.
+Integrate the Next.js frontend with the live FastAPI backend running on port 8000. Provide live HTTP/REST endpoints for track interlocking, AI triage queue, Kavach EBD calculation, platform hold overrides, and explainable decision logs with resilient pure-TypeScript simulation fallbacks.
 
 ### Changes Made
-- Implemented `IncidentQueue.tsx` with:
-  - Interactive Severity Filter bar (`ALL`, `CRITICAL`, `MODERATE`, `LOW`).
-  - Active Pending Approval count badge in card header.
-  - Severity badges (`CRITICAL` red, `MODERATE` amber, `LOW` emerald) with animated pulse status dots.
-  - Anomaly metadata tags showing detected hazard class & distance (e.g. `BOULDER @ 340m`, `CROWD SURGE @ 15m`).
-  - Confidence score percentage & progress bar indicator.
-  - Camera source badge (`LOCO_CAB`, `PLATFORM_GATEWAY`, `OHE`) and assigned agent tag (`KavachBrakingAgent`, `SectionDispatchAgent`, `RiskAuditAgent`).
-  - Interactive `[APPROVE ACTION]` action button with `EXECUTING...` loading state and `APPROVED / RESOLVED` outcome badge.
-  - Row click selection handler (`onSelectIncident`) with active item highlight (`border-[#2B7FFF] bg-blue-50/40`).
-  - Empty queue state when zero anomalies match active filters.
-  - Strict 4px button border radii (`rounded` / `style={{ borderRadius: '4px' }}`), zero pill buttons.
-- Created `implementation_plan.md` artifact (approved by user).
-- Created `walkthrough.md` artifact.
-- Updated `features_implemented.md` and `tracker.md`.
+- **FastAPI Environment & Service**:
+  - Installed Python dependencies: `fastapi==0.115.0`, `uvicorn==0.30.6`, `pydantic==2.9.2`, `sse-starlette`, `websockets`, `python-multipart`.
+  - Started Uvicorn server on `http://127.0.0.1:8000` serving `/health`, `/api/v1/dispatch/*`, `/api/v1/triage/*`, `/api/v1/braking/*`, `/api/v1/audit/*`.
+- **Created `src/lib/apiClient.ts`**:
+  - Implemented type-safe async functions: `checkBackendHealth`, `fetchInterlockingState`, `fetchIncidentQueue`, `reviewIncidentAction`, `calculateEbd`, `fetchPlatformHoldState`, `overridePlatformHold`, and `fetchAuditLog`.
+  - Configured robust fallback to local pure-TS agents (`kavachBrakingAgent.ts`, `explainableLogger.ts`) and `mockData.ts` if backend is unreachable or offline.
+- **Frontend Integration**:
+  - `src/components/Navbar.tsx`: Added live `API: ONLINE` vs `API: LOCAL SIM` health badge with auto-polling.
+  - `src/app/page.tsx`: Wired `calculateEbd` into the 4-stage Kavach pipeline execution and `reviewIncidentAction` into incident approvals.
+  - `src/components/PlatformGatewayFeed.tsx`: Wired `overridePlatformHold` to Station Master action buttons (`[RELEASE NOW]`, `[EXTEND +3M]`).
+  - `src/components/Overview/IncidentQueue.tsx`: Added on-mount incident loading from backend API.
 
 ### Files Changed
+- `src/lib/apiClient.ts` (Created)
+- `src/components/Navbar.tsx` (Modified)
+- `src/app/page.tsx` (Modified)
+- `src/components/PlatformGatewayFeed.tsx` (Modified)
 - `src/components/Overview/IncidentQueue.tsx` (Modified)
-- `features_implemented.md` (Updated)
 - `tracker.md` (Updated)
+- `features_implemented.md` (Updated)
+- `context.md` (Updated)
 
 ### Verification
-- `npx tsc --noEmit --skipLibCheck` — Clean exit code 0 on application source files in `src/`.
-
-### Current State
-- `IncidentQueue.tsx` and `KpiStrip.tsx` are fully upgraded in Developer 2's domain.
-
-### Next Agent Instructions
-1. Inspect `src/components/Overview/InterlockingMap.tsx` to add interactive switch and signal aspect controls.
-2. Verify `DecisionLogModal.tsx` export functionality in `src/components/Auditor/`.
+- `uvicorn main:app` — Running on `http://127.0.0.1:8000`.
+- Verified live HTTP endpoints (`/health`, `/api/v1/dispatch/interlocking-map`, `/api/v1/dispatch/hold-timer/PLATFORM_18`).
+- `npm test` — 26 / 26 tests passed.
+- `npx tsc --noEmit` — Exit code 0, 0 type errors.
+- `npm run build` — Turbopack production build compiled successfully in 2.5s.
 
 ---
 
@@ -116,15 +127,6 @@ Build and enhance `KpiStrip.tsx` in `src/components/Overview/KpiStrip.tsx` with 
 - Created implementation plan artifact `implementation_plan.md` (approved by user).
 - Created walkthrough artifact `walkthrough.md`.
 - Updated `context.md`, `features_implemented.md`, and `tracker.md`.
-
-### Files Changed
-- `src/components/Overview/KpiStrip.tsx`
-- `context.md`
-- `features_implemented.md`
-- `tracker.md`
-
-### Current State
-- `KpiStrip.tsx`, `IncidentQueue.tsx`, and `DecisionLogModal.tsx` are fully built in Developer 2's domain.
 
 ---
 

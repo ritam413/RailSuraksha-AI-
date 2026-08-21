@@ -14,9 +14,12 @@
 | **Cross-View Triage & Interlocking Synchronization** | Implemented | Two-way binding between Incident Queue alerts, track circuits, and tactical camera feeds (`LOCO_CAB` / `PLATFORM_GATEWAY`). |
 | **Kavach Emergency Braking Physics Engine** | Implemented | Pure TS RDSO braking formula: $D_{\text{stop}} = \frac{V^2}{2g(\mu + G)} + V \cdot t_{\text{reaction}}$. |
 | **AI Triage Classifier** | Implemented | Pure TS severity classifier mapping hazard class, confidence, and distance into severity categories. |
-| **Section Dispatch Crowd & Hold Logic** | Implemented | Pure TS crowd density calculator & 5-minute deterministic hold tracker. |
-| **Explainable Audit Logger** | Implemented | Pure TS generator for immutable 4-step decision logs. |
-| **Vitest Automated Test Suite** | Implemented | Comprehensive unit and integration test coverage (`tests/railsuraksha.test.ts` & `tests/feature3_interlocking_compliance.test.ts` - 18/18 passing tests). |
+| **Tactical Multi-Angle Sensor Switcher** | Implemented | 3 selectable video angles: Forward Cab Vision, OHE Pantograph & Catenary Cam, and Bogie Undercarriage Track Cam (`LocoCameraFeed.tsx`). |
+| **Environmental Weather & Friction Simulator** | Implemented | 4 real-time track weather conditions (Dry $\mu=0.134$, Monsoon Rain $\mu=0.095$, Winter Fog $\mu=0.115$, Night IR) dynamically expanding stopping distances in Kavach EBD formula. |
+| **RDSO Safety Audio Synthesizer** | Implemented | Web Audio API dual-tone acoustic alarm generator (800Hz / 1200Hz pulsing alert) and station chimes with Navbar audio toggle (`src/lib/audioAlerts.ts`, `src/components/Navbar.tsx`). |
+| **Historical Incident Audit Dossier Archive** | Implemented | Multi-incident switcher (RS-2048, RS-2049, RS-2050, RS-2051), RDSO Form 14B Certificate seal preview, clipboard copy, and downloadable JSON dossiers (`DecisionLogModal.tsx`). |
+| **FastAPI Backend & Type-Safe API Client** | Implemented | Centralized HTTP client (`src/lib/apiClient.ts`) connecting to FastAPI (`http://127.0.0.1:8000`) for EBD physics, triage review, platform hold overrides, and interlocking telemetry with pure-TS simulation fallback. |
+| **Vitest Automated Test Suite** | Implemented | Comprehensive unit and integration test coverage (`tests/railsuraksha.test.ts`, `tests/feature3_interlocking_compliance.test.ts`, `tests/backend_api_engine.test.ts`, `tests/advanced_features.test.ts` - 32/32 passing tests). |
 
 ---
 

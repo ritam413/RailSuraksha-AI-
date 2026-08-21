@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from './Common/Card';
 import { calculatePlatformHoldState } from '@/lib/agents/sectionDispatchAgent';
+import { overridePlatformHold } from '@/lib/apiClient';
 import { DEMO_VIDEO_STREAMS } from '@/lib/mockData';
 
 interface PlatformGatewayFeedProps {
@@ -229,9 +230,14 @@ export const PlatformGatewayFeed: React.FC<PlatformGatewayFeedProps> = ({
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => {
+                onClick={async () => {
                   setSecondsRemaining(0);
                   setIsTimerRunning(false);
+                  try {
+                    await overridePlatformHold('PLATFORM_18', 'RELEASE');
+                  } catch {
+                    // Handled locally
+                  }
                 }}
                 className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs rounded transition-all shadow-xs flex items-center justify-center space-x-1"
                 style={{ borderRadius: '4px' }}
@@ -240,10 +246,15 @@ export const PlatformGatewayFeed: React.FC<PlatformGatewayFeedProps> = ({
               </button>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   setSecondsRemaining((prev) => prev + 180);
                   setIsTimerRunning(true);
                   setCrowdCount((prev) => Math.min(600, prev + 40));
+                  try {
+                    await overridePlatformHold('PLATFORM_18', 'EXTEND_3M');
+                  } catch {
+                    // Handled locally
+                  }
                 }}
                 className="py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:scale-[0.98] text-white font-bold text-xs rounded transition-all shadow-xs flex items-center justify-center space-x-1"
                 style={{ borderRadius: '4px' }}

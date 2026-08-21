@@ -10,10 +10,12 @@ import { LocoCameraFeed, SCENARIOS, TacticalScenario } from '@/components/LocoCa
 import { AgentPipelineCanvas } from '@/components/AgentPipelineCanvas';
 import { DecisionLogModal } from '@/components/Auditor/DecisionLogModal';
 import { PlatformGatewayFeed } from '@/components/PlatformGatewayFeed';
-import { DeploymentMode, EbdCalculationResult, IncidentRecord, ExplainableDecisionLog } from '@/types/apiContracts';
-import { calculateKavachEbd } from '@/lib/agents/kavachBrakingAgent';
+import { DeploymentMode, EbdCalculationResult, IncidentRecord, ExplainableDecisionLog, WeatherCondition, TacticalCameraAngle } from '@/types/apiContracts';
+import { calculateEbd, reviewIncidentAction } from '@/lib/apiClient';
+import { calculateKavachEbd, getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
 import { buildExplainableDecisionLog } from '@/lib/agents/explainableLogger';
 import { MOCK_DECISION_LOG } from '@/lib/mockData';
+import { playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
 
 export default function CommandCenterPage() {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY'>('OVERVIEW');
@@ -24,8 +26,10 @@ export default function CommandCenterPage() {
   const [selectedTrackId, setSelectedTrackId] = useState<string>('BLK-101');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  // Tactical Scenario & Pipeline State
+  // Tactical Scenario, Weather & Sensor Pipeline State
   const [currentScenario, setCurrentScenario] = useState<TacticalScenario>(SCENARIOS.BOULDER_CRITICAL);
+  const [weatherCondition, setWeatherCondition] = useState<WeatherCondition>('DRY');
+  const [cameraAngle, setCameraAngle] = useState<TacticalCameraAngle>('FORWARD_CAB');
   const [activeStage, setActiveStage] = useState<number>(0);
   const [isPipelineExecuting, setIsPipelineExecuting] = useState(false);
   const [isAdvisoryApproved, setIsAdvisoryApproved] = useState(false);
@@ -73,6 +77,7 @@ export default function CommandCenterPage() {
   const startDecelerationSequence = () => {
     setBrakeState('EMERGENCY_SOLENOID_ACTUATED');
     setBrakePressureBar(5.0);
+    playCabEmergencyAlarm(1.5);
 
     if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
 
@@ -100,23 +105,39 @@ export default function CommandCenterPage() {
     setCurrentSpeedKmh(currentScenario.initialSpeedKmh);
     setBrakePressureBar(0.0);
 
+    // Sound cab alarm on hazard start
+    playCabEmergencyAlarm(0.8);
+
     // Stage 1: YOLOv11 Vision Hazard Detection
     setActiveStage(1);
 
     // Stage 2: Telemetry Aggregation (after 400ms)
-    setTimeout(() => {
+    setTimeout(async () => {
       setActiveStage(2);
 
-      // Stage 3: RDSO Physics Engine Computation (after 500ms)
-      setTimeout(() => {
-        const result = calculateKavachEbd({
-          trainId: currentScenario.trainId,
-          velocityKmh: currentScenario.initialSpeedKmh,
-          obstacleDistanceMeters: currentScenario.distanceMeters,
-          frictionCoefficient: 0.134,
-          gradientPercent: 0.002,
-          reactionTimeSeconds: 1.96
-        });
+      // Stage 3: RDSO Physics Engine Computation (with weather friction factors)
+      setTimeout(async () => {
+        const weatherParams = getWeatherFrictionParams(weatherCondition);
+        let result: EbdCalculationResult;
+        try {
+          result = await calculateEbd({
+            trainId: currentScenario.trainId,
+            velocityKmh: currentScenario.initialSpeedKmh,
+            obstacleDistanceMeters: currentScenario.distanceMeters,
+            massTonnes: 1400,
+            coefficientFriction: weatherParams.frictionCoefficient,
+            trackGradientPercent: 0.2,
+            reactionTimeSeconds: 1.2 * weatherParams.reactionTimeMultiplier,
+          });
+        } catch {
+          result = calculateKavachEbd({
+            trainId: currentScenario.trainId,
+            velocityKmh: currentScenario.initialSpeedKmh,
+            obstacleDistanceMeters: currentScenario.distanceMeters,
+            weatherCondition: weatherCondition,
+            gradientPercent: 0.002,
+          });
+        }
         setEbdResult(result);
         setActiveStage(3);
 
@@ -157,6 +178,7 @@ export default function CommandCenterPage() {
 
   // Advisory Mode: Operator approves action at Stage 4
   const handleApproveAdvisoryAction = () => {
+    playActionConfirmedChime();
     setIsAdvisoryApproved(true);
     startDecelerationSequence();
     setTimeout(() => {
@@ -197,9 +219,17 @@ export default function CommandCenterPage() {
   };
 
   // Incident Queue Action Approval
-  const handleApproveIncidentAction = (incidentId: string) => {
+  const handleApproveIncidentAction = async (incidentId: string) => {
+    playActionConfirmedChime();
     setSelectedIncidentId(incidentId);
     setActionNotice(`Safety Action for Incident #${incidentId} approved by Section Controller OP-402.`);
+
+    // Dispatch approval to backend API (or fallback)
+    try {
+      await reviewIncidentAction(incidentId, 'APPROVE', 'OP-402');
+    } catch {
+      // Handled gracefully in client
+    }
 
     const log = buildExplainableDecisionLog(
       incidentId,
@@ -295,6 +325,10 @@ export default function CommandCenterPage() {
               brakePressureBar={brakePressureBar}
               deploymentMode={deploymentMode}
               activeStage={activeStage}
+              weatherCondition={weatherCondition}
+              onWeatherChange={setWeatherCondition}
+              cameraAngle={cameraAngle}
+              onCameraAngleChange={setCameraAngle}
             />
 
             <AgentPipelineCanvas

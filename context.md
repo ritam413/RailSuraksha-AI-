@@ -42,8 +42,10 @@ src/
 │   └── Auditor/
 │       └── DecisionLogModal.tsx      # 4-step explainable AI audit timeline modal
 ├── lib/
+│   ├── apiClient.ts                  # Type-safe API client connecting to FastAPI port 8000
+│   ├── audioAlerts.ts                # Web Audio API synthesizer for RDSO cab alarms & chimes
 │   ├── agents/
-│   │   ├── kavachBrakingAgent.ts     # RDSO Emergency Braking Distance physics
+│   │   ├── kavachBrakingAgent.ts     # RDSO Emergency Braking Distance physics (with weather friction factors)
 │   │   ├── triageAgent.ts            # Severity scoring & classifier
 │   │   ├── sectionDispatchAgent.ts   # Platform hold timer & crowd density agent
 │   │   └── explainableLogger.ts      # Immutable 4-step decision log generator
@@ -51,7 +53,7 @@ src/
 │   ├── physics/                      # Physics calculation helpers
 │   └── vision/                       # Computer vision inference helpers
 └── types/
-    └── apiContracts.ts               # Shared TypeScript interfaces & types
+    └── apiContracts.ts               # Shared TypeScript interfaces & types (weather, sensor angles, contracts)
 ```
 
 ## 5. Key Rules & Constraints

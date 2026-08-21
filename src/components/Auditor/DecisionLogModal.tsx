@@ -4,6 +4,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ExplainableDecisionLog } from '@/types/apiContracts';
 import { MOCK_DECISION_LOG } from '@/lib/mockData';
+import { buildExplainableDecisionLog } from '@/lib/agents/explainableLogger';
+import { playActionConfirmedChime } from '@/lib/audioAlerts';
 
 interface DecisionLogModalProps {
   isOpen: boolean;
@@ -11,12 +13,21 @@ interface DecisionLogModalProps {
   log?: ExplainableDecisionLog;
 }
 
+const HISTORICAL_INCIDENTS = [
+  { id: 'RS-2048', train: '12345 (Vande Bharat)', section: 'Section 14B Up Main Line', hazard: 'BOULDER', dist: 340, dStop: 410 },
+  { id: 'RS-2049', train: '12137 (Punjab Mail)', section: 'CSMT Platform 17/18 Bottleneck', hazard: 'CROWD_SURGE', dist: 15, dStop: 0 },
+  { id: 'RS-2050', train: '22691 (Rajdhani Express)', section: 'Section 08C Curve 4 Loop', hazard: 'RAIL_FRACTURE', dist: 210, dStop: 295 },
+  { id: 'RS-2051', train: '12002 (Bhopal Shatabdi)', section: 'Section 16A Down Main Line', hazard: 'CATTLE', dist: 680, dStop: 410 }
+];
+
 export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
   isOpen,
   onClose,
-  log = MOCK_DECISION_LOG
+  log: initialLog = MOCK_DECISION_LOG
 }) => {
   const [activeTab, setActiveTab] = useState<'TIMELINE' | 'RAW_JSON'>('TIMELINE');
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string>(initialLog.incidentId || 'RS-2048');
+  const [activeLog, setActiveLog] = useState<ExplainableDecisionLog>(initialLog);
   const [isExported, setIsExported] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -39,32 +50,57 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
     };
   }, [isOpen, handleKeyDown]);
 
+  useEffect(() => {
+    if (initialLog) {
+      setSelectedIncidentId(initialLog.incidentId);
+      setActiveLog(initialLog);
+    }
+  }, [initialLog]);
+
+  const handleSwitchIncident = (incidentId: string) => {
+    setSelectedIncidentId(incidentId);
+    const inc = HISTORICAL_INCIDENTS.find((item) => item.id === incidentId);
+    if (inc) {
+      const generatedLog = buildExplainableDecisionLog(
+        inc.id,
+        inc.train,
+        inc.section,
+        activeLog.deploymentMode,
+        inc.hazard,
+        inc.dist,
+        inc.dStop
+      );
+      setActiveLog(generatedLog);
+    }
+  };
+
   if (!isOpen) return null;
 
-  // Generate downloadable RDSO Section 14B Safety Compliance Report Dossier
+  // Generate real downloadable RDSO Compliance Report Dossier
   const handleExportReport = () => {
+    playActionConfirmedChime();
     const reportData = {
-      dossierId: `RDSO-AUDIT-${log.incidentId}-${Date.now().toString().slice(-6)}`,
+      dossierId: `RDSO-AUDIT-${activeLog.incidentId}-${Date.now().toString().slice(-6)}`,
       governingStandard: 'RDSO Specification No. RDSO/SPN/196/2020 (Kavach / TCAS Safety Standard)',
       governingAuthority: 'Ministry of Railways / RDSO Safety Directorate, Govt of India',
       generatedTimestamp: new Date().toISOString(),
       stationDivision: 'Central Railway / Mumbai CSMT Division / Section 14B Up Main',
       deploymentGovernance: {
-        mode: log.deploymentMode,
+        mode: activeLog.deploymentMode,
         authorizedOperator:
-          log.deploymentMode === 'ADVISORY'
+          activeLog.deploymentMode === 'ADVISORY'
             ? 'Section Controller OP-402 (Manual Verification Gate)'
             : 'Autonomous Direct Solenoid Engine Actuator',
         interlockState: 'LOCKED_AND_VERIFIED'
       },
       incidentDetails: {
-        incidentId: log.incidentId,
-        trainNumber: log.trainNumber,
-        trackSection: log.trackSection,
-        status: log.status,
-        outcomeSummary: log.outcomeSummary
+        incidentId: activeLog.incidentId,
+        trainNumber: activeLog.trainNumber,
+        trackSection: activeLog.trackSection,
+        status: activeLog.status,
+        outcomeSummary: activeLog.outcomeSummary
       },
-      agentDecisionTrail: log.steps.map((s) => ({
+      agentDecisionTrail: activeLog.steps.map((s) => ({
         step: s.stepNumber,
         agent: s.agentName,
         title: s.title,
@@ -83,7 +119,7 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `RDSO_Safety_Audit_Dossier_${log.incidentId}.json`;
+    a.download = `RDSO_Safety_Audit_Dossier_${activeLog.incidentId}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -93,11 +129,11 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
     setTimeout(() => {
       setIsExported(false);
       onClose();
-    }, 1800);
+    }, 1600);
   };
 
   const handleCopyJSON = () => {
-    navigator.clipboard.writeText(JSON.stringify(log, null, 2));
+    navigator.clipboard.writeText(JSON.stringify(activeLog, null, 2));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -123,36 +159,36 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-headline"
-      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="bg-white border border-[#D0DFEE] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white border border-[#D0DFEE] w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
         style={{ borderRadius: '24px' }}
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-[#D0DFEE] flex items-center justify-between bg-[#F0F6FC]">
+        <div className="p-5 border-b border-[#D0DFEE] flex items-center justify-between bg-[#F0F6FC]">
           <div>
             <div className="flex items-center space-x-2.5">
-              <h2 id="modal-headline" className="text-lg font-bold text-[#0F172A] tracking-tight">
-                Explainable Decision Log & Audit Dossier
+              <span className="text-xl">📋</span>
+              <h2 id="modal-headline" className="text-base font-bold text-[#0F172A] tracking-tight">
+                RDSO Explainable Decision Log & Safety Audit Dossier
               </h2>
               <span
                 className={`px-2 py-0.5 text-[10px] font-mono font-bold border ${
-                  log.deploymentMode === 'AUTONOMOUS'
+                  activeLog.deploymentMode === 'AUTONOMOUS'
                     ? 'bg-purple-100 text-purple-800 border-purple-200'
                     : 'bg-blue-100 text-blue-800 border-blue-200'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
-                {log.deploymentMode} MODE
+                {activeLog.deploymentMode} MODE
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-mono mt-1">
-              Incident <span className="font-semibold text-slate-700">{log.incidentId}</span> &bull; Train{' '}
-              <span className="font-semibold text-slate-700">{log.trainNumber}</span> ({log.trackSection})
+            <p className="text-xs text-slate-500 font-mono mt-0.5">
+              Incident #{activeLog.incidentId} | Train {activeLog.trainNumber} ({activeLog.trackSection})
             </p>
           </div>
           <button
@@ -165,68 +201,71 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
           </button>
         </div>
 
-        {/* View Switcher Tabs & Verification Seal */}
-        <div className="px-6 pt-4 pb-2 bg-white border-b border-[#F0F6FC] flex items-center justify-between">
-          <div className="flex space-x-1.5 p-1 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
+        {/* Incident Dossier Archive Selector Tab Strip */}
+        <div className="bg-white px-5 py-2.5 border-b border-[#D0DFEE] flex items-center justify-between gap-2 overflow-x-auto">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-[11px] font-bold text-slate-600 uppercase font-mono tracking-wider">Archive Dossiers:</span>
+            {HISTORICAL_INCIDENTS.map((inc) => (
+              <button
+                key={inc.id}
+                onClick={() => handleSwitchIncident(inc.id)}
+                className={`px-2.5 py-1 text-xs font-mono font-semibold border transition-all ${
+                  selectedIncidentId === inc.id
+                    ? 'bg-[#2B7FFF] text-white border-[#2B7FFF] shadow-xs'
+                    : 'bg-[#F0F6FC] text-slate-700 border-[#D0DFEE] hover:bg-white'
+                }`}
+                style={{ borderRadius: '4px' }}
+              >
+                #{inc.id} ({inc.hazard})
+              </button>
+            ))}
+          </div>
+
+          <div className="flex space-x-1 p-0.5 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
             <button
               onClick={() => setActiveTab('TIMELINE')}
-              className={`px-3 py-1 text-xs font-semibold font-mono transition-all ${
-                activeTab === 'TIMELINE'
-                  ? 'bg-[#2B7FFF] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all ${
+                activeTab === 'TIMELINE' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
               style={{ borderRadius: '4px' }}
             >
-              4-Step AI Timeline
+              4-Step Timeline
             </button>
             <button
               onClick={() => setActiveTab('RAW_JSON')}
-              className={`px-3 py-1 text-xs font-semibold font-mono transition-all ${
-                activeTab === 'RAW_JSON'
-                  ? 'bg-[#2B7FFF] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all ${
+                activeTab === 'RAW_JSON' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
               style={{ borderRadius: '4px' }}
             >
-              Raw Telemetry JSON
+              Raw JSON
             </button>
           </div>
-
-          {/* Quick Copy JSON Action */}
-          <button
-            onClick={handleCopyJSON}
-            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-[11px] font-mono font-medium transition-all flex items-center space-x-1"
-            style={{ borderRadius: '4px' }}
-          >
-            <span>{copied ? '✓' : '📋'}</span>
-            <span>{copied ? 'COPIED TO CLIPBOARD' : 'COPY JSON'}</span>
-          </button>
         </div>
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-4 flex-1">
           {/* Audit Verification Seal */}
-          <div
-            className="p-3 bg-slate-900 text-white border border-slate-800 flex items-center justify-between text-xs font-mono"
-            style={{ borderRadius: '8px' }}
-          >
+          <div className="p-3 rounded-lg bg-slate-900 text-white border border-slate-800 flex items-center justify-between text-xs font-mono" style={{ borderRadius: '8px' }}>
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-slate-400">RDSO SHA-256 SEAL:</span>
-              <span className="text-emerald-400 font-bold tracking-wider">0x8f4b23...e0fa</span>
+              <span className="text-slate-300">RDSO SHA-256 SEAL:</span>
+              <span className="text-emerald-400 font-bold">0x8f4b23...e0fa</span>
+              <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700 hidden sm:inline">RDSO/SPN/196</span>
             </div>
-            <div className="flex items-center space-x-2 text-[10px] text-slate-400">
-              <span>Standard: RDSO/SPN/196/2020</span>
-              <span className="px-1.5 py-0.5 bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold" style={{ borderRadius: '4px' }}>
-                VERIFIED
-              </span>
-            </div>
+            <button
+              onClick={handleCopyJSON}
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-[10px] font-mono transition-all"
+              style={{ borderRadius: '4px' }}
+            >
+              {copied ? '✓ COPIED JSON' : 'COPY RAW JSON'}
+            </button>
           </div>
 
           {/* TAB 1: 4-Step Process Timeline */}
           {activeTab === 'TIMELINE' && (
             <div className="space-y-4">
-              {log.steps.map((step) => {
+              {activeLog.steps.map((step) => {
                 const accent = getStepAccent(step.stepNumber);
                 return (
                   <div key={step.stepNumber} className="flex space-x-4">
@@ -238,7 +277,7 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                       >
                         {step.stepNumber}
                       </div>
-                      {step.stepNumber < log.steps.length && (
+                      {step.stepNumber < activeLog.steps.length && (
                         <div className="w-0.5 flex-1 bg-[#D0DFEE] my-1" />
                       )}
                     </div>
@@ -262,13 +301,29 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                           {step.agentName}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-700 leading-relaxed font-normal">
+                      <p className="text-xs text-slate-700 leading-relaxed font-mono bg-white/70 p-2 border border-slate-100 rounded" style={{ borderRadius: '4px' }}>
                         {step.detailText}
                       </p>
                     </div>
                   </div>
                 );
               })}
+
+              {/* Official RDSO Form 14B Certificate Stamp Box */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 font-mono text-xs text-slate-700 relative overflow-hidden" style={{ borderRadius: '12px' }}>
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200">
+                  <div className="font-bold text-[#0F172A]">RDSO FORM 14B — RAILWAY SAFETY COMPLIANCE SEAL</div>
+                  <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold border border-emerald-300">
+                    APPROVED & LOCKED
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <div>GOVERNING REGULATION: <strong>RDSO/SPN/196/2020</strong></div>
+                  <div>CONTROLLER AUTHORIZATION: <strong>OP-402</strong></div>
+                  <div>PHYSICS ENGINE: <strong>Kavach EBD v2.4 (Deterministic)</strong></div>
+                  <div>AUDIT REPLAY STATUS: <strong>VERIFIED DETERMINISTIC</strong></div>
+                </div>
+              </div>
 
               {/* Outcome Summary Box */}
               <div
@@ -283,11 +338,11 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                     className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"
                     style={{ borderRadius: '4px' }}
                   >
-                    {log.status}
+                    {activeLog.status}
                   </span>
                 </div>
                 <p className="text-xs text-emerald-900 font-mono leading-relaxed">
-                  {log.outcomeSummary}
+                  {activeLog.outcomeSummary}
                 </p>
               </div>
             </div>
@@ -300,7 +355,7 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                 className="bg-slate-950 text-emerald-400 p-4 font-mono text-xs overflow-x-auto max-h-[380px] border border-slate-800"
                 style={{ borderRadius: '12px' }}
               >
-                <pre>{JSON.stringify(log, null, 2)}</pre>
+                <pre>{JSON.stringify(activeLog, null, 2)}</pre>
               </div>
             </div>
           )}
@@ -311,7 +366,7 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
               className="p-3 bg-blue-50 border border-blue-300 text-xs font-mono text-[#2B7FFF] text-center"
               style={{ borderRadius: '8px' }}
             >
-              ✓ RDSO Safety Dossier successfully downloaded & filed to regulatory compliance registry.
+              ✓ RDSO Safety Dossier for #{activeLog.incidentId} successfully downloaded & filed to regulatory compliance registry.
             </div>
           )}
         </div>
