@@ -10,13 +10,19 @@ import { LocoCameraFeed, SCENARIOS, TacticalScenario } from '@/components/LocoCa
 import { AgentPipelineCanvas } from '@/components/AgentPipelineCanvas';
 import { DecisionLogModal } from '@/components/Auditor/DecisionLogModal';
 import { PlatformGatewayFeed } from '@/components/PlatformGatewayFeed';
-import { DeploymentMode, EbdCalculationResult } from '@/types/apiContracts';
+import { DeploymentMode, EbdCalculationResult, IncidentRecord, ExplainableDecisionLog } from '@/types/apiContracts';
 import { calculateKavachEbd } from '@/lib/agents/kavachBrakingAgent';
+import { buildExplainableDecisionLog } from '@/lib/agents/explainableLogger';
+import { MOCK_DECISION_LOG } from '@/lib/mockData';
 
 export default function CommandCenterPage() {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY'>('OVERVIEW');
   const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('ADVISORY');
   const [isDecisionLogOpen, setIsDecisionLogOpen] = useState(false);
+  const [currentDecisionLog, setCurrentDecisionLog] = useState<ExplainableDecisionLog>(MOCK_DECISION_LOG);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string>('RS-2048');
+  const [selectedTrackId, setSelectedTrackId] = useState<string>('BLK-101');
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   // Tactical Scenario & Pipeline State
   const [currentScenario, setCurrentScenario] = useState<TacticalScenario>(SCENARIOS.BOULDER_CRITICAL);
@@ -114,6 +120,18 @@ export default function CommandCenterPage() {
         setEbdResult(result);
         setActiveStage(3);
 
+        // Generate dynamic decision log
+        const log = buildExplainableDecisionLog(
+          currentScenario.id === 'BOULDER_CRITICAL' ? 'RS-2048' : currentScenario.id === 'CATTLE_WARNING' ? 'RS-2051' : 'RS-2050',
+          currentScenario.trainId,
+          'Section 14B — Up Main Line',
+          deploymentMode,
+          currentScenario.hazardClass,
+          currentScenario.distanceMeters,
+          result.calculatedStoppingDistanceMeters
+        );
+        setCurrentDecisionLog(log);
+
         // Stage 4: Actuation / Advisory Operator Gate (after 500ms)
         setTimeout(() => {
           setActiveStage(4);
@@ -149,6 +167,74 @@ export default function CommandCenterPage() {
     }, 800);
   };
 
+  // Incident Queue Selection Handler -> Switches view to appropriate feed
+  const handleSelectIncident = (incident: IncidentRecord) => {
+    setSelectedIncidentId(incident.incidentId);
+
+    if (incident.cameraType === 'LOCO_CAB') {
+      if (incident.boundingBoxes[0]?.class === 'BOULDER') {
+        handleSelectScenario(SCENARIOS.BOULDER_CRITICAL);
+      } else if (incident.boundingBoxes[0]?.class === 'CATTLE') {
+        handleSelectScenario(SCENARIOS.CATTLE_WARNING);
+      } else {
+        handleSelectScenario(SCENARIOS.FRACTURE_CRITICAL);
+      }
+      setActiveTab('LOCO_CAB');
+    } else if (incident.cameraType === 'PLATFORM_GATEWAY') {
+      setActiveTab('PLATFORM_GATEWAY');
+    }
+
+    const log = buildExplainableDecisionLog(
+      incident.incidentId,
+      incident.incidentId === 'RS-2048' ? '12345 (Vande Bharat)' : incident.incidentId === 'RS-2049' ? '12137 (Punjab Mail)' : '22691 (Rajdhani)',
+      incident.incidentId === 'RS-2049' ? 'CSMT Platform 17/18 Bottleneck' : 'Section 14B Up Main Line',
+      deploymentMode,
+      incident.boundingBoxes[0]?.class || 'BOULDER',
+      incident.boundingBoxes[0]?.estimatedDistanceMeters || 340,
+      410
+    );
+    setCurrentDecisionLog(log);
+  };
+
+  // Incident Queue Action Approval
+  const handleApproveIncidentAction = (incidentId: string) => {
+    setSelectedIncidentId(incidentId);
+    setActionNotice(`Safety Action for Incident #${incidentId} approved by Section Controller OP-402.`);
+
+    const log = buildExplainableDecisionLog(
+      incidentId,
+      incidentId === 'RS-2048' ? '12345 (Vande Bharat)' : incidentId === 'RS-2049' ? '12137 (Punjab Mail)' : '22691 (Rajdhani)',
+      incidentId === 'RS-2049' ? 'CSMT Platform 17/18 Bottleneck' : 'Section 14B Up Main Line',
+      deploymentMode,
+      incidentId === 'RS-2049' ? 'CROWD_SURGE' : incidentId === 'RS-2050' ? 'RAIL_FRACTURE' : 'BOULDER',
+      incidentId === 'RS-2049' ? 15 : 340,
+      410
+    );
+    setCurrentDecisionLog(log);
+
+    setTimeout(() => {
+      setIsDecisionLogOpen(true);
+    }, 400);
+
+    setTimeout(() => {
+      setActionNotice(null);
+    }, 5000);
+  };
+
+  // Interlocking Diagram Track / Signal Interaction
+  const handleTrackSelect = (circuitId: string) => {
+    setSelectedTrackId(circuitId);
+    if (circuitId === 'BLK-104' || circuitId === 'BLK-105') {
+      setActiveTab('PLATFORM_GATEWAY');
+    } else if (circuitId === 'BLK-101') {
+      handleSelectScenario(SCENARIOS.BOULDER_CRITICAL);
+      setActiveTab('LOCO_CAB');
+    } else if (circuitId === 'BLK-103') {
+      handleSelectScenario(SCENARIOS.CATTLE_WARNING);
+      setActiveTab('LOCO_CAB');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F0F6FC] flex flex-col">
       {/* Global Navigation Header */}
@@ -159,18 +245,38 @@ export default function CommandCenterPage() {
         onModeToggle={setDeploymentMode}
       />
 
+      {/* Action Notification Toast Banner */}
+      {actionNotice && (
+        <div className="max-w-7xl mx-auto w-full px-6 pt-3">
+          <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-lg flex items-center justify-between text-xs font-mono shadow-xs" style={{ borderRadius: '8px' }}>
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{actionNotice}</span>
+            </div>
+            <button
+              onClick={() => setActionNotice(null)}
+              className="text-emerald-700 hover:text-emerald-900 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Command Center Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6">
         {/* VIEW 1: OVERVIEW SIGNALING MAP */}
         {activeTab === 'OVERVIEW' && (
           <div>
             <KpiStrip />
-            <InterlockingMap />
+            <InterlockingMap
+              onTrackSelect={handleTrackSelect}
+              selectedTrackId={selectedTrackId}
+            />
             <IncidentQueue
-              onApproveAction={(id) => {
-                alert(`Action for incident ${id} approved by Controller OP-402.`);
-                setIsDecisionLogOpen(true);
-              }}
+              selectedIncidentId={selectedIncidentId}
+              onSelectIncident={handleSelectIncident}
+              onApproveAction={handleApproveIncidentAction}
             />
           </div>
         )}
@@ -218,6 +324,7 @@ export default function CommandCenterPage() {
       <DecisionLogModal
         isOpen={isDecisionLogOpen}
         onClose={() => setIsDecisionLogOpen(false)}
+        log={currentDecisionLog}
       />
     </div>
   );
