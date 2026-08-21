@@ -29,10 +29,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows Next.js frontend from any domain (Vercel, Render, HF, localhost)
-    allow_credentials=True,
+    allow_origins=["*"],  # Allows all origins (localhost, Vercel, etc.)
+    allow_credentials=False,  # Must be False when allow_origins is wildcard to prevent browser security rejection
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(streams.router,  prefix="/api/v1/streams",  tags=["Video Streams (SSE)"])
