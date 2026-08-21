@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const targetUrl = process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '') + '/health'
-    : 'https://railsuraksha-ai.onrender.com/health';
+    ? `${process.env.NEXT_PUBLIC_API_URL}/system/status`
+    : 'https://railsuraksha-ai.onrender.com/api/v1/system/status';
 
   try {
     const startTime = Date.now();

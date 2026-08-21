@@ -35,22 +35,29 @@ export async function checkBackendHealth(): Promise<BackendStatus> {
   const startTime = Date.now();
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-    const healthUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/health';
-    const res = await fetch(healthUrl, {
+    // Try /api/v1/system/status first (adblocker-safe), fallback to /health
+    let res: Response | null = await fetch(`${API_BASE_URL}/system/status`, {
       signal: controller.signal,
-    });
+    }).catch(() => null);
+
+    if (!res || !res.ok) {
+      const healthUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, '') + '/health';
+      res = await fetch(healthUrl, {
+        signal: controller.signal,
+      }).catch(() => null);
+    }
     clearTimeout(timeoutId);
 
-    if (res.ok) {
+    if (res && res.ok) {
       return {
         online: true,
         message: 'FastAPI Backend Connected',
         latencyMs: Date.now() - startTime,
       };
     }
-    return { online: false, message: `HTTP Error: ${res.status}` };
+    return { online: false, message: `Offline / Connecting` };
   } catch {
     return { online: false, message: 'Offline (Using Local TS Simulation)' };
   }
