@@ -32,8 +32,8 @@
   - **Status:** Implemented
   - **Description:** Displays 6 operational metric cards (Active Trains, Track Circuits, Signals Active, Incidents Logged, Platform Holds, Telemetry Latency) with SVG iconography, status pills with pulsing animations, and Light-Blue Mintlify card design (`#FFFFFF` cards with `#D0DFEE` border and `16px` radius). Accepts dynamic props with `mockData.ts` fallbacks.
 - **`IncidentQueue.tsx` (`src/components/Overview/IncidentQueue.tsx`):**
-  - **Status:** Implemented
-  - **Description:** Displays list of AI triage incidents with severity badges and `[APPROVE ACTION]` buttons.
+  - **Status:** Implemented (Enhanced)
+  - **Description:** Real-time AI triage priority queue featuring interactive severity filter tabs (`ALL`, `CRITICAL`, `MODERATE`, `LOW`), dynamic pending action count counter, severity badges with status pulse dots, hazard distance telemetry tags (e.g. `BOULDER @ 340m`), confidence percentage bars, camera source badges, assigned safety agent tags, row selection handler (`onSelectIncident`), empty state component, and interactive `[APPROVE ACTION]` action buttons with `EXECUTING` and `APPROVED / RESOLVED` status transitions. Fully compliant with Light-Blue Mintlify design guidelines (strictly 4px button border radii, zero pill buttons).
 - **`DecisionLogModal.tsx` (`src/components/Auditor/DecisionLogModal.tsx`):**
   - **Status:** Implemented
   - **Description:** Drawer modal displaying 4-step explainable AI decision timeline, SHA-256 cryptographic seal, raw JSON inspection, and RDSO compliance dossier export.
