@@ -1,6 +1,25 @@
 # Agent Handoff Log (tracker.md)
 
-## 2026-08-21 — Tactical Multi-Angle Cameras, Dynamic Weather Friction, RDSO Audio Synthesizer & Auditor Archive
+## 2026-08-21 — Public Asset Uploads & Static Reference Integration
+
+### Objective
+Upload user-provided computer vision track hazard detection and platform gateway crowd CCTV images into `public/assets/`, configure static asset paths in `src/lib/mockData.ts`, and push to GitHub.
+
+### Changes Made
+- Created `public/assets/` directory.
+- Copied uploaded images:
+  - `public/assets/track_hazard_vision.jpg`: 4K loco-cab forward vision feed with Surface Fracture 85% and Obstruction 72% YOLO bounding boxes.
+  - `public/assets/platform_gateway_cctv.png`: CSMT station gateway camera feed with crowd density ($2.4\text{ p/sqm}$) and optical flow directional vector grid.
+- Exported `DEMO_IMAGE_ASSETS` in `src/lib/mockData.ts`.
+- Verified TypeScript compilation and Vitest suite (32/32 tests passed).
+
+### Files Changed
+- `public/assets/track_hazard_vision.jpg` (Added)
+- `public/assets/platform_gateway_cctv.png` (Added)
+- `src/lib/mockData.ts` (Modified)
+- `tracker.md` (Updated)
+
+---
 
 ### Objective
 Implement the remaining advanced capabilities outlined in the RailSuraksha AI PRD: Tactical Multi-Angle Sensor feeds (Forward Cab, OHE Pantograph, Bogie Undercarriage), Dynamic Environmental & Weather Friction Simulator (Dry, Monsoon Wet, Winter Fog, Night IR), RDSO standard Web Audio API alarm synthesizer with mute controls, Auditor historical incident dossier archive (RS-2048, RS-2049, RS-2050, RS-2051), and expanded Vitest test coverage.

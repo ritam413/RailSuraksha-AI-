@@ -179,3 +179,8 @@ export const DEMO_VIDEO_STREAMS = {
   platformGatewayCctv: 'https://assets.mixkit.co/videos/preview/mixkit-crowd-of-people-walking-in-a-train-station-41553-large.mp4',
   ohePantographCam: 'https://assets.mixkit.co/videos/preview/mixkit-electric-train-moving-fast-on-railroad-tracks-43542-large.mp4'
 };
+
+export const DEMO_IMAGE_ASSETS = {
+  trackHazardVision: '/assets/track_hazard_vision.jpg',
+  platformGatewayCctv: '/assets/platform_gateway_cctv.png'
+};
