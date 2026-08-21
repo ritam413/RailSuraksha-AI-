@@ -4,11 +4,11 @@
 
 | Feature | Status | Details |
 | :--- | :--- | :--- |
-| **Light-Blue Mintlify Design System** | Implemented | `#F0F6FC` background, `#FFFFFF` cards with `#D0DFEE` borders, `#2B7FFF` accent, strict 4px/16px/24px geometry. |
+| **Light-Blue Mintlify Design System** | Implemented | `#F0F6FC` background, `#FFFFFF` cards with `#D0DFEE` borders, `#2B7FFF` accent, strict 4px/16px/24px geometry (strictly 0 pill buttons). |
 | **Global Persistent Navbar** | Implemented | Includes brand logo, 3-view switcher, and Advisory vs Autonomous deployment toggle. |
 | **View 1: Overview Signaling & Interlocking** | Partially Implemented | Top 6 KPI strip, static track circuit diagram, and incident queue with approval button. |
-| **View 2: Loco-Cab Forward Vision** | Implemented | Video stream with YOLOv11 bounding box overlay, HUD telemetry stats, and `[APPLY BRAKING FORMULA]` CTA. |
-| **4-Agent Pipeline Execution Canvas** | Implemented | Visualizes 4-step Kavach pipeline progression (Vision $\to$ Telemetry $\to$ Kavach Physics $\to$ Auto-Brake). |
+| **View 2: Loco-Cab Forward Vision** | Implemented | Multi-scenario selector (Boulder, Cattle, Rail Fracture), live video stream, dynamic bounding box overlay, HUD telemetry stats, and real-time kinematic deceleration gauges. |
+| **4-Agent Pipeline Execution Canvas** | Implemented | Interactive 4-stage sequential safety pipeline with sub-second micro-timing simulation (12ms Vision $\to$ 24ms Telemetry $\to$ 15ms RDSO Physics $\to$ Actuation), dynamic RDSO stopping distance display, and mode-aware branching (Autonomous instant failsafe vs Advisory Phase 1 controller gate). |
 | **View 3: Platform Gateway CCTV & Hold** | Implemented | Modular `PlatformGatewayFeed.tsx` with live video stream, YOLOv11 & Optical Flow crowd detection overlay, active 1-second countdown ticker, dynamic status transitions, and Station Master override controls (`[RELEASE NOW]`, `[EXTEND +3M]`, `[RESET 5M]`). |
 | **Auditor Decision Log Modal** | Implemented | 4-step chronological audit timeline with outcome summary and compliance report filing CTA. |
 | **Kavach Emergency Braking Physics Engine** | Implemented | Pure TS RDSO braking formula: $D_{\text{stop}} = \frac{V^2}{2g(\mu + G)} + V \cdot t_{\text{reaction}}$. |
