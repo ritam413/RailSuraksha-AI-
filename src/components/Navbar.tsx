@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { DeploymentMode } from '@/types/apiContracts';
 import { isAudioMuted, toggleAudioMute, subscribeAudioMute } from '@/lib/audioAlerts';
+import { checkBackendHealth } from '@/lib/apiClient';
 
 interface NavbarProps {
   activeTab: 'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY';
@@ -31,8 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/health', { method: 'GET' });
-        setBackendOnline(res.ok);
+        const status = await checkBackendHealth();
+        setBackendOnline(status.online);
       } catch {
         setBackendOnline(false);
       }

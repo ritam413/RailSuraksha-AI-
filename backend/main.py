@@ -29,7 +29,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_origins=["*"],  # Allows Next.js frontend from any domain (Vercel, Render, HF, localhost)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

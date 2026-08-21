@@ -1,6 +1,32 @@
 # Agent Handoff Log (tracker.md)
 
-## 2026-08-21 — Public Asset Uploads & Static Reference Integration
+## 2026-08-21 — Backend Dockerfile, CORS Configuration & Cloud Deployment Readiness
+
+### Objective
+Create production-grade container configuration (`backend/Dockerfile`), Hugging Face Space metadata (`backend/README.md`), enable universal CORS in `backend/main.py`, and make frontend API client and Navbar health monitoring dynamic for cloud deployment.
+
+### Changes Made
+- **Created `backend/Dockerfile`**:
+  - Python 3.11 slim base with Uvicorn, exposing port `7860` (Hugging Face default) with dynamic `$PORT` support for Render/Koyeb.
+- **Created `backend/README.md`**:
+  - Configured Hugging Face Space YAML frontmatter (`sdk: docker`, `app_port: 7860`, `title: RailSuraksha AI API`).
+- **Updated `backend/main.py`**:
+  - Enabled wildcard CORS (`allow_origins=["*"]`) for production cross-origin requests.
+- **Updated `src/lib/apiClient.ts` & `src/components/Navbar.tsx`**:
+  - Made `checkBackendHealth` dynamically target the remote host parsed from `API_BASE_URL` (`process.env.NEXT_PUBLIC_API_URL`).
+- **Verification**:
+  - `npm test` — 32 / 32 tests passed.
+  - `npx tsc --noEmit` — 0 errors.
+
+### Files Changed
+- `backend/Dockerfile` (Created)
+- `backend/README.md` (Created)
+- `backend/main.py` (Modified)
+- `src/lib/apiClient.ts` (Modified)
+- `src/components/Navbar.tsx` (Modified)
+- `tracker.md` (Updated)
+
+---
 
 ### Objective
 Upload user-provided computer vision track hazard detection and platform gateway crowd CCTV images into `public/assets/`, configure static asset paths in `src/lib/mockData.ts`, and push to GitHub.
