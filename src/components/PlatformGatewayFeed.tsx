@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { Card } from './Common/Card';
 import { calculatePlatformHoldState } from '@/lib/agents/sectionDispatchAgent';
 import { overridePlatformHold } from '@/lib/apiClient';
-import { DEMO_VIDEO_STREAMS } from '@/lib/mockData';
 
 interface PlatformGatewayFeedProps {
   initialSeconds?: number;
@@ -62,13 +61,10 @@ export const PlatformGatewayFeed: React.FC<PlatformGatewayFeedProps> = ({
         {/* Left Column: Live Gateway CCTV Video Stream (7 Cols) */}
         <div className="lg:col-span-7 flex flex-col">
           <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 min-h-[340px] flex items-center justify-center shadow-inner">
-            {/* Live Video Feed */}
-            <video
-              src={DEMO_VIDEO_STREAMS.platformGatewayCctv}
-              autoPlay
-              loop
-              muted
-              playsInline
+            {/* Supplied platform gateway CCTV reference image */}
+            <img
+              src="/assets/platform_gateway_cctv.png"
+              alt="Platform gateway CCTV view of station crowd flow"
               className="w-full h-[340px] object-cover opacity-90"
             />
 

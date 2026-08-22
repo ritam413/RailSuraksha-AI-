@@ -31,7 +31,7 @@ export const SCENARIOS: Record<string, TacticalScenario> = {
     initialSpeedKmh: 110,
     trainId: '12345 (Vande Bharat)',
     trackSection: 'Section 14B — Up Main Line',
-    boxStyle: { top: '36%', left: '42%', width: '150px', height: '105px' },
+    boxStyle: { top: '56%', left: '47%', width: '120px', height: '115px' },
     badgeLabel: 'BOULDER 98.2% (340m)'
   },
   CATTLE_WARNING: {
@@ -44,7 +44,7 @@ export const SCENARIOS: Record<string, TacticalScenario> = {
     initialSpeedKmh: 110,
     trainId: '22691 (Rajdhani Exp)',
     trackSection: 'Section 16A — Down Main Line',
-    boxStyle: { top: '44%', left: '38%', width: '125px', height: '80px' },
+    boxStyle: { top: '41%', left: '46%', width: '110px', height: '65px' },
     badgeLabel: 'CATTLE 94.1% (680m)'
   },
   FRACTURE_CRITICAL: {
@@ -57,9 +57,15 @@ export const SCENARIOS: Record<string, TacticalScenario> = {
     initialSpeedKmh: 90,
     trainId: '12137 (Punjab Mail)',
     trackSection: 'Section 08C — Curve 4 Loop',
-    boxStyle: { top: '56%', left: '45%', width: '100px', height: '65px' },
+    boxStyle: { top: '78%', left: '56%', width: '95px', height: '70px' },
     badgeLabel: 'RAIL FRACTURE 96.5% (210m)'
   }
+};
+
+const scenarioImageUrls: Record<TacticalScenario['key'], string> = {
+  BOULDER_CRITICAL: '/assets/locomotive_pov_boulder.png',
+  CATTLE_WARNING: '/assets/locomotive_pov_cattle.png',
+  FRACTURE_CRITICAL: '/assets/locomotive_pov_fracture.png'
 };
 
 interface LocoCameraFeedProps {
@@ -115,7 +121,7 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
   const isStopped = currentSpeedKmh === 0 && isEmergency;
   const weatherInfo = getWeatherFrictionParams(activeWeather);
 
-  // Video URL based on tactical angle
+  // Auxiliary live feeds remain video; the forward cab is the supplied local POV.
   const videoUrls: Record<TacticalCameraAngle, string> = {
     FORWARD_CAB: 'https://assets.mixkit.co/videos/preview/mixkit-train-passing-through-a-green-landscape-42211-large.mp4',
     OHE_PANTOGRAPH: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-cargo-train-running-on-tracks-42214-large.mp4',
@@ -259,16 +265,24 @@ export const LocoCameraFeed: React.FC<LocoCameraFeedProps> = ({
       <div className={`relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 min-h-[420px] flex items-center justify-center shadow-inner ${
         activeWeather === 'NIGHT_IR' ? 'filter hue-rotate-90 saturate-200 contrast-125' : activeWeather === 'DENSE_FOG' ? 'contrast-75 brightness-95' : ''
       }`}>
-        {/* Real Train Cab Video Stream */}
-        <video
-          key={activeAngle}
-          src={videoUrls[activeAngle]}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-[420px] object-cover opacity-90"
-        />
+        {/* Forward vision uses the supplied locomotive cab point-of-view image. */}
+        {activeAngle === 'FORWARD_CAB' ? (
+          <img
+            src={scenarioImageUrls[currentScenario.key]}
+            alt={`${currentScenario.hazardClass.toLowerCase().replace('_', ' ')} detection from locomotive cab`}
+            className="w-full h-[420px] object-cover opacity-90"
+          />
+        ) : (
+          <video
+            key={activeAngle}
+            src={videoUrls[activeAngle]}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-[420px] object-cover opacity-90"
+          />
+        )}
 
         {/* Environmental Rain Overlay */}
         {activeWeather === 'WET_MONSOON' && (

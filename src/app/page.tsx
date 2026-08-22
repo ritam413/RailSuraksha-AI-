@@ -25,6 +25,17 @@ export default function CommandCenterPage() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string>('RS-2048');
   const [selectedTrackId, setSelectedTrackId] = useState<string>('BLK-101');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem('railsuraksha-theme');
+    setIsDarkMode(savedTheme === 'dark');
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle('theme-dark', isDarkMode);
+    window.localStorage.setItem('railsuraksha-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   // Tactical Scenario, Weather & Sensor Pipeline State
   const [currentScenario, setCurrentScenario] = useState<TacticalScenario>(SCENARIOS.BOULDER_CRITICAL);
@@ -273,6 +284,8 @@ export default function CommandCenterPage() {
         onTabChange={setActiveTab}
         deploymentMode={deploymentMode}
         onModeToggle={setDeploymentMode}
+        isDarkMode={isDarkMode}
+        onThemeToggle={() => setIsDarkMode((value) => !value)}
       />
 
       {/* Action Notification Toast Banner */}

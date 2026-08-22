@@ -99,7 +99,7 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
         </div>
 
         {/* Track Line Visual Canvas */}
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 text-white space-y-6 shadow-inner relative overflow-hidden" style={{ borderRadius: '16px' }}>
+        <div className="theme-static bg-slate-950 border border-slate-800 rounded-xl p-6 text-white space-y-6 shadow-inner relative overflow-hidden" style={{ borderRadius: '16px' }}>
           {/* Subtle Grid Background */}
           <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
 

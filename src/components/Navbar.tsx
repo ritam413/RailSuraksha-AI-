@@ -10,13 +10,17 @@ interface NavbarProps {
   onTabChange: (tab: 'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY') => void;
   deploymentMode: DeploymentMode;
   onModeToggle: (mode: DeploymentMode) => void;
+  isDarkMode: boolean;
+  onThemeToggle: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onTabChange,
   deploymentMode,
-  onModeToggle
+  onModeToggle,
+  isDarkMode,
+  onThemeToggle
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
   const [backendOnline, setBackendOnline] = useState<boolean>(false);
@@ -124,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Telemetry Clock, Operator Status & Deployment Mode Toggle */}
         <div className="flex items-center space-x-4">
-          <div className="hidden lg:flex items-center space-x-2 text-right border-r border-slate-200 pr-4">
+          <div className="hidden lg:flex items-center space-x-2 text-right border-r border-slate-200 px-2 pr-4">
             <div className="flex items-center space-x-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[11px] font-mono font-bold text-slate-700">{currentTime || '08:45:12 IST'}</span>
@@ -146,6 +150,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
+            <button
+              onClick={onThemeToggle}
+              aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+              aria-pressed={isDarkMode}
+              className="theme-toggle relative inline-flex h-8 w-16 items-center rounded-full border border-[#D0DFEE] bg-[#F0F6FC] p-1 transition-colors duration-500"
+              title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            >
+              <span className={`theme-toggle-knob flex h-6 w-6 items-center justify-center rounded-full bg-[#2B7FFF] text-[12px] text-white shadow-sm transition-transform duration-500 ${isDarkMode ? 'translate-x-[25px]' : 'translate-x-0'}`}>
+                {isDarkMode ? '☾' : '☀'}
+              </span>
+            </button>
             {/* Audio Alerts Synthesizer Toggle */}
             <button
               onClick={() => toggleAudioMute()}
