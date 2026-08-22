@@ -29,10 +29,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
-    allow_credentials=True,
+    allow_origins=["*"],  # Allows all origins (localhost, Vercel, etc.)
+    allow_credentials=False,  # Must be False when allow_origins is wildcard to prevent browser security rejection
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(streams.router,  prefix="/api/v1/streams",  tags=["Video Streams (SSE)"])
@@ -43,7 +44,7 @@ app.include_router(system.router,   prefix="/api/v1/system",   tags=["System Mod
 app.include_router(audit.router,    prefix="/api/v1/audit",    tags=["Audit & Compliance"])
 
 
-@app.get("/", tags=["Health"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["System"])
 async def root():
     return {
         "service": "RailSuraksha AI Backend",
@@ -53,6 +54,16 @@ async def root():
     }
 
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["System"])
 async def health():
     return {"status": "ok"}
+
+
+@app.api_route("/ping", methods=["GET", "HEAD"], tags=["System"])
+async def ping():
+    return {"status": "ok", "service": "RailSuraksha"}
+
+
+@app.api_route("/api/v1/system/status", methods=["GET", "HEAD"], tags=["System"])
+async def system_status():
+    return {"status": "ok", "service": "RailSuraksha AI"}
