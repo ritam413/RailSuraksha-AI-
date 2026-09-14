@@ -1,5 +1,159 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-14 — NotebookLM Master Dossier & Team Teaching Synthesis
+
+### Objective
+Create a comprehensive, self-contained master study guide and briefing dossier (`docs/notebooklm_master_guide.md`) tailored for upload into Google NotebookLM, applying principles from `/research` (primary sources), `/adversarial-review` (edge cases, failure modes, counter-arguments), and `/ask-matt` (mental models, progressive disclosure, team role division) so the user can study and query the architecture on mobile and teach it to teammates.
+
+### Changes Made
+- Created `docs/notebooklm_master_guide.md` containing:
+  1. Executive Problem Understanding & Domain Context (13,000+ trains, 4 siloed CRIS systems).
+  2. Domain Knowledge & Glossary (TMS, TDMS, SMMS, COA, BDMS, Shadow Blocks, Kavach TCAS, Chainage).
+  3. End-to-End System Architecture (4-Step Operational Loop).
+  4. Mathematical & Algorithmic Core (MILP Objective Function, Alpha/Beta/Gamma weights, Hard Constraints).
+  5. Adversarial Review & Stress-Testing Defense (Machine break-down/overrun, resource contention, controller trust & advisory mode, delayed CRIS feeds).
+  6. Team Teaching Guide & 3-Developer Zero-Conflict Role Division Matrix.
+  7. NotebookLM Interactive Prompt Catalog (11 high-yield queries for self-study and examiner grilling).
+  8. Official Indian Railways & RDSO Regulatory Citations (IRPWM, ACTM, IRSEM, Kavach SPN/196/2020).
+
+### Files Changed
+- `docs/notebooklm_master_guide.md` (Created)
+- `tracker.md` (Updated)
+
+### Verification
+- File created and verified against all primary docs and SIH 26027 specifications.
+
+### Current State
+Ready for direct upload into NotebookLM for audio podcast generation, self-study query loops, and team presentation.
+
+---
+
+
+### Objective
+Update all documents across `docs/` and root to accurately reflect the SIH Problem Statement 26027 refactoring (*"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*), resolving legacy scope drift from the initial prototype.
+
+### Changes Made
+- **Fixed `docs/research_sources.md`**: Cleaned up header syntax typo and mapped official Indian Railways, CRIS, and RDSO citations to SIH 26027.
+- **Rewrote `docs/ideasUnderstanding.md`**: Expanded from a 14-line stub to a comprehensive operational guide detailing railway maintenance directorates (Civil/TMS, Electrical/TDMS, Signal/SMMS), decentralized BDMS bottlenecks, the 4-step continuous optimization loop, multi-department joint shadow blocking, multi-horizon planning (24h/7D/30D), and Kavach TSR safety integration.
+- **Updated `docs/prd.md` & `prd.md` (v2.0.0)**: Overhauled Product Requirements Document from localized collision/stampede triage to the **Auto-BDMS: Automated Block Planning & Corridor Optimization System**; detailed personas (Section Controller, Maintenance Planners, Safety Auditor, Loco Pilot), functional modules, MILP constraints, and success metrics.
+- **Updated `docs/architecture_walkthrough.md` (v2.0.0)**: Detailed the event-driven system architecture, 4-tab mission control cockpit, data flows, Google OR-Tools MILP mathematical formulation, and Kavach TCAS `RDSO/SPN/196/2020` integration.
+- **Updated `docs/api_endpoints_and_backend_schema.md` (v2.0.0)**: Defined REST, SSE, and Pydantic schemas for TMS, SMMS, TDMS, COA ingestion, urgency scoring, MILP solver endpoints, one-click block sanctioning, and Kavach TSR streaming.
+- **Updated `docs/three_developer_execution_plan.md`**: Aligned the 3-developer team ownership matrix, shared TypeScript contract definitions (`src/types/apiContracts.ts`), hour-by-hour sequence, and 4-minute demo pitch narrative for hackathon judges.
+- **Updated `docs/mock_data_resources.md` & `docs/resources.md`**: Structured mock datasets for TMS, SMMS, TDMS, COA timetables, Central Railway CSMT–Kalyan corridor profiles, and central documentation index.
+- **Updated `docs/test.md`**: Outlined the Vitest test suite (32/32 tests passing).
+- **Synchronized Tracking Files**: Updated `context.md`, `features_implemented.md`, and `tracker.md`.
+
+### Files Changed
+- `docs/milp_solver_use_case_diagram.md` (Created UML use-case diagram & elaboration)
+- `docs/research_sources.md` (Modified)
+- `docs/ideasUnderstanding.md` (Updated)
+- `docs/prd.md` (Updated)
+- `prd.md` (Updated)
+- `docs/architecture_walkthrough.md` (Updated)
+- `docs/api_endpoints_and_backend_schema.md` (Updated)
+- `docs/three_developer_execution_plan.md` (Updated)
+- `docs/mock_data_resources.md` (Updated)
+- `docs/resources.md` (Updated)
+- `docs/test.md` (Updated)
+- `context.md` (Updated)
+- `features_implemented.md` (Updated)
+- `tracker.md` (Updated)
+
+### Current State
+All documentation across the repository is 100% synchronized and aligned with **SIH Problem Statement 26027**.
+
+### Next Agent Instructions
+1. Inspect `src/types/apiContracts.ts` and ensure all interfaces match `docs/api_endpoints_and_backend_schema.md`.
+2. Inspect `src/lib/mockData.ts` and add any additional corridor block plan mock instances if building out the `CorridorStringChart.tsx` component.
+3. Run `npm test` before committing.
+
+---
+
+## 2026-09-04 — SIH 2025 Architecture & Workflow Diagram + Refactoring Blueprint
+
+### Objective
+Generate a presentation-ready architecture and workflow diagram modeled after the user's reference diagram (5-stage left pipeline $\to$ central AI engine $\to$ 3 multi-horizon visual execution cards) and establish a deep-module codebase refactoring plan.
+
+### Changes Made
+- Created [`docs/architecture_diagram.html`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/architecture_diagram.html) featuring:
+  - 16:9 widescreen presentation canvas with dark navy styling (`#0B132B` & `#0F172A`), glowing gradient badges, and SIH 2025 finalist headers.
+  - **Left Pipeline (Steps I to V)**: Multi-Source Data Ingestion (TMS/SMMS/TDMS/COA) $\to$ Geospatial & Headway Preprocessing $\to$ ML Urgency Triage (P1/P2/P3) $\to$ Joint Shadow-Block Optimizer Engine (MILP Solver) $\to$ Sanction & Kavach TSR Safety Broadcast.
+  - **Center Hub**: Pulsing `OPTIMIZED CORRIDOR BLOCK PLAN` AI decision node with animated routing paths.
+  - **Right Visual Cards**: 3 interactive SVG graph cards displaying the 24h Tactical Horizon (Night Lulls & TSRs), 7-Day Weekly Matrix (Joint Shadow Blocking & Downtime Savings), and 30-Day Cyclical Master Plan (Track Geometry Index & Machine Routing).
+  - Bottom Impact KPI bar (35-40% downtime reduction, 0 passenger cancellations, <30s computation, 100% Kavach TSR).
+- Structured the deep-module refactoring blueprint ([`docs/research_sources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_sources.md), [`src/types/apiContracts.ts`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/src/types/apiContracts.ts), and [`src/lib/agents/`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/src/lib/agents)).
+
+### Files Changed
+- `docs/architecture_diagram.html` (Created)
+- `tracker.md` (Updated)
+
+---
+
+## 2026-09-04 — Generated SIH Automatic Block Planning PowerPoint Presentation (.pptx)
+
+### Objective
+Create an official, 16:9 widescreen PowerPoint presentation (`SIH_Automatic_Block_Planning_Presentation.pptx`) for the Smart India Hackathon (SIH) Ministry of Railways problem statement, detailing the unified block planning architecture, multi-department shadow blocking innovation, multi-horizon execution (tactical 24h, weekly 7-day, monthly 30-day), and operational impact metrics.
+
+### Changes Made
+- Installed `python-pptx` dependency.
+- Created `generate_deck.py` and built a 6-slide deck formatted with Light-Blue Mintlify card design tokens (#F0F6FC base, #FFFFFF cards, #2B7FFF Signal Blue accents):
+  1. **Slide 1**: Title & Problem Statement Overview.
+  2. **Slide 2**: Problem Understanding & Operational Inefficiencies in Current BDMS (TMS vs SMMS vs TDMS silos).
+  3. **Slide 3**: Proposed Solution (3-Pillar Ingestion $\to$ Optimization $\to$ Controller Cockpit visual architecture).
+  4. **Slide 4**: Core Technical Innovation (Automated Multi-Department Shadow Blocking comparison).
+  5. **Slide 5**: Multi-Horizon Planning & Execution (Daily Tactical, Weekly Operational, Monthly Strategic).
+  6. **Slide 6**: Operational Impact, Punctuality & RDSO Safety Compliance Metrics.
+- Generated `SIH_Automatic_Block_Planning_Presentation.pptx` in workspace root.
+
+### Files Changed
+- `SIH_Automatic_Block_Planning_Presentation.pptx` (Generated)
+- `generate_deck.py` (Created)
+- `tracker.md` (Updated)
+
+---
+
+## 2026-09-04 — Installed Matt Pocock Skills Suite
+
+### Objective
+Install Matt Pocock's skills suite (`mattpocock/skills`) into both global Antigravity config (`~/.gemini/config/skills`) and workspace `.agents/skills/` so they can be accessed via `/` commands and used across the codebase.
+
+### Changes Made
+- Verified global installation in `C:\Users\LENOVO\.gemini\config\skills\` (57 skills including `setup-matt-pocock-skills`, `grill-me`, `grill-with-docs`, `tdd`, `to-spec`, `to-tickets`, `to-questionnaire`, `triage`, `codebase-design`, `domain-modeling`, `implement`, `code-review`, `ask-matt`, `humanizer`, etc.).
+- Synced all skills to workspace `.agents/skills/` for project-level persistence and team portability.
+- Prepared usage guide for `/` commands and engineering workflows.
+
+### Files Changed
+- `.agents/skills/*` (Populated with Matt Pocock and engineering skills)
+- `tracker.md` (Updated)
+
+---
+
+## 2026-08-21 — Workspace Full Backup & Complete Chat History Export to D:\sih
+
+### Objective
+Export all 28 Antigravity agent conversation histories, reasoning traces, tool executions, and planning artifacts to structured Markdown format in `docs/chats/`, and copy the entire `RailwaySuraksh-Ai` codebase (including dependencies and docs) to `D:\sih`.
+
+### Changes Made
+- **Created `docs/chats/` & Markdown Exporter**:
+  - Parsed all agent conversation logs and serialized them to human- and agent-readable Markdown files (`docs/chats/chat_<conv_id>.md`).
+  - Created [`docs/chats/README.md`](docs/chats/README.md) indexing all 28 sessions with prompts, message counts, and artifact references.
+  - Copied raw `.gemini` brain artifacts into `docs/chats/raw_brain_sessions/` so any other Antigravity instance can open both raw JSONL logs and rendered Markdown files.
+- **Directory Size Verification**:
+  - `node_modules`: 425.44 MB (< 0.5 GB)
+  - `__pycache__`: 0.06 MB
+  - Combined Size: 435.5 MB (substantially below the 10 GB threshold).
+  - Total workspace size: 628.98 MB.
+- **Full Workspace Copy**:
+  - Copied all 17,063 files and 1,516 directories to `D:\sih` with 100% fidelity (0 mismatches, 0 failed).
+
+### Files Changed
+- `docs/chats/` (Created with 28 chat MD files + README + raw sessions)
+- `docs/chats_exporter.py` (Created)
+- `tracker.md` (Updated)
+
+---
+
+
 ## 2026-08-21 — Backend Dockerfile, CORS Configuration & Cloud Deployment Readiness
 
 ### Objective

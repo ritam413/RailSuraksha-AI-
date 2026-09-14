@@ -1,216 +1,194 @@
 # RailSuraksha AI — API Endpoints & Backend Data Structure Specification
 
 > **Location:** `docs/api_endpoints_and_backend_schema.md`  
-> **Purpose:** Comprehensive REST, SSE, WebSocket API specification and Backend Data Schemas for RailSuraksha AI.  
-> **Last Updated:** 2026-08-21  
+> **System:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+> **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
+> **Document Version:** 2.0.0 (SIH 26027 Refactored Architecture)
 
 ---
 
 ## 🌐 1. API Endpoints Specification
 
-### 1.1 Multi-Camera Video & Edge Telemetry Ingestion
-- `GET /api/v1/streams/loco-cab/:locoId/stream` (SSE / HLS / WebSocket)
-  - **Purpose:** Delivers live video frame feed with YOLOv11 bounding boxes and distance metadata.
-  - **Response Payload:** `LocoStreamFrame`
-- `GET /api/v1/streams/platform-gateway/:stationId/:pillarId` (SSE / WebSocket)
-  - **Purpose:** Delivers platform gateway entrance CCTV video stream with optical flow vectors and crowd count.
-  - **Response Payload:** `GatewayStreamFrame`
-- `GET /api/v1/streams/ohe/:sectionId` (SSE)
-  - **Purpose:** Delivers Overhead Equipment (OHE) camera feed for pantograph spark & catenary line monitoring.
+### 1.1 Multi-Source Departmental Ingestion Endpoints
+* `POST /api/v1/ingestion/tms/sync`
+  * **Purpose:** Ingests civil track defect alerts, ultrasonic flaw detection (USFD) records, and Track Geometry Index (TGI) deficits.
+  * **Request Payload:** `TmsIngestionPayload`
+  * **Response:** `{ success: true, ingestedCount: 14, normalizedSection: "CSMT-KYN" }`
+* `POST /api/v1/ingestion/smms/sync`
+  * **Purpose:** Ingests S&T point machine cycle counts, track circuit relay alerts, and electronic interlocking disconnection requests.
+  * **Request Payload:** `SmmsIngestionPayload`
+  * **Response:** `{ success: true, ingestedCount: 8 }`
+* `POST /api/v1/ingestion/tdms/sync`
+  * **Purpose:** Ingests electrical TRD 25kV OHE catenary/contact wire wear logs, neutral section overhauls, and power block demands.
+  * **Request Payload:** `TdmsIngestionPayload`
+  * **Response:** `{ success: true, ingestedCount: 6 }`
+* `POST /api/v1/ingestion/coa/timetables`
+  * **Purpose:** Ingests real-time train positions, scheduled timetables, and freight path forecasts from Control Office Application.
+  * **Request Payload:** `CoaTimetablePayload`
+  * **Response:** `{ success: true, activeTrains: 42, freightRakesForecasted: 18 }`
 
 ---
 
-### 1.2 AI Triage Agent & Incident Management Endpoints
-- `POST /api/v1/triage/classify`
-  - **Request Body:** `RawAnomalyPayload`
-  - **Response Body:** `TriageClassificationResult` (Severity: `CRITICAL` | `MODERATE` | `LOW`, confidence %, assigned handler).
-- `GET /api/v1/triage/queue`
-  - **Query Params:** `status=active&severity=all`
-  - **Response Body:** `Array<IncidentRecord>`
-- `POST /api/v1/triage/incidents/:id/review`
-  - **Request Body:** `{ action: "APPROVE" | "REJECT", operatorId: "OP-402", reason?: string }`
-  - **Response Body:** `IncidentReviewResponse`
+### 1.2 ML Urgency Triage & Priority Scoring Endpoints
+* `GET /api/v1/triage/demands`
+  * **Purpose:** Retrieves all pending maintenance demands across Civil, Electrical, and Signal directorates, ranked by calculated urgency score.
+  * **Query Params:** `sectionId=SEC-KYN-01&urgency=ALL&horizon=TACTICAL_24H`
+  * **Response:** `Array<MaintenanceDemandRecord>`
+* `POST /api/v1/triage/score`
+  * **Purpose:** Dynamically re-evaluates urgency score when new flaw parameters or traffic delays are detected.
+  * **Request Payload:** `UrgencyScoringRequest`
+  * **Response:** `UrgencyScoringResult` (Urgency Tier: `P1_CRITICAL` | `P2_SCHEDULED` | `P3_ROUTINE`, calculated score 0.0–1.0).
 
 ---
 
-### 1.3 Kavach Braking Agent Endpoints (Critical Safety)
-- `POST /api/v1/braking/calculate-ebd`
-  - **Request Body:** `EbdCalculationRequest`
-    - Speed ($V$ in km/h), Mass ($M$ in tonnes), Friction ($\mu$), Gradient ($G$), Obstacle Distance ($D_{\text{obstacle}}$ in meters).
-  - **Response Body:** `EbdCalculationResponse`
-    - Safe Stopping Distance ($D_{\text{stop}}$ in meters), Hazard Warning Flag (`isHazardDetected`), Required Brake Deceleration ($a$ in $\text{m/s}^2$).
-- `POST /api/v1/braking/execute-command`
-  - **Request Body:** `{ incidentId: string, locoId: string, brakeMode: "EMERGENCY_SOLENOID", mode: "ADVISORY" | "AUTONOMOUS", confirmedBy?: string }`
-  - **Response Body:** `{ success: boolean, commandId: string, executionTimestamp: string, brakeState: "ACTUATED" }`
-- `WS /api/v1/braking/pipeline-stream`
-  - **Purpose:** Real-time WebSocket channel streaming the sequential execution of the 4 agents (Agent 1 $\to$ Agent 2 $\to$ Agent 3 $\to$ Agent 4).
+### 1.3 Joint Shadow-Block Optimizer Endpoints
+* `POST /api/v1/optimizer/solve-corridor`
+  * **Purpose:** Triggers the Mixed-Integer Linear Programming (MILP) solver to generate an optimized block plan bundling co-located maintenance into traffic gaps.
+  * **Request Body:**
+    ```json
+    {
+      "corridorSectionId": "CSMT-KYN-UP",
+      "horizon": "TACTICAL_24H",
+      "targetDate": "2026-09-06",
+      "maxAllowedFreightDelayMinutes": 30,
+      "allowNightLullOnly": true
+    }
+    ```
+  * **Response Body:** `BlockPlanResolution`
+    * Array of bundled joint block windows.
+    * Corridor downtime saved percentage (e.g. `38.4%`).
+    * Train delay impact summary (`zeroPassengerDelays: true`).
+    * Kavach TSR speed restrictions generated.
+* `GET /api/v1/optimizer/schedules/active`
+  * **Purpose:** Returns the current corridor schedule for the Time-Distance String Chart / Gantt UI.
+  * **Query Params:** `horizon=TACTICAL_24H`
+  * **Response:** `CorridorScheduleView`
 
 ---
 
-### 1.4 Section Dispatch Agent & Platform Hold Endpoints
-- `GET /api/v1/dispatch/interlocking-map`
-  - **Response Body:** `TrackInterlockingState` (Circuits `BLK-101`, signals `S-12`/`S-14`, switches `P-4A`).
-- `GET /api/v1/dispatch/hold-timer/:platformId`
-  - **Response Body:** `PlatformHoldState` (Platform number, remaining time in seconds, gateway occupancy index $\rho$, dynamic ML extension flag).
-- `POST /api/v1/dispatch/override-hold`
-  - **Request Body:** `{ platformId: string, action: "RELEASE" | "EXTEND_3M", operatorId: string }`
-  - **Response Body:** `PlatformHoldState`
+### 1.4 e-BDMS Sanction & Controller Workflow Endpoints
+* `POST /api/v1/blocks/:blockId/sanction`
+  * **Purpose:** Section Controller one-click sanction of an AI-recommended joint maintenance block.
+  * **Request Body:**
+    ```json
+    {
+      "operatorId": "CTRL-MUM-402",
+      "approvalMode": "ADVISORY",
+      "sanctionedSlot": {
+        "startTime": "2026-09-06T01:30:00Z",
+        "endTime": "2026-09-06T04:45:00Z"
+      },
+      "enforceKavachTsr": true
+    }
+    ```
+  * **Response:** `BlockSanctionResponse` (Block ID, Sanction Status `SANCTIONED`, Kavach TSR Broadcast ID, SHA-256 Audit Seal).
+* `POST /api/v1/blocks/:blockId/reject`
+  * **Purpose:** Controller rejects a proposed block with operational justification, prompting the solver to find an alternative window.
+  * **Request Body:** `{ "reason": "Late running express train 12138", "alternativePreference": "AFTER_0300" }`
 
 ---
 
-### 1.5 System Mode & Audit Workspace Endpoints
-- `GET /api/v1/system/mode`
-  - **Response Body:** `{ mode: "ADVISORY" | "AUTONOMOUS", lastChangedBy: string, timestamp: string }`
-- `PUT /api/v1/system/mode`
-  - **Request Body:** `{ mode: "ADVISORY" | "AUTONOMOUS", operatorId: string }`
-  - **Response Body:** `{ mode: "ADVISORY" | "AUTONOMOUS", success: true }`
-- `GET /api/v1/audit/logs/:incidentId`
-  - **Response Body:** `ExplainableDecisionLog`
-- `POST /api/v1/audit/close-incident`
-  - **Request Body:** `{ incidentId: string, auditorId: string, complianceNotes: string }`
-  - **Response Body:** `AuditorComplianceReport`
+### 1.5 Safety, Kavach TSR & Interlocking Endpoints
+* `GET /api/v1/safety/kavach-tsr/active`
+  * **Purpose:** Streams all active Temporary Speed Restrictions broadcast to locomotive cab units.
+  * **Response:** `Array<KavachTsrPacket>`
+* `GET /api/v1/safety/interlocking-status/:sectionId`
+  * **Purpose:** Returns live track circuit occupancy and signal lockout aspects for circuits `TC-01` through `TC-06`.
+  * **Response:** `TrackInterlockingState`
 
 ---
 
-## 🗄️ 2. Backend Data Structures & TypeScript Schemas
+## 📦 2. Core Backend Data Schemas (TypeScript & Pydantic)
 
-### 2.1 Triage & Anomaly Payload Schema
+### 2.1 Unified Maintenance Demand Model
 ```typescript
-export type SeverityLevel = 'CRITICAL' | 'MODERATE' | 'LOW';
+export type DepartmentCode = 'TMS_CIVIL' | 'TDMS_ELECTRICAL' | 'SMMS_SIGNAL';
+export type UrgencyTier = 'P1_CRITICAL' | 'P2_SCHEDULED' | 'P3_ROUTINE';
 
-export interface RawAnomalyPayload {
-  anomalyId: string;
-  sourceCameraId: string;
-  cameraType: 'LOCO_CAB' | 'PLATFORM_GATEWAY' | 'OHE';
-  timestamp: string; // ISO 8601
-  rawFrameUrl: string;
-  boundingBoxes: Array<{
-    class: 'BOULDER' | 'RAIL_FRACTURE' | 'CROWD_SURGE' | 'CATTLE' | 'SIGNAL_OVERRUN';
-    confidence: number; // 0.0 - 1.0
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    estimatedDistanceMeters: number;
-  }>;
-}
-
-export interface TriageClassificationResult {
-  incidentId: string;
-  rawAnomaly: RawAnomalyPayload;
-  severityScore: number; // e.g. 0.982
-  severityCategory: SeverityLevel;
-  assignedAgent: 'KavachBrakingAgent' | 'SectionDispatchAgent' | 'RiskAuditAgent';
-  status: 'PENDING_APPROVAL' | 'EXECUTING' | 'RESOLVED' | 'REJECTED';
+export interface MaintenanceDemandRecord {
+  demandId: string;
+  department: DepartmentCode;
+  assetType: 'RAIL_TRACK' | 'OHE_CATENARY' | 'POINT_MACHINE' | 'TRACK_CIRCUIT';
+  sectionId: string;
+  chainageStartKm: number; // e.g. 108.4
+  chainageEndKm: number;   // e.g. 112.2
+  trackCircuitId: string;  // e.g. "TC-03"
+  urgencyTier: UrgencyTier;
+  urgencyScore: number;    // 0.00 - 1.00
+  estimatedDurationMinutes: number;
+  requiredAssets: string[]; // e.g. ["CSM_TAMPER_98", "TOWER_WAGON_04"]
+  canShadowBlock: boolean;
+  status: 'PENDING_TRIAGE' | 'SLOTTED' | 'SANCTIONED' | 'COMPLETED';
 }
 ```
 
----
-
-### 2.2 Kavach Braking Physics Data Structure (RDSO EBD Formula)
-$$\text{Stopping Distance } D_{\text{stop}} = \frac{V^2}{2 \cdot g \cdot (\mu + G)} + (V \cdot t_{\text{reaction}})$$
-
+### 2.2 Train Schedule & Path Slot Model
 ```typescript
-export interface EbdCalculationRequest {
-  trainId: string;
-  locoId: string;
-  velocityKmh: number; // Speed V in km/h
-  massTonnes: number; // Mass M in tonnes
-  coefficientFriction: number; // friction mu (e.g. 0.35)
-  trackGradientPercent: number; // Gradient G (+1.2% uphill, -0.8% downhill)
-  reactionTimeSeconds: number; // t_reaction (default: 1.2s)
-  obstacleDistanceMeters: number; // D_obstacle
-}
-
-export interface EbdCalculationResponse {
-  trainId: string;
-  velocityKmh: number;
-  obstacleDistanceMeters: number;
-  calculatedStoppingDistanceMeters: number; // D_stop
-  marginDistanceMeters: number; // D_obstacle - D_stop
-  isCollisionRisk: boolean; // True if D_stop > D_obstacle
-  requiredDecelerationMs2: number;
-  autoBrakeCommandPayload: {
-    command: 'APPLY_EMERGENCY_BRAKE';
-    solenoidPulseMs: number;
-    cabAlertAudio: string;
-  };
-}
-```
-
----
-
-### 2.3 Platform Gateway & Hold Timer Data Structure
-```typescript
-export interface PlatformHoldState {
-  stationCode: string; // e.g. "CSMT"
-  heldPlatformId: string; // e.g. "PLATFORM_18"
-  adjacentPlatformId: string; // e.g. "PLATFORM_17"
-  gatewayOccupancyIndex: number; // rho ratio 0.0 - 1.0 (e.g. 0.88 = 88%)
-  gatewayCrowdCount: number; // e.g. 482
-  holdFloorSecondsTotal: number; // 300 seconds (5 mins)
-  remainingHoldSeconds: number; // e.g. 252 (04:12)
-  isMlExtensionActive: boolean; // True if crowd density triggered +3m extension
-  status: 'HOLD_ACTIVE' | 'CLEARING' | 'RELEASED' | 'OVERRIDDEN';
-  lastUpdated: string;
-}
-```
-
----
-
-### 2.4 Railway Track Interlocking GIS Data Structure
-```typescript
-export interface TrackBlockCircuit {
-  circuitId: string; // e.g. "BLK-101"
-  lineName: string; // e.g. "Up Main 1A"
-  isOccupied: boolean;
-  occupyingTrainId?: string; // e.g. "12345"
-  speedLimitKmh: number;
-}
-
-export interface SignalAspectState {
-  signalId: string; // e.g. "S-12"
-  aspect: 'CLEAR' | 'CAUTION' | 'STOP' | 'HOLD_ACTIVE'; // 🟢 | 🟡 | 🔴 | 🔵
-  associatedCircuitId: string;
-  isAutomatic: boolean;
-}
-
-export interface PointSwitchState {
-  switchId: string; // e.g. "P-4A"
-  position: 'NORMAL' | 'REVERSE';
-  isLocked: boolean;
-}
-
-export interface TrackInterlockingState {
-  timestamp: string;
-  circuits: TrackBlockCircuit[];
-  signals: SignalAspectState[];
-  switches: PointSwitchState[];
-}
-```
-
----
-
-### 2.5 Explainable Decision Log Schema
-```typescript
-export interface DecisionLogStep {
-  stepNumber: number; // 1, 2, 3, 4
-  agentName: string; // e.g. "Vision Hazard Detector"
-  title: string;
-  detailText: string;
-  timestamp: string;
-  telemetrySnapshot: Record<string, any>;
-}
-
-export interface ExplainableDecisionLog {
-  incidentId: string;
+export interface TrainScheduleSlot {
   trainNumber: string;
-  trackSection: string;
-  status: 'ACTION_CONFIRMED' | 'REJECTED_BY_OPERATOR' | 'RESOLVED';
-  deploymentMode: 'ADVISORY' | 'AUTONOMOUS';
-  steps: DecisionLogStep[];
-  outcomeSummary: string;
-  closedByAuditorId?: string;
-  closureTimestamp?: string;
+  trainName: string;
+  trainType: 'PREMIUM_PASSENGER' | 'EXPRESS_PASSENGER' | 'SUBURBAN' | 'FREIGHT';
+  sectionId: string;
+  entryTime: string;
+  exitTime: string;
+  isDelayTolerant: boolean;
+  maxAllowableDelayMinutes: number;
+  priorityRank: number; // 1 (highest) to 5
+}
+```
+
+### 2.3 Joint Shadow-Block Resolution Model
+```typescript
+export interface JointBlockPlan {
+  blockId: string;
+  sectionId: string;
+  trackCircuitIds: string[]; // ["TC-03", "TC-04"]
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  bundledDemands: MaintenanceDemandRecord[];
+  coLocatedSavingsMinutes: number;
+  trafficLullIdentified: string; // e.g. "01:30 - 04:45 IST Night Window"
+  passengerCancellations: number; // Strictly 0
+  freightDelayMinutes: number;
+  kavachTsr: {
+    tsrSpeedKmh: number; // e.g. 30 km/h
+    affectedSections: string[];
+    broadcastStatus: 'ARMED' | 'BROADCASTING' | 'CLEARED';
+  };
+  sanctionStatus: 'RECOMMENDED' | 'SANCTIONED' | 'REJECTED';
+}
+```
+
+### 2.4 Explainable Decision Dossier Model
+```typescript
+export interface ExplainableDecisionDossier {
+  blockId: string;
+  corridorSection: string;
+  sha256VerificationHash: string;
+  sanctionedBy: string;
+  sanctionTimestamp: string;
+  steps: [
+    {
+      step: 1;
+      title: "Multi-Source Data Ingestion";
+      detail: "Normalized 3 TMS defect markers, 1 TDMS 25kV power cut demand, and COA live train paths.";
+    },
+    {
+      step: 2;
+      title: "Traffic Conflict & Headway Analysis";
+      detail: "Avoided 14:00 freight path bottleneck. Identified natural 3h 15m night traffic lull.";
+    },
+    {
+      step: 3;
+      title: "Joint Shadow-Block Bundling";
+      detail: "Bundled OHE catenary wash with civil track tamping under single 210-min window, saving 85 mins of downtime.";
+    },
+    {
+      step: 4;
+      title: "Safety Dissemination & Sanction Output";
+      detail: "Generated Kavach TSR 30 km/h for adjacent tracks and locked S-12 signal aspect.";
+    }
+  ];
 }
 ```

@@ -20,6 +20,8 @@
 | **Historical Incident Audit Dossier Archive** | Implemented | Multi-incident switcher (RS-2048, RS-2049, RS-2050, RS-2051), RDSO Form 14B Certificate seal preview, clipboard copy, and downloadable JSON dossiers (`DecisionLogModal.tsx`). |
 | **FastAPI Backend & Type-Safe API Client** | Implemented | Centralized HTTP client (`src/lib/apiClient.ts`) connecting to FastAPI (`http://127.0.0.1:8000`) for EBD physics, triage review, platform hold overrides, and interlocking telemetry with pure-TS simulation fallback. |
 | **Vitest Automated Test Suite** | Implemented | Comprehensive unit and integration test coverage (`tests/railsuraksha.test.ts`, `tests/feature3_interlocking_compliance.test.ts`, `tests/backend_api_engine.test.ts`, `tests/advanced_features.test.ts` - 32/32 passing tests). |
+| **SIH 26027 Auto-BDMS Refactoring Architecture** | Implemented (Docs & Design) | Complete end-to-end documentation suite across `docs/` (PRD v2.0.0, architecture walkthrough, API contracts & schemas, 3-developer execution plan, mock datasets, research sources, and 16:9 interactive architecture diagram). |
+| **SIH 26027 Pitch Presentation Deck** | Implemented | 6-slide widescreen presentation deck generated via `generate_deck.py` (`SIH_Automatic_Block_Planning_Presentation.pptx`) with multi-department shadow blocking and punctuality impact metrics. |
 
 ---
 

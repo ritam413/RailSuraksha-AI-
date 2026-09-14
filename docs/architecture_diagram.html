@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RailSuraksha AI - System Architecture & Workflow Diagram (SIH 2025)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0B132B;
+      color: #F8FAFC;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .glow-blue {
+      box-shadow: 0 0 35px -5px rgba(43, 127, 255, 0.35);
+    }
+
+    .glow-cyan {
+      box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.4);
+    }
+
+    .glow-emerald {
+      box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.35);
+    }
+
+    .glow-amber {
+      box-shadow: 0 0 30px -5px rgba(245, 158, 11, 0.35);
+    }
+
+    .flow-line {
+      position: relative;
+    }
+
+    .flow-line::after {
+      content: '';
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 18px;
+      background: linear-gradient(180deg, #3B82F6, #60A5FA);
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .animate-pulse-subtle {
+      animation: pulse-ring 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-6 md:p-10 min-h-screen flex flex-col justify-center items-center">
+
+  <!-- Container for 16:9 Presentation Framing -->
+  <div class="w-full max-w-[1400px] bg-[#0F172A] border border-[#1E293B] rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
+    
+    <!-- Background Ambient Glows -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-600/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header Section with SIH Branding -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-8 mb-8 border-b border-[#1E293B] relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+          <i data-lucide="train" class="w-8 h-8 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Auto-BDMS Engine</span>
+            <span class="text-xs text-slate-400 font-mono">RDSO & CRIS Compliant</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mt-0.5">
+            RailSuraksha AI <span class="text-slate-400 font-normal">| Multi-Department Block Planning Architecture</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- SIH 2025 Badge -->
+      <div class="flex items-center gap-3 bg-[#1E293B]/80 backdrop-blur border border-slate-700/60 px-5 py-3 rounded-2xl">
+        <div class="w-9 h-9 bg-gradient-to-tr from-amber-500 to-orange-500 rounded-xl flex items-center justify-center font-black text-black text-base shadow">
+          SIH
+        </div>
+        <div class="text-right">
+          <div class="text-xs font-bold text-amber-400 tracking-wider">SMART INDIA HACKATHON</div>
+          <div class="text-sm font-extrabold text-white font-mono">2025 FINALIST</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Architecture Grid Layout (Reference Layout: Left Flow -> Center Hub -> Right Multi-Horizon Cards) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+
+      <!-- LEFT COLUMN: 5-Step Pipeline (Col Span 5) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <!-- STEP I -->
+        <div class="flow-line bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-blue-400 hover:shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-blue-500/20 border border-blue-400/40 text-blue-400 font-bold text-xs flex items-center justify-center font-mono">I</span>
+              <h3 class="text-sm font-bold text-white tracking-wide">Multi-Source Data Ingestion</h3>
+            </div>
+            <span class="text-[11px] font-mono text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">TMS • SMMS • TDMS • COA</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Pulls track geometry (Civil), signal overhauls (S&T), OHE power demands (Electrical), and live passenger & freight train paths from CRIS portals.
+          </p>
+        </div>
+
+        <!-- STEP II -->
+        <div class="flow-line bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-cyan-400 hover:shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-400 font-bold text-xs flex items-center justify-center font-mono">II</span>
+              <h3 class="text-sm font-bold text-white tracking-wide">Geospatial & Headway Preprocessing</h3>
+            </div>
+            <span class="text-[11px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">GIS • Track Circuits</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Normalizes KM chainage markers to electrical track circuits and scans train timetables to identify off-peak freight gaps and line availability.
+          </p>
+        </div>
+
+        <!-- STEP III -->
+        <div class="flow-line bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-amber-400 hover:shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-400 font-bold text-xs flex items-center justify-center font-mono">III</span>
+              <h3 class="text-sm font-bold text-white tracking-wide">ML Urgency & Defect Priority Triage</h3>
+            </div>
+            <span class="text-[11px] font-mono text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/40">Gradient Boost / RF</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Classifies backlogs by urgency: <strong class="text-rose-400">P1 (Safety Critical)</strong>, <strong class="text-amber-400">P2 (Operational Urgency)</strong>, and <strong class="text-emerald-400">P3 (Routine/Preventive)</strong>.
+          </p>
+        </div>
+
+        <!-- STEP IV -->
+        <div class="flow-line bg-[#1E293B]/90 border border-blue-500/50 rounded-2xl p-4 glow-blue transition-all hover:border-blue-400">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-blue-500 text-white font-bold text-xs flex items-center justify-center font-mono">IV</span>
+              <h3 class="text-sm font-bold text-white tracking-wide">Joint Shadow-Block Optimizer Engine</h3>
+            </div>
+            <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">MILP Solver (OR-Tools)</span>
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">
+            Mathematically co-locates compatible tasks across departments into a single block window, cutting corridor downtime by 35%+ with zero passenger cancellations.
+          </p>
+        </div>
+
+        <!-- STEP V -->
+        <div class="bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-rose-400 hover:shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-400/40 text-rose-400 font-bold text-xs flex items-center justify-center font-mono">V</span>
+              <h3 class="text-sm font-bold text-white tracking-wide">Sanction & Kavach Safety Broadcast</h3>
+            </div>
+            <span class="text-[11px] font-mono text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/40">Kavach TSR • e-BDMS</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            One-click Section Controller approval in e-BDMS; broadcasts automatic Temporary Speed Restrictions (TSR) to Kavach cab units & alerts field gangs via SMS.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- CENTER HUB: Decision & Optimization Node (Col Span 2) -->
+      <div class="lg:col-span-2 flex flex-col items-center justify-center relative py-4 lg:py-0">
+        
+        <!-- Animated Connecting Lines -->
+        <div class="hidden lg:block absolute inset-0 pointer-events-none">
+          <svg class="w-full h-full" viewBox="0 0 200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 0 300 C 60 300, 70 120, 200 120" stroke="#38BDF8" stroke-width="2.5" stroke-dasharray="6 4" />
+            <path d="M 0 300 C 80 300, 100 300, 200 300" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6 4" />
+            <path d="M 0 300 C 60 300, 70 480, 200 480" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="6 4" />
+          </svg>
+        </div>
+
+        <div class="w-36 h-36 md:w-44 md:h-44 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 p-1 glow-blue animate-pulse-subtle flex items-center justify-center shadow-2xl relative z-20">
+          <div class="w-full h-full bg-[#0F172A] rounded-full p-4 flex flex-col items-center justify-center text-center">
+            <i data-lucide="cpu" class="w-8 h-8 text-cyan-400 mb-1"></i>
+            <span class="text-[10px] font-mono tracking-widest text-cyan-400 font-bold uppercase">AI Engine</span>
+            <h4 class="text-xs md:text-sm font-extrabold text-white leading-tight mt-0.5">
+              OPTIMIZED<br/>CORRIDOR<br/>BLOCK PLAN
+            </h4>
+          </div>
+        </div>
+        
+        <div class="text-[11px] font-mono text-slate-400 mt-3 text-center">
+          Constraint-Satisfaction Engine
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: 3 Multi-Horizon Execution Visual Cards (Col Span 5) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <!-- CARD 1: 24h Tactical Horizon (Low Traffic / High Risk Fix) -->
+        <div class="bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-cyan-400 glow-cyan">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <h3 class="text-sm font-bold text-white tracking-wide">24h Tactical Horizon</h3>
+            </div>
+            <span class="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-700/50">P1 Emergency & Night Lulls</span>
+          </div>
+
+          <!-- Mini SVG Graph: Tactical Night Slot -->
+          <div class="bg-[#0B132B] border border-slate-800 rounded-xl p-3 my-2">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+              <span>00:00 (Midnight)</span>
+              <span class="text-cyan-400 font-bold">01:30 - 03:30 [MAINT. BLOCK]</span>
+              <span>06:00 AM</span>
+            </div>
+            <!-- SVG String Chart / Lull Area -->
+            <svg class="w-full h-14" viewBox="0 0 300 60" fill="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="50" x2="300" y2="50" stroke="#1E293B" stroke-width="1" />
+              <line x1="0" y1="25" x2="300" y2="25" stroke="#1E293B" stroke-width="1" stroke-dasharray="3 3" />
+              <!-- Traffic Density Line -->
+              <path d="M 0 20 Q 40 15, 75 48 T 150 48 T 225 15 T 300 10" stroke="#64748B" stroke-width="2" fill="none" />
+              <!-- Optimal Block Window Shaded Box -->
+              <rect x="75" y="5" width="75" height="45" rx="4" fill="rgba(6, 182, 212, 0.25)" stroke="#06B6D4" stroke-width="1.5" />
+              <text x="82" y="28" fill="#E0F2FE" font-size="8" font-family="monospace" font-weight="bold">BLOCK: 120m</text>
+              <text x="82" y="40" fill="#38BDF8" font-size="7" font-family="monospace">TSR: 30 km/h</text>
+            </svg>
+            <div class="flex justify-between items-center text-[10px] mt-1 pt-1 border-t border-slate-800/80">
+              <span class="text-slate-400">Predicted Risk: <strong class="text-emerald-400">Safe Headway</strong></span>
+              <span class="text-cyan-300 font-mono">Passenger Delays: <strong>0 min</strong></span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-300">
+            Fixes rail fractures & point failures during low-density night freight gaps; activates automated Kavach speed restriction.
+          </p>
+        </div>
+
+        <!-- CARD 2: 7-Day Weekly Matrix (Joint Shadow Blocking) -->
+        <div class="bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-emerald-400 glow-emerald">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <h3 class="text-sm font-bold text-white tracking-wide">7-Day Weekly Matrix (Shadow Blocks)</h3>
+            </div>
+            <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">Multi-Dept Co-Location</span>
+          </div>
+
+          <!-- Mini SVG Graph: Bundled Multi-Department Block -->
+          <div class="bg-[#0B132B] border border-slate-800 rounded-xl p-3 my-2">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+              <span>Mon</span><span>Tue</span><span class="text-emerald-400 font-bold">Wed (Joint Window)</span><span>Thu</span><span>Fri</span>
+            </div>
+            <!-- SVG Multi-Layer Track Allocation -->
+            <svg class="w-full h-14" viewBox="0 0 300 60" fill="none">
+              <!-- Section Corridor Track Line -->
+              <rect x="0" y="24" width="300" height="12" rx="3" fill="#1E293B" />
+              <!-- Single Joint Window encompassing both departments -->
+              <rect x="110" y="8" width="100" height="44" rx="6" fill="rgba(16, 185, 129, 0.2)" stroke="#10B981" stroke-width="1.5" />
+              <!-- Sub-blocks inside joint window -->
+              <rect x="116" y="14" width="88" height="14" rx="3" fill="#0284C7" />
+              <text x="122" y="24" fill="#FFFFFF" font-size="7.5" font-family="monospace" font-weight="bold">TMS: Track Tamping</text>
+              <rect x="116" y="32" width="88" height="14" rx="3" fill="#D97706" />
+              <text x="122" y="42" fill="#FFFFFF" font-size="7.5" font-family="monospace" font-weight="bold">TDMS: OHE Power Cut</text>
+            </svg>
+            <div class="flex justify-between items-center text-[10px] mt-1 pt-1 border-t border-slate-800/80">
+              <span class="text-slate-400">Downtime Saved: <strong class="text-emerald-400">38% (85 mins)</strong></span>
+              <span class="text-emerald-300 font-mono">1 Single Closure</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-300">
+            Bundles track tamping with catenary maintenance in one single track possession instead of closing the line twice.
+          </p>
+        </div>
+
+        <!-- CARD 3: 30-Day Cyclical Master Plan (Preventive Overhauls) -->
+        <div class="bg-[#1E293B]/90 border border-slate-700/80 rounded-2xl p-4 transition-all hover:border-amber-400 glow-amber">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <h3 class="text-sm font-bold text-white tracking-wide">30-Day Cyclical Master Plan</h3>
+            </div>
+            <span class="text-[10px] font-mono font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-700/50">Capacity & Machine Routing</span>
+          </div>
+
+          <!-- Mini SVG Graph: 4-Week Health Index Projection -->
+          <div class="bg-[#0B132B] border border-slate-800 rounded-xl p-3 my-2">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400 mb-1">
+              <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
+            </div>
+            <svg class="w-full h-14" viewBox="0 0 300 60" fill="none">
+              <!-- Upward Health Curve -->
+              <path d="M 10 45 C 80 42, 140 30, 290 12" stroke="#F59E0B" stroke-width="2.5" />
+              <!-- Points -->
+              <circle cx="10" cy="45" r="3.5" fill="#F59E0B" />
+              <circle cx="100" cy="40" r="3.5" fill="#F59E0B" />
+              <circle cx="200" cy="24" r="3.5" fill="#F59E0B" />
+              <circle cx="290" cy="12" r="4.5" fill="#10B981" />
+              <!-- Shaded fill under curve -->
+              <path d="M 10 45 C 80 42, 140 30, 290 12 L 290 55 L 10 55 Z" fill="rgba(245, 158, 11, 0.1)" />
+              <text x="180" y="48" fill="#FDE68A" font-size="8" font-family="monospace">Target: 99.8% Uptime</text>
+            </svg>
+            <div class="flex justify-between items-center text-[10px] mt-1 pt-1 border-t border-slate-800/80">
+              <span class="text-slate-400">Track Geometry Index: <strong class="text-emerald-400">TGI > 92</strong></span>
+              <span class="text-amber-300 font-mono">100% Machines Utilized</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-300">
+            Routes heavy tamper/ballast machines across division corridors, preventing emergency speed restrictions.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Footer Stats & Value Proposition Bar -->
+    <div class="mt-8 pt-6 border-t border-[#1E293B] grid grid-cols-2 md:grid-cols-4 gap-4 text-center relative z-10">
+      <div class="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-800">
+        <div class="text-lg md:text-xl font-extrabold text-cyan-400 font-mono">35% - 40%</div>
+        <div class="text-[11px] text-slate-400 font-medium">Track Downtime Reduced</div>
+      </div>
+      <div class="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-800">
+        <div class="text-lg md:text-xl font-extrabold text-emerald-400 font-mono">0 Cancellations</div>
+        <div class="text-[11px] text-slate-400 font-medium">Passenger Paths Protected</div>
+      </div>
+      <div class="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-800">
+        <div class="text-lg md:text-xl font-extrabold text-blue-400 font-mono">&lt; 30 Seconds</div>
+        <div class="text-[11px] text-slate-400 font-medium">Full Schedule Generation</div>
+      </div>
+      <div class="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-800">
+        <div class="text-lg md:text-xl font-extrabold text-amber-400 font-mono">100% Kavach TSR</div>
+        <div class="text-[11px] text-slate-400 font-medium">Automated Safety Enforced</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

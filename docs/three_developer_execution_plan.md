@@ -1,180 +1,111 @@
-# RailSuraksha AI — 3-Developer Parallel 6-Hour Hackathon Execution Plan
+# RailSuraksha AI — 3-Developer Parallel Execution Plan (SIH 26027)
 
 > **Location:** `docs/three_developer_execution_plan.md`  
-> **Target Timeline:** 6 Hours (Fast-Track Hackathon Prototype)  
-> **Team Size:** 3 Developers using Antigravity AI Coding Assistants  
-> **Core Strategy:** Strict File/Directory Ownership Boundaries & Contract-First Interface Specs (Zero Merge Conflicts).  
+> **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
+> **Target Timeline:** Fast-Track Hackathon Prototype & Finalist Presentation  
+> **Team Strategy:** Strict File/Directory Ownership Boundaries & Contract-First Interface Specs (Zero Merge Conflicts).
 
 ---
 
-## 👥 Role Allocation & Dedicated File Ownership Matrix
+## 👥 1. Role Allocation & Dedicated File Ownership Matrix
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                               3-DEVELOPER PARALLEL WORK SPLIT                           │
+│                           3-DEVELOPER PARALLEL WORK SPLIT (SIH 26027)                   │
 ├───────────────────────────────┬───────────────────────────────┬─────────────────────────┤
-│ DEVELOPER 1 (YOU - LEAD)      │ DEVELOPER 2 (BASIC CODER)     │ DEVELOPER 3 (ML / AI)   │
-│ Full-Stack / Integrator       │ Component & UI Layouts        │ Physics & Agent Logic   │
+│ DEVELOPER 1 (LEAD / INTEGRATE)│ DEVELOPER 2 (UI COMPONENTS)   │ DEVELOPER 3 (AI / SOLVER│
+│ Full-Stack & Operations Engine│ Dispatcher Surfaces & Dossiers│ Optimization & Safety   │
 ├───────────────────────────────┼───────────────────────────────┼─────────────────────────┤
-│ 📁 Directory:                 │ 📁 Directory:                 │ 📁 Directory:           │
+│ 📁 Dedicated Directory:       │ 📁 Dedicated Directory:       │ 📁 Dedicated Directory: │
 │   src/app/page.tsx            │   src/components/Overview/**  │   src/lib/agents/**     │
-│   src/components/Navbar.tsx   │   src/components/Auditor/**   │   src/lib/physics/**    │
-│   src/app/globals.css         │   src/components/Common/**    │   src/lib/vision/**     │
+│   src/components/Navbar.tsx   │   src/components/Auditor/**   │   src/lib/ingestion/**  │
+│   src/components/Planner/**   │   src/components/Common/**    │   backend/optimizer.py  │
+│   src/app/globals.css         │                               │   src/types/**          │
 ├───────────────────────────────┼───────────────────────────────┼─────────────────────────┤
 │ 🎯 Focus:                     │ 🎯 Focus:                     │ 🎯 Focus:               │
-│   - Next.js 16 App Routing    │   - KPI Strip Card Component  │   - RDSO EBD Physics    │
-│   - Global Advisory Switcher  │   - Incident Queue List UI    │     stopping distance   │
-│   - Video Canvas Overlay      │   - Decision Log Modal        │   - Triage severity     │
-│   - Mock State & Demo Wiring  │   - Light-Blue Design System  │   - Crowd density state │
+│   - Next.js 16 App Router     │   - 6-Metric KPI Strip        │   - Unified Ingestion   │
+│   - Corridor String Chart     │   - Department Demand Queue   │     Adapter (TMS/TDMS)  │
+│   - Multi-Horizon Switcher    │   - Decision Dossier Modal    │   - MILP Shadow-Block   │
+│     (24h / 7D / 30D)          │   - Mintlify Light-Blue tokens│     Optimizer Engine    │
+│   - Interlocking Sync         │   - Urgency Tier Badges       │   - Kavach TSR Broadcast│
 └───────────────────────────────┴───────────────────────────────┴─────────────────────────┘
 ```
 
 ---
 
-## 🔒 Shared Interface Contract (`src/types/apiContracts.ts`)
+## 🔒 2. Shared Interface Contract (`src/types/apiContracts.ts`)
 
-> **CRITICAL RULE:** All 3 developers agree on `src/types/apiContracts.ts` in **Hour 01**. No developer modifies property names in `apiContracts.ts` without notifying the team.
+All 3 developers program against these shared TypeScript contracts:
 
 ```typescript
 // src/types/apiContracts.ts
 
 export type DeploymentMode = 'ADVISORY' | 'AUTONOMOUS';
-export type SeverityCategory = 'CRITICAL' | 'MODERATE' | 'LOW';
+export type DepartmentCode = 'TMS_CIVIL' | 'TDMS_ELECTRICAL' | 'SMMS_SIGNAL';
+export type UrgencyTier = 'P1_CRITICAL' | 'P2_SCHEDULED' | 'P3_ROUTINE';
+export type HorizonTier = 'TACTICAL_24H' | 'WEEKLY_7D' | 'MONTHLY_30D';
 
-export interface AnomalyBoundingBox {
-  class: 'BOULDER' | 'RAIL_FRACTURE' | 'CROWD_SURGE' | 'CATTLE';
-  confidence: number; // e.g. 0.982
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  estimatedDistanceMeters: number;
+export interface MaintenanceDemand {
+  id: string;
+  department: DepartmentCode;
+  assetType: 'RAIL_TRACK' | 'OHE_CATENARY' | 'POINT_MACHINE' | 'TRACK_CIRCUIT';
+  sectionId: string;
+  chainageKm: string;           // e.g. "KM 108/4 - 112/2"
+  trackCircuitId: string;       // e.g. "TC-03"
+  urgencyTier: UrgencyTier;
+  urgencyScore: number;         // 0.0 - 1.0
+  estimatedDurationMinutes: number;
+  requiredAssets: string[];      // e.g. ["CSM_TAMPER", "TOWER_WAGON"]
+  canShadowBlock: boolean;
+  status: 'PENDING_TRIAGE' | 'SLOTTED' | 'SANCTIONED';
 }
 
-export interface IncidentRecord {
-  incidentId: string;
-  timestamp: string;
-  sourceCameraId: string;
-  cameraType: 'LOCO_CAB' | 'PLATFORM_GATEWAY' | 'OHE';
-  severityCategory: SeverityCategory;
-  severityScore: number;
-  assignedAgent: 'KavachBrakingAgent' | 'SectionDispatchAgent' | 'RiskAuditAgent';
-  status: 'PENDING_APPROVAL' | 'EXECUTING' | 'RESOLVED' | 'REJECTED';
-  boundingBoxes: AnomalyBoundingBox[];
+export interface JointBlockSchedule {
+  blockId: string;
+  sectionId: string;
+  trackCircuits: string[];
+  startTime: string;            // e.g. "01:30 IST"
+  endTime: string;              // e.g. "04:45 IST"
+  durationMinutes: number;
+  bundledDemands: MaintenanceDemand[];
+  downtimeSavedMinutes: number; // Co-located bundling savings
+  passengerDelays: number;      // Strictly 0
+  freightDelayMinutes: number;
+  kavachTsrSpeedKmh: number;    // e.g. 30
+  sanctionStatus: 'RECOMMENDED' | 'SANCTIONED';
 }
 
-export interface EbdCalculationResult {
-  trainId: string;
-  velocityKmh: number;
-  obstacleDistanceMeters: number;
-  calculatedStoppingDistanceMeters: number; // D_stop
-  marginDistanceMeters: number;
-  isCollisionRisk: boolean;
-  requiredDecelerationMs2: number;
-  brakeState: 'CLEAR' | 'EMERGENCY_SOLENOID_ACTUATED';
-}
-
-export interface PlatformHoldState {
-  stationCode: string;
-  heldPlatformId: string;
-  adjacentPlatformId: string;
-  gatewayOccupancyIndex: number; // rho (0.0 - 1.0)
-  gatewayCrowdCount: number;
-  remainingHoldSeconds: number;
-  isMlExtensionActive: boolean;
-  status: 'HOLD_ACTIVE' | 'CLEARING' | 'RELEASED';
-}
-
-export interface ExplainableDecisionLog {
-  incidentId: string;
-  trainNumber: string;
-  trackSection: string;
-  status: 'ACTION_CONFIRMED' | 'REJECTED' | 'RESOLVED';
-  deploymentMode: DeploymentMode;
-  steps: Array<{
-    stepNumber: number;
-    agentName: string;
-    title: string;
-    detailText: string;
-    timestamp: string;
-  }>;
-  outcomeSummary: string;
+export interface CorridorKpiMetrics {
+  corridorDowntimeSavedPct: number; // 38.4%
+  assetAvailabilityIndexPct: number; // 96.2%
+  activeBlocksCount: number;
+  pendingDemandsCount: number;
+  whiteCorridorHeadwayMinutes: number; // 195 mins (3h 15m)
+  activeKavachTsrsCount: number;
 }
 ```
 
 ---
 
-## ⏰ 6-Hour Master Execution Schedule
+## ⏱️ 3. Hour-by-Hour Implementation Sequence
 
-### 🚀 HOUR 01: Setup, Contract Sync & Design System Tokens
-- **ALL 3 DEVS (15 Mins):** Align on `src/types/apiContracts.ts` and `src/lib/mockData.ts`.
-- **DEV 1 (Lead):** Setup Light-Blue global CSS (`#F0F6FC`, `#FFFFFF`, `#2B7FFF`, `#0F172A`) and `Navbar.tsx` shell with Advisory/Autonomous mode toggle.
-- **DEV 2 (Basic Coder):** Copy static mock dataset types and prepare `src/components/Overview/` folder.
-- **DEV 3 (ML/AI):** Setup `src/lib/agents/` pure TypeScript module exports and stubs.
-
-### 🏗️ HOURS 02–03: Isolated Parallel Component & Agent Construction
-- **DEV 1 (Frontend Lead):**
-  - Build `LocoCameraFeed.tsx` video container with HTML5 canvas bounding box overlay.
-  - Wire main tab view switcher (`Overview`, `Loco-Cab Vision`, `Platform Gateway`) in `src/app/page.tsx`.
-- **DEV 2 (Basic Coder UI):**
-  - Prompt Antigravity: *"Build `KpiStrip.tsx` (6 metric cards) and `IncidentQueue.tsx` (alert list with `[APPROVE ACTION]` buttons) in `src/components/Overview/` using static data from `src/lib/mockData.ts`."*
-- **DEV 3 (ML / AI / Physics):**
-  - Prompt Antigravity: *"Implement `kavachBrakingAgent.ts` with RDSO physics formula $D_{\text{stop}} = \frac{V^2}{2g(\mu + G)} + V \cdot t_{\text{reaction}}$."*
-  - Implement `triageAgent.ts` severity classifier and `sectionDispatchAgent.ts` 5-minute crowd density hold logic.
-
-### ⚡ HOURS 04–05: Scenario Wiring, Pipeline Visualizer & Decision Logs
-- **DEV 1 (Lead):** Build `AgentPipelineCanvas.tsx` (4-stage animated safety pipeline visualizer).
-- **DEV 2 (Basic Coder UI):** Build `DecisionLogModal.tsx` auditor drawer modal displaying step-by-step decision steps.
-- **DEV 3 (ML/AI):** Connect agent outputs to `explainableLogger.ts` to output clean 4-step decision logs.
-- **MILESTONE:** All 3 component sets import cleanly into `src/app/page.tsx` without merge conflicts.
-
-### 🎯 HOUR 06: System Integration, Mintlify Geometry Verification & Presentation Practice
-- **ALL DEVS:** Verify 4 key demo flows:
-  1. **Flow 1 (Track Hazard & Kavach EBD):** Boulder detected at 340m $\to$ $D_{\text{stop}} = 410\text{m}$ $\to$ Emergency brake actuated.
-  2. **Flow 2 (Platform Overcrowding):** Platform 17 overcrowding ($\rho = 88\%$) $\to$ 5-minute hold on Platform 18 train.
-  3. **Flow 3 (Advisory vs Autonomous):** Global header toggle switches between manual approval gate and automatic execution.
-  4. **Flow 4 (Auditor Compliance):** Click `[CLOSE INCIDENT & FILE REPORT]` to show compliance log output.
-- **DEV 1:** Enforce Mintlify spatial geometry rules (4px button radius, 16px card radius, 24px container radius, 0 pill buttons).
+| Hour | Developer 1 (Lead) | Developer 2 (UI Layouts) | Developer 3 (AI & Solver) |
+| :---: | :--- | :--- | :--- |
+| **01** | Wire top Navbar, Horizon Switcher (24h/7D/30D), and view containers. | Build `KpiStrip.tsx` with 6 block planning metrics and status badges. | Formalize `src/types/apiContracts.ts` and `src/lib/mockData.ts` with TMS/SMMS/TDMS datasets. |
+| **02** | Scaffold SVG Corridor Time-Distance String Chart with train lines. | Implement `IncidentQueue.tsx` with Department origin badges and filter tabs. | Build Unified Ingestion Normalizer mapping chainage KMs to `TC-01..06`. |
+| **03** | Overlay shaded rectangular maintenance block windows onto String Chart. | Style Urgency Tier badges (`P1`, `P2`, `P3`) and `[SANCTION BLOCK]` buttons. | Implement Joint Shadow-Block Bundling algorithm (co-location matching). |
+| **04** | Connect one-click `[SANCTION BLOCK]` to update Interlocking Map circuits. | Build `DecisionLogModal.tsx` displaying 4-step block sanction justification. | Integrate Google OR-Tools MILP constraint logic / white-corridor search. |
+| **05** | Integrate Advisory vs Autonomous mode toggle and live demo ticker. | Wire RDSO Section 14B certificate export and clipboard copy. | Generate Kavach TSR packets (30 km/h) and safety boundary checks. |
+| **06** | End-to-end rehearsal, UI polish, run `vitest` test suite, update tracking files. | Cross-browser styling audit & responsive layout verification. | Verification of zero-passenger-delay constraint and downtime savings. |
 
 ---
 
-## 🛠️ Antigravity Agent Prompt Templates (Copy-Paste per Role)
+## 🎯 4. Demo Pitch Narrative for Hackathon Judges
 
-### 📌 Prompt for Developer 1 (Frontend & System Lead):
-```text
-You are Developer 1 on RailSuraksha AI. Your exclusive domain is building client-side React 19 components in `src/app/page.tsx` and `src/components/Navbar.tsx` using Next.js 16 and Tailwind CSS v4.
-
-Follow the Light-Blue Mintlify design system:
-- Canvas Base: #F0F6FC
-- Card Surface: #FFFFFF (border #D0DFEE)
-- Primary Accent: #2B7FFF (Signal Blue)
-- Text Primary: #0F172A (Ink Slate)
-- Geometry: 4px button/input radius, 16px card radius, 24px container radius (STRICTLY ZERO PILL BUTTONS).
-
-Do NOT modify files in `src/components/Overview/` or `src/lib/agents/`. Import types strictly from `src/types/apiContracts.ts` and datasets from `src/lib/mockData.ts`.
-```
-
-### 📌 Prompt for Developer 2 (Basic Coder - UI Components):
-```text
-You are Developer 2 on RailSuraksha AI. Your exclusive domain is building client-side UI components in `src/components/Overview/` and `src/components/Auditor/`.
-
-Build:
-1. `KpiStrip.tsx` (6 operational metric cards displaying Active Trains, Track Circuits, Signals, Incidents, Active Holds).
-2. `IncidentQueue.tsx` (Priority alert list displaying severity badges and `[APPROVE ACTION]` buttons).
-3. `DecisionLogModal.tsx` (Drawer modal showing 4-step AI decision logs).
-
-Follow Light-Blue Mintlify styling (#F0F6FC base, #FFFFFF cards with #D0DFEE border, 4px button radius, 16px card radius). Import mock data from `src/lib/mockData.ts`. Do NOT touch `src/app/page.tsx` or `src/lib/agents/`.
-```
-
-### 📌 Prompt for Developer 3 (ML, AI & Physics Lead):
-```text
-You are Developer 3 on RailSuraksha AI. Your exclusive domain is building pure TypeScript business logic in `src/lib/agents/`, `src/lib/physics/`, and `src/lib/vision/`.
-
-Implement:
-1. `kavachBrakingAgent.ts`: RDSO stopping distance formula D_stop = (V^2 / (2 * g * (mu + G))) + (V * t_reaction). Compare D_stop vs D_obstacle.
-2. `triageAgent.ts`: Severity scoring classifier (CRITICAL, MODERATE, LOW).
-3. `sectionDispatchAgent.ts`: 5-minute hold timer & crowd flow density index calculation.
-4. `explainableLogger.ts`: Immutable 4-step decision log timeline generator.
-
-Export pure TypeScript functions. Do NOT touch UI components or `src/app/page.tsx`.
-```
+1. **The Hook (0:00–0:45):** Show the problem — Civil, Electrical, and Signal teams blocking the same track 3 times a week, causing cascading freight delays and passenger speed restrictions.
+2. **The Innovation (0:45–2:00):** Show the **Corridor Time-Distance String Chart**. Point to the 02:15 AM night lull where the AI bundled OHE catenary wash and track tamping into **one single window**, saving **38.4% corridor downtime**.
+3. **The Workflow (2:00–3:15):** The Section Controller clicks `[SANCTION BLOCK]`. Instantly show:
+   * The Interlocking Map clamping circuit `TC-03` to red.
+   * Kavach TCAS broadcasting a 30 km/h TSR directly to locomotives.
+   * The Decision Log producing an immutable RDSO Form 14B certificate.
+4. **The Impact (3:15–4:00):** Highlight quantifiable ROI: +18% asset availability, 0 passenger cancellations, and compliance with RDSO safety standards.

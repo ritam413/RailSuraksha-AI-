@@ -38,3 +38,12 @@ __pycache__/
 .idea/
 .vscode/
 .DS_Store
+
+# Chat Transcripts & Raw Brain Dumps
+docs/chats/
+docs/context/
+docs/features_implemented/
+docs/tracker/
+.system_generated/
+*.log
+

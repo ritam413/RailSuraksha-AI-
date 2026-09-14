@@ -1,7 +1,9 @@
 # Project Context: RailSuraksha AI (रेल-सुरक्षा)
 
-## 1. Project Overview
-RailSuraksha AI is a national-grade railway safety, interlocking monitoring, and incident intelligence platform built for Indian Railways operations. It bridges computer vision hazard detection, deterministic RDSO-standard stopping physics (Kavach EBD), platform crowd surge control, and transparent explainable AI compliance auditing.
+## 1. Project Overview & SIH 26027 Problem Statement
+RailSuraksha AI (Auto-BDMS) is an AI-powered Automatic Block Planning and Corridor Optimization System aligned with **Smart India Hackathon (SIH) Problem Statement 26027**: *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*. 
+
+It transforms decentralized, manual maintenance scheduling into a data-driven, coordinated process by integrating maintenance defect data across Civil Engineering (**TMS**), Electrical TRD (**TDMS**), and Signaling & Telecom (**SMMS**) with live corridor availability from the Control Office Application (**COA**). It uses Mixed-Integer Linear Programming (MILP) to bundle co-located maintenance into multi-department **joint shadow blocks**, operates across multi-horizon planning (24h Tactical, 7-Day Operational, 30-Day Strategic), and disseminates Temporary Speed Restrictions (TSRs) directly to locomotive **Kavach TCAS** units.
 
 ## 2. Team Architecture & Ownership Matrix
 - **Developer 1 (Lead / Integrator):** `src/app/page.tsx`, `src/components/Navbar.tsx`, `src/components/LocoCameraFeed.tsx`, `src/components/AgentPipelineCanvas.tsx`, `src/components/PlatformGatewayFeed.tsx`, `src/app/globals.css`.
