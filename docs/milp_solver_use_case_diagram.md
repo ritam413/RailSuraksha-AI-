@@ -1,8 +1,9 @@
-# Use-Case Specification: MILP Solver & Joint Shadow-Block Optimizer Engine
+# Use-Case Specification: CP-SAT / MILP Solver & Joint Shadow-Block Optimizer Engine
 
 > **System:** RailSuraksha AI (Auto-BDMS)  
-> **Component:** Core Mathematical Optimization Engine (Mixed-Integer Linear Programming / CP-SAT Solver)  
-> **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*
+> **Component:** Core Mathematical Optimization Engine (Google OR-Tools CP-SAT & Mixed-Integer Linear Programming)  
+> **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
+> **Standards Grounding:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 (Kavach Ver 4.0)
 
 ---
 
@@ -14,20 +15,20 @@ graph LR
     subgraph Actors ["👥 System Actors"]
         Controller["👤 Divisional Section Controller<br/>(Sr. DOM / Section Dispatcher)"]
         Planners["👷 Department Maintenance Planners<br/>(Civil P-Way / Electrical TRD / S&T)"]
-        CRIS["🖥️ CRIS Data Systems<br/>(TMS, SMMS, TDMS, COA)"]
+        CRIS["🖥️ CRIS Data Systems<br/>(TMS, SMMS, TDMS, COA, BDMS)"]
         Kavach["📡 Kavach TCAS & Interlocking<br/>(Loco Cab Radio & EI Relays)"]
         Auditor["📋 Safety & RDSO Auditor<br/>(Compliance Officer)"]
     end
 
     %% System Boundary
-    subgraph SolverBoundary ["⚙️ SYSTEM BOUNDARY: MILP Optimizer & Multi-Horizon Scheduler Engine"]
+    subgraph SolverBoundary ["⚙️ SYSTEM BOUNDARY: Google OR-Tools CP-SAT Optimizer & Multi-Horizon Scheduler Engine"]
         UC1(["UC-01: Ingest & Normalize Asset Demands<br/><i>(Convert Chainage KMs to Track Circuits)</i>"])
         UC2(["UC-02: Triage Demand Urgency & Safety Score<br/><i>(Rank P1 Critical / P2 Periodic / P3 Routine)</i>"])
-        UC3(["UC-03: Analyze COA Headways & Traffic Gaps<br/><i>(Identify Natural Nocturnal Lulls)</i>"])
+        UC3(["UC-03: Analyze COA Headways & Traffic Gaps<br/><i>(Identify Natural Nocturnal White Corridors)</i>"])
         
-        UC4(["UC-04: Execute MILP Corridor Optimization<br/><i>(OR-Tools Multi-Objective Solver)</i>"])
+        UC4(["UC-04: Execute CP-SAT / MILP Corridor Optimization<br/><i>(Google OR-Tools Disjunctive Solver)</i>"])
         UC4_1(["UC-04.1: Minimize Total Corridor Downtime"]):::sub
-        UC4_2(["UC-04.2: Enforce Zero-Passenger Cancellation"]):::sub
+        UC4_2(["UC-04.2: Enforce Zero-Passenger Cancellation & 15m Buffer"]):::sub
         UC4_3(["UC-04.3: Cluster Co-Located Shadow Blocks<br/><i>(Civil + TRD OHE + S&T Signals)</i>"]):::sub
         UC4_4(["UC-04.4: Enforce Track Machine & Crew Feasibility"]):::sub
 
@@ -37,9 +38,9 @@ graph LR
         UC5_3(["UC-05.3: 30-Day Monthly Strategic Master Plan<br/><i>(Heavy Tamping & TGI Recovery)</i>"]):::horizon
 
         UC6(["UC-06: Simulate 'What-If' Disruption Scenarios<br/><i>(Weather / Freight Diversion)</i>"])
-        UC7(["UC-07: Sanction & Dispatch Corridor Block"])
-        UC8(["UC-08: Broadcast Kavach TSR & Signal Lockout"])
-        UC9(["UC-09: Compile Explainable Decision Dossier<br/><i>(SHA-256 Digital Verification)</i>"])
+        UC7(["UC-07: Sanction & Dispatch Corridor Block<br/><i>(Auto-BDMS Sanction Gate)</i>"])
+        UC8(["UC-08: Broadcast Kavach TSR & Form S&T/T-351 Lockout"])
+        UC9(["UC-09: Compile Explainable Decision Dossier<br/><i>(SHA-256 Digital Verification & Form 14B)</i>"])
     end
 
     %% Actor Relationships
@@ -81,9 +82,9 @@ graph LR
 ## 🔍 2. Detailed Elaboration of Core Solver Use Cases
 
 ### UC-01: Ingest & Normalize Asset Demands
-* **Primary Actors:** Departmental Planners (P-Way, TRD, S&T), CRIS Systems.
-* **Trigger:** Daily/hourly synchronization from TMS, SMMS, TDMS.
-* **Description:** Ingests unstructured defect logs, overdue maintenance work orders, and Track Geometry Index (TGI) deficits. Normalizes engineering chainage markers (e.g., `KM 108/4 to 112/2`) into discrete electrical track circuit nodes (`TC-01` to `TC-06`).
+* **Primary Actors:** Departmental Planners (P-Way, TRD, S&T), CRIS Systems (TMS, TDMS, SMMS).
+* **Trigger:** Daily/hourly synchronization from CRIS databases.
+* **Description:** Ingests unstructured defect logs, overdue maintenance work orders, ultrasonic flaw detection (USFD) records (IMR/OBS/REM per IRPWM 2020), contact wire wear (< 74 mm² per ACTM), and Track Geometry Index (TGI) deficits. Normalizes engineering chainage markers (e.g., `KM 108/4 to 112/2`) into discrete electrical track circuit nodes (`TC-01` to `TC-06`).
 * **Output:** Normalized stream of `MaintenanceDemandRecord` objects ready for solver indexing.
 
 ---
@@ -92,11 +93,11 @@ graph LR
 * **Primary Actor:** ML Urgency Triage Classifier.
 * **Precondition:** Ingestion and normalization complete.
 * **Formulation:** Evaluates urgency score $S_i \in [0, 1]$:
-  $$S_i = 0.45 \cdot \text{SafetyRisk} + 0.35 \cdot \text{DegradationRate} + 0.20 \cdot \text{OverdueDays}$$
+  $$S_i = 0.45 \cdot \text{SafetyRisk} + 0.35 \cdot \text{DegradationRate} \cdot \Delta t + 0.20 \cdot \frac{\text{OverdueDays}}{\text{TargetCycleDays}}$$
 * **Tier Categorization:**
-  * **P1 (Immediate Threat):** Transverse rail fractures, sudden OHE sagging, track circuit fail-safes. Must be slated into the **24-Hour Tactical Horizon**.
-  * **P2 (Scheduled Maintenance):** Track tamping cycles, point machine motor overhauls. Slated into **7-Day Operational Matrix**.
-  * **P3 (Preventive / Opportunistic):** Drain cleaning, ballast dressing, insulator washing. Scheduled during shadow blocks.
+  * **P1 (Immediate Threat / Score 80–100):** Transverse rail fractures (IMR), sudden OHE sagging, track circuit fail-safes. Slated into **24-Hour Tactical Horizon**.
+  * **P2 (Scheduled Maintenance / Score 50–79):** Track tamping cycles, point machine motor overhauls. Slated into **7-Day Operational Matrix**.
+  * **P3 (Preventive / Routine / Score 0–49):** Drain cleaning, ballast dressing, insulator washing. Scheduled during opportunistic shadow blocks.
 
 ---
 
@@ -106,16 +107,14 @@ graph LR
 
 ---
 
-### UC-04: Execute MILP Corridor Optimization (The Solver Core)
-* **Mathematical Solver:** Google OR-Tools (`ortools.sat.python.cp_model.CpModel`) or Mixed-Integer Linear Programming.
+### UC-04: Execute CP-SAT / MILP Corridor Optimization (The Solver Core)
+* **Mathematical Solver:** Google OR-Tools (`ortools.sat.python.cp_model.CpModel`) disjunctive interval scheduling.
 * **Objective Function:**
-  $$\min \quad \sum_{s,t} \Big( C_{\text{downtime}} \cdot y_{s,t} \Big) + \sum_{j} \Big( C_{\text{delay}, j} \cdot d_j \Big) + \sum_{i} \Big( P_{\text{defer}, i} \cdot (1 - \sum_t x_{i,t}) \Big)$$
+  $$\min \quad \alpha \sum_{b \in \mathcal{B}} \text{Duration}(b) + \beta \sum_{t \in \mathcal{T}} \Delta_{t}^{\text{delay}} + \gamma \sum_{d \in \mathcal{D}_{\text{deferred}}} \text{Risk}(d) - \delta \sum_{d_1, d_2 \in \text{Bundled}} \text{Synergy}(d_1, d_2)$$
 * **Sub-Use Cases & Constraints:**
   * **UC-04.1 (Minimize Corridor Downtime):** Minimizes total minutes track sections $s$ are blocked from active train movements.
-  * **UC-04.2 (Zero-Passenger Cancellation):** Hard constraint: $d_j = 0$ for all mail/express passenger trains $j \in \mathcal{P}_{\text{sched}}$.
-  * **UC-04.3 (Co-Located Shadow Blocking):** If demand $i_1 \in \text{TDMS}$ (OHE power cut) and demand $i_2 \in \text{TMS}$ (track tamping) overlap along section $s$, enforce identical track closure:
-    $$x_{i_1, t} \le y_{s,t} \quad \text{and} \quad x_{i_2, t} \le y_{s,t}$$
-    This single constraint eliminates 35%–40% of redundant line closures.
+  * **UC-04.2 (Zero-Passenger Cancellation & 15m Buffer):** Hard constraint: zero passenger cancellations and $t_{\text{start}}(t_{\text{passenger}}) - t_{\text{end}}(b) \ge 15\text{ min}$ safety clearance margin ($\Delta_{\text{clear}}$).
+  * **UC-04.3 (Co-Located Shadow Blocking):** Civil track gangs and S&T technicians work simultaneously underneath de-energized OHE windows ($\Delta_{\text{earth}} \ge 10\text{ min}$, $\Delta_{\text{restore}} \ge 10\text{ min}$), eliminating 35%–50% of redundant line closures.
   * **UC-04.4 (Resource Feasibility):** Enforces availability limits for high-capacity machines (CSM tampers, BCM ballast cleaners, Tower Wagons) and field maintenance gangs.
 
 ---
@@ -131,23 +130,23 @@ graph LR
 
 ### UC-06: Simulate 'What-If' Disruption Scenarios
 * **Primary Actor:** Divisional Section Controller.
-* **Trigger:** Controller inputs simulated weather disruptions (e.g., monsoon flooding, winter fog) or emergency freight priority diversions.
+* **Trigger:** Controller inputs simulated weather disruptions (e.g., monsoon flooding $\mu=0.095$, winter fog) or emergency freight priority diversions.
 * **Outcome:** The solver re-runs in $<15\text{ seconds}$, dynamically shifting block windows and projecting alternative corridor paths.
 
 ---
 
-### UC-07: Sanction & Dispatch Corridor Block
+### UC-07: Sanction & Dispatch Corridor Block (Auto-BDMS Sanction Gate)
 * **Primary Actor:** Divisional Section Controller (`Sr. DOM`).
 * **Trigger:** Controller reviews proposed bundled block on the **Corridor Time-Distance String Chart** and clicks `[SANCTION BLOCK]`.
-* **Outcome:** The system issues digital sanction tokens to station masters, updates the e-BDMS portal, and triggers UC-08 and UC-09.
+* **Outcome:** The system issues digital sanction tokens to station masters, generates **Form T/409 Caution Orders**, updates the e-BDMS portal, and triggers UC-08 and UC-09.
 
 ---
 
-### UC-08: Broadcast Kavach TSR & Signal Lockout
-* **Primary Secondary Actors:** Kavach TCAS locomotive units, Electronic Interlocking (EI).
+### UC-08: Broadcast Kavach TSR & Form S&T/T-351 Lockout
+* **Primary Secondary Actors:** Kavach TCAS locomotive units (`RDSO/SPN/196/2020`), Electronic Interlocking (EI).
 * **Description:** 
-  * Automatically transmits **Temporary Speed Restriction (TSR 30 km/h)** packets wirelessly via trackside radio balises to all locomotive cabs operating on adjacent tracks.
-  * Clamps signal aspects (`S-12`, `S-14`) to danger (`RED`) in the electronic interlocking relay logic to physically protect track gangs.
+  * Automatically transmits **Temporary Speed Restriction (TSR 30 km/h)** packets wirelessly via the Temporary Speed Restriction Management System (TSRMS) and trackside radio balises to all locomotive cabs operating in the zone.
+  * Enforces statutory **Form S&T/T-351** electronic interlocking lockout by clamping signal aspects (`S-12`, `S-14`) to danger (`RED`) in relay logic to physically protect track gangs.
 
 ---
 
@@ -157,5 +156,5 @@ graph LR
   1. *Ingestion Evidence:* Specific TMS, SMMS, TDMS ticket IDs and chainage markers.
   2. *Conflict Resolution:* Avoided train path bottlenecks.
   3. *Co-Location Savings:* Exact hours saved by bundling OHE with tamping.
-  4. *Safety Confirmation:* Verified Kavach TSR dissemination and interlocking clamping.
+  4. *Safety Confirmation:* Verified Kavach TSR dissemination, Form S&T/T-351 electronic lockout, and Form T/409 Caution Order emission.
 * **Export:** One-click download of official **RDSO Form 14B Safety Compliance Certificate**.

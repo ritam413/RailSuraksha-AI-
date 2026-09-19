@@ -66,6 +66,7 @@ docs/
 ├── api_endpoints_and_backend_schema.md                  # REST, SSE, and Pydantic schemas for TMS/SMMS/TDMS/COA
 ├── three_developer_execution_plan.md                    # 3-developer work split & hour-by-hour roadmap
 ├── mock_data_resources.md                               # Mock datasets, corridor profiles (CSMT-KYN) & sample records
+├── research_concepts_master.md                          # Master research concepts dossier (CRIS, RDSO Kavach, MILP, TGI)
 ├── research_sources.md                                  # Primary Indian Railways, CRIS, and RDSO citations
 └── resources.md                                         # Central index of external links, manuals, and assets
 ```

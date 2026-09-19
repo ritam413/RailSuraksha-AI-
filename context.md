@@ -62,3 +62,13 @@ src/
 - Strict role boundaries according to the team ownership matrix.
 - Zero pill buttons across all components (strictly 4px radius).
 - All AI automated interventions must produce an immutable 4-step explainable decision log.
+
+## 6. Multi-Agent Skills & Workflow Execution Engine
+The workspace contains an integrated 28-skill execution suite located in `.agents/skills/` orchestrated via `.agents/rules/session-init.md`:
+- **Meta-Orchestration & Routing:** `claude-code-route`, `/ask-matt`, `/wayfinder`, `vibe-kanban`.
+- **Deliberation & Consensus:** `beads` (behavior contracts), `multica` (multi-agent rooms), `/council-review`, `/adversarial-review`, `system-prompts-ai`.
+- **Role Specialization:** `wshobson-agents` (Architect, Implementation Dev, QA Engineer, Security Lead, Staff Optimizer, UI/UX Designer).
+- **Code Execution & Quality:** `/tdd`, `/ponytail` (stdlib/YAGNI first), `/10x-dev` (hot-path $O(1)$ optimizer), `/diagnosing-bugs`.
+- **Context, Scraping & Tools:** `repomix` (CLI installed), `playwright` (CLI installed), `firecrawl`, `codegraph`, `headroom`, `claude-mem`.
+- **UI/UX & Motion:** `/taste`, `/awesome-design`, `/impeccable`, `/animate`.
+
