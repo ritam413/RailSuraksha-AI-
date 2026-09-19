@@ -56,13 +56,16 @@
 
 ```text
 docs/
-├── ideasUnderstanding.md                # SIH 26027 problem statement understanding & operational loop
-├── prd.md                               # Product Requirements Document (Auto-BDMS v2.0.0)
-├── architecture_walkthrough.md          # End-to-end architecture, data flows & MILP formulation
-├── architecture_diagram.html            # 16:9 widescreen presentation-ready architecture visual
-├── api_endpoints_and_backend_schema.md  # REST, SSE, and Pydantic schemas for TMS/SMMS/TDMS/COA
-├── three_developer_execution_plan.md    # 3-developer work split & hour-by-hour roadmap
-├── mock_data_resources.md               # Mock datasets, corridor profiles (CSMT-KYN) & sample records
-├── research_sources.md                  # Primary Indian Railways, CRIS, and RDSO citations
-└── resources.md                         # Central index of external links, manuals, and assets
+├── ideasUnderstanding.md                                # SIH 26027 problem statement understanding & operational loop
+├── prd.md                                               # Product Requirements Document (Auto-BDMS v2.0.0)
+├── architecture_walkthrough.md                          # End-to-end architecture, data flows & MILP formulation
+├── architecture_diagram.html                            # 16:9 widescreen presentation-ready architecture visual
+├── sih_26027_architecture_and_regulatory_whitepaper.md  # Official publication-grade whitepaper & RDSO compliance
+├── notebooklm_master_guide.md                           # Master briefing study dossier for NotebookLM & team teaching
+├── milp_solver_use_case_diagram.md                      # UML Use-Case diagram & operational matrix for MILP optimizer
+├── api_endpoints_and_backend_schema.md                  # REST, SSE, and Pydantic schemas for TMS/SMMS/TDMS/COA
+├── three_developer_execution_plan.md                    # 3-developer work split & hour-by-hour roadmap
+├── mock_data_resources.md                               # Mock datasets, corridor profiles (CSMT-KYN) & sample records
+├── research_sources.md                                  # Primary Indian Railways, CRIS, and RDSO citations
+└── resources.md                                         # Central index of external links, manuals, and assets
 ```
