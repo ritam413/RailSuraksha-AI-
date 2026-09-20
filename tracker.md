@@ -1,5 +1,75 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-20 — Full Codebase Repomix Indexing Snapshot (/repomix)
+
+### Objective
+Update the full repository XML context snapshot (`repomix-output.xml`) using `/repomix` to index newly added research extractions, grounded architectural specifications, and documentation files.
+
+### Changes Made
+- Executed `npx repomix --style xml --output repomix-output.xml`.
+- Pack summary:
+  - Total Files: 762 files indexed.
+  - Total Tokens: 3,681,493 tokens.
+  - Total Characters: 11,792,980 chars.
+  - Security Scan: 0 suspicious files detected.
+- Updated `tracker.md`.
+
+### Files Changed
+- `repomix-output.xml` (Updated)
+- `tracker.md` (Modified)
+
+### Verification
+- Repomix CLI executed with exit code 0.
+- Verified output in `repomix-output.xml`.
+
+### Current State
+- The complete updated repository (including all research papers, architectural invariants, and multi-horizon specs) is packed and ready.
+
+---
+
+## 2026-09-20 — Rolling Horizon Framework Research Grounding from Primary Papers (/research & /firecrawl)
+
+### Objective
+Ground the **Multi-Horizon Block Planning** architecture and **Rolling Horizon Framework (RHF)** in Indian Railways using two primary research papers provided by the user:
+1. `C:\Users\LENOVO\Downloads\papers\horizon.pdf`: Consilvio, Di Febbraro, & Sacco (IEEE Transactions on Reliability, 2020) — *A Rolling-Horizon Approach for Predictive Maintenance Planning to Reduce the Risk of Rail Service Disruptions*.
+2. `C:\Users\LENOVO\Downloads\papers\rolling horizon.pdf`: *A Rolling Horizon Model for Efficient Load Planning of Intermodal Trains* (Indian Railways / DFC container train operations).
+
+### Changes Made
+- Extracted and analyzed the full contents of both research papers into `docs/extracted_horizon_paper.md` and `docs/extracted_rolling_horizon_paper.md`.
+- Authored master research grounding document [`docs/research_rolling_horizon_papers.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_rolling_horizon_papers.md):
+  - Formulated the stochastic track degradation process $\delta_i(\tau) = \delta_i(\tau_k^i) \exp(\alpha_i \tau) + \epsilon$, where $\epsilon \sim \mathcal{N}(0, \sigma^2)$.
+  - Modeled ISO 55000 failure risk thresholds, hard deadlines $\tau_i^H$, soft deadlines $\tau_i^S$, and release dates $\tau_i^R$.
+  - Detailed the MILP / CP-SAT rolling horizon window dynamics (prediction horizon $H$, execution freeze $\Delta t$, and event-triggered feedback loops).
+  - Linked Indian Railways structural freight constraints (axle load, double-stack stability, position arbitrage, rail haulage cost schedules) with multi-train simultaneous rolling optimization.
+  - Mapped the 3 operational planning tiers (Horizon 1: 24h Tactical / Kavach; Horizon 2: 7-Day Operational / CRIS RBS; Horizon 3: 26-Week Strategic / GR 15.02 Rolling Block Programme).
+- Ran `/serena` semantic scan across `docs/` and updated all Multi-Horizon sections to explicitly specify the Rolling Horizon Framework:
+  - [`docs/ideasUnderstanding.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/ideasUnderstanding.md)
+  - [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md)
+  - [`docs/milp_solver_use_case_diagram.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/milp_solver_use_case_diagram.md)
+  - [`docs/notebooklm_master_guide.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/notebooklm_master_guide.md)
+- Updated [`context.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/context.md), [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md), and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+
+### Files Changed
+- `docs/extracted_horizon_paper.md` (Created)
+- `docs/extracted_rolling_horizon_paper.md` (Created)
+- `docs/research_rolling_horizon_papers.md` (Created)
+- `docs/ideasUnderstanding.md` (Modified)
+- `docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md` (Modified)
+- `docs/milp_solver_use_case_diagram.md` (Modified)
+- `docs/notebooklm_master_guide.md` (Modified)
+- `context.md` (Modified)
+- `features_implemented.md` (Modified)
+- `tracker.md` (Modified)
+
+### Verification
+- Extracted text from both PDFs (12 pages and 47 pages) without character loss or corruption.
+- Verified all mathematical formulas, objective functions, Indian Railways operational constraints, and cross-horizon synchronization mappings.
+
+### Current State
+- The Multi-Horizon Block Planning and Rolling Horizon architecture is thoroughly grounded in published, peer-reviewed operations research and Indian Railways regulatory policies.
+
+---
+
 ## 2026-09-19 — Comprehensive System Writeup & Codebase Guide PDF Generation (/pdf, /humanizer, /write-well, /serena)
 
 ### Objective

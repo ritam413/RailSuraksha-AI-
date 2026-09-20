@@ -100,15 +100,21 @@ When the Section Controller clicks `[SANCTION BLOCK]`:
 
 ---
 
-## 4. Multi-Horizon Planning Capabilities
+## 4. Multi-Horizon Block Planning via Rolling Horizon Framework
 
-The system provides planning capabilities across three distinct operational horizons:
+Instead of relying on static, fragile long-term schedules or myopic day-to-day decisions, RailSuraksha AI uses a **Rolling Horizon Framework (RHF)** to solve multi-horizon block planning. The engine optimizes over a forward-looking prediction window ($H$), locks in immediate actions during an execution window ($\Delta t$), and continuously rolls forward as live telemetry updates.
 
-| Horizon | Scope | Primary Objective & Assets |
-| :--- | :--- | :--- |
-| **24-Hour Tactical Horizon** | Immediate Day Operations | Night-lull slot allocation ($01:30\text{--}04:30\text{ AM}$), emergency P1 flaw patching, real-time COA freight rescheduling, dynamic Kavach TSR generation. |
-| **7-Day Operational Horizon** | Weekly Rolling Corridor Plan | Bundling multi-department blocks into rolling corridor maintenance days; machine crew, CSM tampers, and Tower Wagon roster alignment. |
-| **30-Day Strategic Horizon** | Cyclical Corridor Overhauls | High-capacity machine routing (CSM tampers, BCM ballast cleaners), Track Geometry Index (TGI) improvement tracking per IRPWM, seasonal monsoon/winter fog preparation. |
+| Horizon | Scope ($H$) | Step / Freeze ($\Delta t$) | Primary Objective & Assets | Mathematical & Regulatory Driver |
+| :--- | :--- | :--- | :--- | :--- |
+| **Horizon 1: Tactical Horizon** | 24 Hours | 1 Hour | Night-lull slot allocation ($01:30\text{--}04:30\text{ AM}$), emergency P1 USFD IMR flaw insertion, real-time COA delay conflict resolution, dynamic Kavach TSR broadcast. | Shortest-Path Conflict Resolution, Headway buffer $\ge 15\text{ min}$, RDSO/SPN/196/2020 TSRMS. |
+| **Horizon 2: Operational Horizon** | 7 Days | 24 Hours | Multi-department shadow block bundling (Civil track tamping, TRD 25kV OHE power shutdowns, S&T point machine overhauls), machine gang rosters, freight path diversion windows. | Google OR-Tools CP-SAT Disjunctive Interval Scheduling, CRIS RBS (Rolling Block System). |
+| **Horizon 3: Strategic Horizon** | 26 Weeks | 1 Week | Master corridor block programmes, long-range Track Geometry Index (TGI) degradation tracking, heavy machine fleet routing (CSM tampers, BCM ballast cleaners), seasonal monsoon/fog prep. | Stochastic rail degradation $\delta_i(\tau) = \delta_i(\tau_k)e^{\alpha_i\tau} + \epsilon$, Indian Railways GR 15.02, Operating Manual Ch 22. |
+
+### How the Rolling Mechanism Operates
+1. **Solve:** At time $t$, solve the CP-SAT optimization model over horizon $[t, t+H]$.
+2. **Execute:** Commit and execute only the decisions within $[t, t+\Delta t]$.
+3. **Roll & Ingest:** Advance time to $t+\Delta t$. Ingest real-time feedback (actual job completion logs, new USFD defects from TMS, train delays from COA).
+4. **Re-Optimize:** Re-solve over $[t+\Delta t, t+\Delta t+H]$, preserving long-term corridor capacity without breaking the live railway network.
 
 ---
 

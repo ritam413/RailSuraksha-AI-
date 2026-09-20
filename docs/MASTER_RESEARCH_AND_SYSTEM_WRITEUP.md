@@ -141,14 +141,14 @@ When the Section Controller clicks `[SANCTION BLOCK]`:
 * **Optimization Solver:** Google OR-Tools CP-SAT (`ortools.sat.python.cp_model`) and NetworkX track graph topology.
 * **Audio Synthesizer:** Pure Web Audio API synthesizing 800Hz and 1200Hz RDSO locomotive cab warning tones.
 
-### 2. Multi-Horizon Planning Framework
-The software provides planning capabilities across three distinct operational horizons:
+### 2. Multi-Horizon Planning via Rolling Horizon Framework
+The software provides planning capabilities across three distinct operational horizons powered by a **Rolling Horizon Framework (RHF)**:
 
-| Planning Horizon | Temporal Scope | Operational Focus & Assets |
-| :--- | :--- | :--- |
-| **24-Hour Tactical** | Immediate Day (Real-Time) | Night-lull slotting ($01:30\text{--}04:30\text{ AM}$), P1 flaw patching, dynamic freight pathing, Kavach TSR broadcast. |
-| **7-Day Operational** | Weekly Rolling Plan | Multi-department joint block bundling, heavy machine (CSM tamper, Tower Wagon) route planning, passenger diversions. |
-| **30-Day Strategic** | Master Monthly Schedule | High-capacity machine routing (BCM ballast cleaners), Track Geometry Index (TGI) recovery, seasonal fog/monsoon prep. |
+| Planning Horizon | Scope ($H$) | Freeze Step ($\Delta t$) | Operational Focus & Assets | Governing Mechanics |
+| :--- | :--- | :--- | :--- | :--- |
+| **Horizon 1: 24-Hour Tactical** | 24 Hours | 1 Hour | Night-lull slotting ($01:30\text{--}04:30\text{ AM}$), emergent P1 USFD IMR flaw patching, dynamic freight pathing, Kavach wireless TSR broadcast. | Real-time conflict resolution, 15-min train clearance buffers. |
+| **Horizon 2: 7-Day Operational** | 7 Days | 24 Hours | Multi-department joint shadow block bundling, heavy machine (CSM tamper, Tower Wagon) route planning, passenger diversions. | CP-SAT disjunctive scheduling, CRIS Rolling Block System. |
+| **Horizon 3: 26-Week Strategic** | 26 Weeks | 1 Week | High-capacity machine routing (BCM ballast cleaners), Track Geometry Index (TGI) recovery, seasonal fog/monsoon prep. | Stochastic degradation tracking, Indian Railways GR 15.02 (Rolling Block Programme). |
 
 ### 3. Core API Endpoints & Data Contracts
 

@@ -38,7 +38,7 @@ Indian Railways runs over **13,000 passenger trains** and **8,000+ freight rakes
 Currently, each department submits separate paper or standalone digital requests through the **Block Demand Management System (BDMS)**:
 1. **Departmental Silos:** Civil takes a 3-hour block on Monday. Electrical takes a 2.5-hour block on Wednesday on the *exact same section*. S&T takes a 2-hour block on Friday. The result: the corridor is shut down **three separate times in one week**, multiplying train delays and killing freight throughput.
 2. **Controller Overload in COA:** The Section Controller in the Divisional Control Office uses **COA (Control Office Application)**. Under heavy pressure to maintain punctuality, controllers often reject maintenance blocks or cut them short. This leads to **deferred maintenance**, higher accident risks, and emergency **Temporary Speed Restrictions (TSRs)** that permanently slow down trains.
-3. **Lack of Integrated Multi-Horizon Planning:** Controllers only look 2–4 hours ahead. They lack tools to forecast train paths over **24 hours (Tactical)**, **7 days (Operational)**, or **30 days (Strategic)**.
+3. **Lack of Integrated Multi-Horizon Planning:** Controllers only look 2 to 4 hours ahead. They lack tools to forecast train paths over **24 hours (Tactical)**, **7 days (Operational)**, or **26 weeks (Strategic Rolling Block Programme)** using a dynamic Rolling Horizon Framework.
 
 ---
 

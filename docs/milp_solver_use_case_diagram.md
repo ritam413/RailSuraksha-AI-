@@ -119,12 +119,12 @@ graph LR
 
 ---
 
-### UC-05: Generate Multi-Horizon Schedules
-* **Primary Actor:** Multi-Horizon Schedule Generator.
-* **Description:** Splits the optimization output into three actionable operational horizons:
-  1. **UC-05.1 (Daily Tactical - 24 Hours):** Slotting emergency P1 flaws into tonight's lull window, with micro-headway re-routing for delayed freight rakes.
-  2. **UC-05.2 (Weekly Operational - 7 Days):** Rolling corridor schedule bundling civil, electrical, and signal teams into coordinated 3.5-hour joint shadow blocks across divisional sections.
-  3. **UC-05.3 (Monthly Strategic - 30 Days):** Cyclic corridor overhaul schedules, machine depot logistics, and Track Geometry Index (TGI) recovery projections.
+### UC-05: Generate Multi-Horizon Schedules (Rolling Horizon Framework)
+* **Primary Actor:** Rolling Horizon Multi-Horizon Schedule Generator.
+* **Description:** Operates a rolling horizon framework ($H$ prediction window, $\Delta t$ control execution step) to decompose large-scale network block planning into three synchronized tiers:
+  1. **UC-05.1 (Daily Tactical - 24 Hours, $\Delta t = 1\text{h}$):** Real-time conflict resolution, night-lull slotting ($01:30\text{--}04:30\text{ AM}$), and emergency P1 USFD IMR flaw insertion with Kavach TSR broadcast.
+  2. **UC-05.2 (Weekly Operational - 7 Days, $\Delta t = 24\text{h}$):** Rolling corridor schedule bundling civil, electrical, and signal teams into coordinated 3.5-hour joint shadow blocks across divisional sections per CRIS RBS.
+  3. **UC-05.3 (Strategic RBP - 26 Weeks, $\Delta t = 1\text{w}$):** Rolling Block Programme per Indian Railways GR 15.02, cyclic corridor overhauls, machine depot logistics (CSM, BCM), and Track Geometry Index (TGI) recovery projections.
 
 ---
 
