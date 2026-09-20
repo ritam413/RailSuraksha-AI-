@@ -1,7 +1,7 @@
 # Architectural Fix Specifications: Grounded Invariants & Failure Mode Resolutions
 
 > **Source Grounding:** 
-> 1. Consilvio et al. (IEEE T-Rel 2020, `horizon.pdf`): Soft Deadline Relaxation `[q_i = max(0, c_i - τ_i^S)]`, Rolling Execution Intervals `[Δt ≈ 1.5 δt]`, and Disruption Rescheduling.
+> 1. Consilvio et al. (IEEE T-Rel 2020, `horizon.pdf`): Soft Deadline Relaxation ($q_i = \max(0, c_i - \tau_i^S)$), Rolling Execution Intervals ($\Delta t \approx 1.5 \cdot \delta t$), and Disruption Rescheduling.
 > 2. Indian Railways Double-Stack Freight Research (`rolling horizon.pdf`): Two-Stage Simultaneous Optimization & Multi-Train Rolling Framework.
 > 3. Indian Railways General & Subsidiary Rules (G&SR GR 15.02, GR 15.06), ACTM Vol II, IRSEM 2021, and RDSO/SPN/196/2020 Kavach Ver 4.0.
 
@@ -14,9 +14,9 @@ To eliminate secondary failure modes identified during adversarial stress-testin
 ```mermaid
 flowchart TD
     subgraph "Grounded Invariant Engine"
-        INV1["Invariant 1: Gradient-Aware Machine Siding Transit<br/>WorkEnd + GradientTransit(m, G_s) + 15m Buffer ≤ NextTrainArrival<br/>(Guarantees Turnout & Siding Reachability)"]
+        INV1["Invariant 1: Gradient-Aware Machine Siding Transit<br/>WorkEnd + GradientTransit(m, G_s) + 15m Buffer <= NextTrainArrival<br/>(Guarantees Turnout & Siding Reachability)"]
         INV2["Invariant 2: Multi-Department 2PC with G&SR 15.06 PN Fallback<br/>Atomic Digital Clearances OR Station Master + Controller Voice PN"]
-        INV3["Invariant 3: Congestion-Preemptible Freeze-Band<br/>48h Immutability Damped by ω_shift, Preempted if Passenger Delay > 45m"]
+        INV3["Invariant 3: Congestion-Preemptible Freeze-Band<br/>48h Immutability Damped by omega_shift, Preempted if Passenger Delay > 45m"]
         INV4["Invariant 4: Approach-Locked Kavach Speed Supervision<br/>Direct Cab Target Curve Injection (No False SPAD / Signal Drops in Driver Face)"]
         INV5["Invariant 5: Continuous Soft Deadline Risk Relaxation<br/>Monsoon Settlement Absorbed via Objective Penalty q_i + Safe TSRs"]
         INV6["Invariant 6: Batched Corridor Review & Anti-Starvation Escalation<br/>3-Veto Trigger Escalates Batched Section Dossiers to Sr. DOM"]
@@ -49,13 +49,13 @@ flowchart TD
 ### [Resolution 2] Approach-Locking Hazard -> Direct Kavach Speed Curve Supervision
 * **Failure Mode Addressed:** Instant signal aspect drop to RED in front of an approaching 110 km/h train causing false SPAD, emergency brake trips, and passenger injuries.
 * **Grounded Mechanism (RDSO/SPN/196/2020 & Signalling Practice):**
-  1. **Check Approach Locking State:** Before altering any optical signal aspect, the interlocking engine inspects the approach track circuits (`D_train` from signal).
-  2. **If Train is Inside Approach Distance (`D_train < D_ebd`):**
+  1. **Check Approach Locking State:** Before altering any optical signal aspect, the interlocking engine inspects the approach track circuits ($D_{\text{train}}$ from signal).
+  2. **If Train is Inside Approach Distance ($D_{\text{train}} < D_{\text{ebd}}$):**
      * The optical signal aspect is **NOT** dropped to RED (preventing driver panic and emergency clamping).
      * The system broadcasts the 30 km/h Temporary Speed Restriction directly to the locomotive Kavach on-board unit (OBU) via UHF / GSM-R.
-     * Kavach dynamically calculates the target deceleration curve (`V_target = 30 km/h` at the hazard boundary) and smoothly supervises service braking inside the loco cab.
-  3. **If Train is Outside Approach Distance (`D_train >= D_ebd`):**
-     * The signal steps down gracefully through normal multi-aspect progression (`GREEN -> DOUBLE YELLOW -> YELLOW / 30 km/h` approach release).
+     * Kavach dynamically calculates the target deceleration curve ($V_{\text{target}} = 30\text{ km/h}$ at the hazard boundary) and smoothly supervises service braking inside the loco cab.
+  3. **If Train is Outside Approach Distance ($D_{\text{train}} \ge D_{\text{ebd}}$):**
+     * The signal steps down gracefully through normal multi-aspect progression ($\text{GREEN} \to \text{DOUBLE YELLOW} \to \text{YELLOW} \to 30\text{ km/h}$ approach release).
 
 ---
 
@@ -63,9 +63,9 @@ flowchart TD
 * **Failure Mode Addressed:** 48-hour frozen P2 maintenance blocking 8 diverted passenger trains during upstream network disruptions.
 * **Grounded Mechanism (Consilvio et al. & Paper 2):**
   * In the CP-SAT objective function, passenger train delay penalties strictly dominate maintenance schedule displacement penalties:
-    ```
-    Cost_PassengerDelay(ΔT) = c_pass * ΔT >> ω_shift * |Δt_maintenance|^2
-    ```
+
+$$C_{\text{PassengerDelay}}(\Delta T) = c_{\text{pass}} \cdot \Delta T \gg \omega_{\text{shift}} \cdot |\Delta t_{\text{maintenance}}|^2$$
+
   * **Dynamic Preemption Trigger:** If upstream disruptions accumulate more than 45 minutes of aggregate passenger delay or more than 3 express train diversions through the section:
     * The solver automatically preempts the frozen P2/P3 maintenance window.
     * The maintenance block is rolled forward to the next available 7-day window.
@@ -77,23 +77,22 @@ flowchart TD
 * **Failure Mode Addressed:** Tamping machine routed to park in a siding whose turnout is clamped straight for S&T maintenance.
 * **Grounded Mechanism:**
   * Siding reachability is dynamically computed via NetworkX track topology coupled with Electronic Interlocking (EI) switch states:
-    ```
-    ReachableSidings(t) = { S_k in Sidings | for all PW_j on PathToSiding(S_k): EI_Status(PW_j, t) == OPERATIONAL }
-    ```
+
+$$\text{ReachableSidings}(t) = \left\{ S_k \in \text{Sidings} \;\middle|\; \forall\, \text{PW}_j \in \text{PathToSiding}(S_k) : \text{EI\_Status}(\text{PW}_j, t) = \text{OPERATIONAL} \right\}$$
+
   * The CP-SAT solver only considers sidings with verified physical route access and remaining clear standing length:
-    ```
-    Sum(Length(m) for m in StagedMachines) + Length(m_new) <= ClearStandingLength(S_k)
-    ```
+
+$$\sum_{m \in \text{StagedMachines}} \text{Length}(m) + \text{Length}(m_{\text{new}}) \le \text{ClearStandingLength}(S_k)$$
 
 ---
 
 ### [Resolution 5] Degradation Avalanche -> Soft Deadline Risk Relaxation
 * **Failure Mode Addressed:** Heavy monsoon rainfall causing 50 sections to hit hard deadlines simultaneously, creating solver infeasibility.
 * **Grounded Mechanism (Consilvio et al. Equations 7 & 10):**
-  * Soft deadlines (`τ_i^S`) are modeled with continuous slack penalty variables in the objective function rather than rigid constraints:
-    ```
-    J_risk = λ_q * Sum(q_i),  where q_i = max(0, c_i - τ_i^S)
-    ```
+  * Soft deadlines ($\tau_i^S$) are modeled with continuous slack penalty variables in the objective function rather than rigid constraints:
+
+$$J_{\text{risk}} = \lambda_q \sum_{i} q_i \quad \text{where} \quad q_i = \max\left(0, \; c_i - \tau_i^S\right)$$
+
   * If physical tamping machine capacity cannot service all 50 degrading sections immediately:
     * The model never crashes or returns null; it optimizes the most critical sections up to machine throughput limits.
     * For remaining unserviced sections, the system automatically injects fail-safe 30 km/h Temporary Speed Restrictions (TSRs) into Kavach, keeping the line safe while preventing optimization failure.
@@ -112,10 +111,10 @@ flowchart TD
 * **Failure Mode Addressed:** Heavy ballast cleaners (BCM) taking 300% longer on steep ghat gradients than flat 25 km/h estimates.
 * **Grounded Mechanism (IRPWM Chapter 5):**
   * Transit speed is dynamically calculated based on locomotive power and track geometry:
-    ```
-    V_transit(m, s) = min( V_max(m),  sqrt( P_engine(m) / (M_m * (r_0 + g * G_s + r_c)) ) )
-    ```
-    where `G_s` is track gradient (e.g. +1/37) and `r_c = 0.04 / R_s` is curve resistance.
+
+$$V_{\text{transit}}(m, s) = \min\left( V_{\max}(m), \; \sqrt{\frac{P_{\text{engine}}(m)}{M_m \cdot \left(r_0 + g \cdot G_s + r_c\right)}} \right)$$
+
+    where $G_s$ is track gradient (e.g. $+1/37$) and $r_c = \frac{0.04}{R_s}$ is curve resistance.
 
 ---
 
@@ -127,6 +126,6 @@ flowchart TD
 | **Approach-Locking Trip** | Direct Cab Target Speed Curve Overlay | RDSO/SPN/196/2020 Kavach & ETCS Baseline 3 |
 | **Freeze-Band Jam** | Passenger Delay Dominance Preemption | Consilvio et al. (2020) & CTLP Freight Paper |
 | **Turnout-Locked Siding** | Interlocking-Coupled NetworkX Graph | IRSEM 2021 Part II (Electronic Interlocking) |
-| **Degradation Avalanche** | Continuous Risk Penalty (`q_i`) + Dynamic TSR | Consilvio et al. Eq. 7, 10 & ISO 55000 |
+| **Degradation Avalanche** | Continuous Risk Penalty ($q_i$) + Dynamic TSR | Consilvio et al. Eq. 7, 10 & ISO 55000 |
 | **Executive Alert Flood** | Batched Corridor Dossiers & P1/P2 Filtering | Indian Railways Operating Manual Chapter 22 |
 | **Ghat Gradient Slowness** | Physics-Based Tractive Effort & Grade Model | IRPWM 2020 Chapter 5 (Track Machine Operations) |
