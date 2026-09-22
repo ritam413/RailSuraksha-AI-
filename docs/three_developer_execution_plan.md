@@ -1,4 +1,4 @@
-# RailSuraksha AI — 3-Developer Parallel Execution Plan (SIH 26027)
+# IRIS AI — 3-Developer Parallel Execution Plan (SIH 26027)
 
 > **Location:** `docs/three_developer_execution_plan.md`  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
@@ -45,6 +45,29 @@ export type DepartmentCode = 'TMS_CIVIL' | 'TDMS_ELECTRICAL' | 'SMMS_SIGNAL';
 export type UrgencyTier = 'P1_CRITICAL' | 'P2_SCHEDULED' | 'P3_ROUTINE';
 export type HorizonTier = 'TACTICAL_24H' | 'WEEKLY_7D' | 'MONTHLY_30D';
 
+export interface BaseIngestionPayload {
+  eventId: string;
+  sourceSystem: string;         // e.g. "CRIS_TMS", "IR_TDMS", "SMMS_IOT"
+  timestamp: string;
+  divisionId: string;
+  rawPayload: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface DivisionalPolicyProfile {
+  divisionId: string;
+  divisionName: string;
+  safetyHeadwayBufferMinutes: number; // e.g. 15
+  earthingDischargeBufferMinutes: number; // e.g. 10
+  earthingRestorationBufferMinutes: number; // e.g. 10
+  defaultTsrSpeedKmh: number; // e.g. 30
+  urgencyWeights: {
+    safetyCriticality: number;
+    degradationRate: number;
+    overdueRatio: number;
+  };
+}
+
 export interface MaintenanceDemand {
   id: string;
   department: DepartmentCode;
@@ -62,6 +85,7 @@ export interface MaintenanceDemand {
 
 export interface JointBlockSchedule {
   blockId: string;
+  version: number;              // Optimistic concurrency control lock
   sectionId: string;
   trackCircuits: string[];
   startTime: string;            // e.g. "01:30 IST"

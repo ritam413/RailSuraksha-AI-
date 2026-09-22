@@ -1,6 +1,6 @@
 # Use-Case Specification: CP-SAT / MILP Solver & Joint Shadow-Block Optimizer Engine
 
-> **System:** RailSuraksha AI (Auto-BDMS)  
+> **System:** IRIS AI (Intelligent Railway Inspection and Restoration AI)  
 > **Component:** Core Mathematical Optimization Engine (Google OR-Tools CP-SAT & Mixed-Integer Linear Programming)  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 > **Standards Grounding:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 (Kavach Ver 4.0)

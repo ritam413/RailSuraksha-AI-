@@ -1,6 +1,6 @@
-# RailSuraksha AI — User Personas & Role-Based Access Control (RBAC)
+# IRIS AI — User Personas & Role-Based Access Control (RBAC)
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 **Document Version:** 3.0.0 (Unified Grounded Specification)  
 **Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
@@ -9,7 +9,7 @@
 
 ## 👥 1. Target User Personas
 
-RailSuraksha AI serves four key operational personas operating across Divisional Headquarters, Maintenance Depots, Control Rooms, and Locomotive Cabs:
+IRIS AI serves four key operational personas operating across Divisional Headquarters, Maintenance Depots, Control Rooms, and Locomotive Cabs:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -40,7 +40,7 @@ RailSuraksha AI serves four key operational personas operating across Divisional
   * Overwhelmed by fragmented, uncoordinated block memos from three separate departments.
   * Fear of causing train punctuality losses leads to rejecting critical maintenance blocks.
   * Lacks visual decision-support tools to identify natural traffic gaps in train charts.
-* **Key RailSuraksha AI Features Used:**
+* **Key IRIS AI Features Used:**
   * **Corridor Time-Distance String Chart (`CorridorStringChart.tsx`):** Real-time visual comparison of train paths vs bundled block windows.
   * **One-Click Sanction Gate:** Approves AI-optimized joint shadow blocks with automatic safety dispatch.
   * **Advisory vs. Autonomous Mode Toggle:** Switches between human-in-the-loop sanctioning and automated rule-based approval.
@@ -59,7 +59,7 @@ RailSuraksha AI serves four key operational personas operating across Divisional
 * **Pain Points with Legacy System:**
   * Sits through contentious divisional daily block meetings where requisitions are routinely curtailed or rejected.
   * Civil gangs and Tower Wagons sit idle waiting for separate block possessions on the same track.
-* **Key RailSuraksha AI Features Used:**
+* **Key IRIS AI Features Used:**
   * **Department Demand Queue (`IncidentQueue.tsx`):** Tracks demand status (`PENDING_TRIAGE`, `SLOTTED`, `SANCTIONED`).
   * **Shadow-Block Bundling View:** Reviews co-location proposals where Civil and S&T share an electrical power cut window.
   * **Machine Transit Coordinator:** Verifies track machine transit times and siding reachability.
@@ -75,7 +75,7 @@ RailSuraksha AI serves four key operational personas operating across Divisional
 * **Pain Points with Legacy System:**
   * Paper-based registers and fragmented logs make post-incident root cause analysis tedious and error-prone.
   * Inability to verify whether drivers complied with Temporary Speed Restrictions (TSRs).
-* **Key RailSuraksha AI Features Used:**
+* **Key IRIS AI Features Used:**
   * **Explainable AI Decision Dossier (`DecisionLogModal.tsx`):** 4-step chronological audit trail (Ingestion $\to$ Conflict Check $\to$ Shadow Bundling $\to$ Safety Sanction).
   * **SHA-256 Digital Verification:** Verifies cryptographic integrity of sanction logs.
   * **RDSO Form 14B Certificate Generator:** One-click PDF/JSON export of certified compliance documents.
@@ -91,7 +91,7 @@ RailSuraksha AI serves four key operational personas operating across Divisional
 * **Pain Points with Legacy System:**
   * Relying on physical paper Caution Orders (**Form T/409**) handed over at preceding stations.
   * Risk of unexpected signal drops in driver face causing false SPAD or emergency braking.
-* **Key RailSuraksha AI Features Used:**
+* **Key IRIS AI Features Used:**
   * **Kavach TCAS Wireless TSR Stream:** Receives digital $30\text{ km/h}$ speed caps directly into the locomotive cab onboard unit.
   * **Station Interlocking State View (`InterlockingMap.tsx`):** Verifies electronic interlocking lockout (**Form S&T/T-351**) and signal danger clamps (`S-12/14`).
 
@@ -99,7 +99,7 @@ RailSuraksha AI serves four key operational personas operating across Divisional
 
 ## 🔐 2. Role-Based Access Control (RBAC) Matrix
 
-RailSuraksha AI enforces strict Role-Based Access Control across all UI routes and API actions:
+IRIS AI enforces strict Role-Based Access Control across all UI routes and API actions:
 
 | Functional Capability / UI Action | `SECTION_CONTROLLER` | `DEPARTMENT_PLANNER` | `SAFETY_AUDITOR` | `FIELD_OPERATOR` |
 | :--- | :---: | :---: | :---: | :---: |

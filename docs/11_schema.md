@@ -1,10 +1,10 @@
-# RailSuraksha AI — TypeScript Domain Schema & Contract Definitions
+# IRIS AI — TypeScript Domain Schema & Contract Definitions
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-**Document Version:** 3.0.0 (Unified Grounded Specification)  
+**Document Version:** 3.1.0 (Grounded Multi-Horizon & Decoupled Architecture Specification)  
 **Location:** `src/types/apiContracts.ts` & `src/types/index.ts`  
-**Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
+**Governing Standards Reference:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
 
 ---
 
@@ -45,11 +45,52 @@ export type TrainType =
 
 ---
 
-## 📦 2. Requisition & Maintenance Models
+## ⚙️ 2. Dynamic Policy Configuration & Ingestion Contracts
 
 ```typescript
 // ============================================================================
-// 2. Ingested Maintenance Demand Model (TMS / TDMS / SMMS)
+// 2. Dynamic Policy Profile & Ingestion Port Interfaces
+// ============================================================================
+
+export interface DivisionalPolicyProfile {
+  policyId: string;                      // e.g. "POL-CR-MUMBAI-2026-V1"
+  divisionCode: string;                  // "CR_MUMBAI"
+  version: string;                       // "1.2.0"
+  minPassengerClearanceMin: number;      // Parameterized (default reference: 15)
+  oheEarthingBufferMin: number;          // Parameterized (default reference: 10)
+  oheRestorationBufferMin: number;       // Parameterized (default reference: 10)
+  defaultTsrSpeedKmph: number;           // Parameterized (default reference: 30)
+  urgencyWeights: {
+    safety: number;                      // default: 0.40
+    overdue: number;                     // default: 0.35
+    traffic: number;                     // default: 0.25
+  };
+  secondaryDelayPenaltyWeight: number;   // default: 1.50
+  isLocked?: boolean;
+}
+
+export interface BaseIngestionPayload {
+  sourceSystem: 'TMS' | 'TDMS' | 'SMMS' | 'COA' | 'CSV_FEED' | 'SIMULATOR';
+  schemaVersion: string;
+  rawPayload: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface IIngestionAdapter<TRaw, TNormalized> {
+  readonly adapterName: string;
+  readonly schemaVersion: string;
+  validate(raw: TRaw): Promise<boolean>;
+  transform(raw: TRaw, policy: DivisionalPolicyProfile): Promise<TNormalized[]>;
+}
+```
+
+---
+
+## 📦 3. Requisition & Maintenance Models
+
+```typescript
+// ============================================================================
+// 3. Ingested Maintenance Demand Model (TMS / TDMS / SMMS)
 // ============================================================================
 
 export interface MaintenanceDemand {
@@ -64,7 +105,7 @@ export interface MaintenanceDemand {
   description: string;
   usfdClassification?: UsfdClassification; // 'IMR' (Immediate Removal per IRPWM)
   tgiScore?: number;               // Track Geometry Index (e.g. 32.4)
-  contactWireResidualAreaSqMm?: number; // ACTM < 74 mm² limit
+  contactWireResidualAreaSqMm?: number; // ACTM < 74 mm² reference limit
   pointMachineStrokeSeconds?: number;   // IRSEM > 4.5s alert
   pointMachineCurrentAmps?: number;     // IRSEM > 2.5A alert
   formST351Required?: boolean;     // Statutory Disconnection Notice
@@ -72,17 +113,19 @@ export interface MaintenanceDemand {
   requiredAssets: string[];         // ["CSM_TAMPER_98", "TOWER_WAGON_02"]
   canShadowBlock: boolean;         // True if co-locatable with OHE/Civil
   status: 'PENDING_TRIAGE' | 'SLOTTED' | 'SANCTIONED' | 'COMPLETED';
+  rawPayload?: Record<string, unknown>; // Preserved raw external payload
+  metadata?: Record<string, unknown>;   // Extensible custom attributes
   createdAt?: string;
 }
 ```
 
 ---
 
-## 🚂 3. Train Scheduling & Traffic Slot Models
+## 🚂 4. Train Scheduling & Traffic Slot Models
 
 ```typescript
 // ============================================================================
-// 3. Train Timetable & Section Path Slot Model (COA Integration)
+// 4. Train Timetable & Section Path Slot Model (COA Integration)
 // ============================================================================
 
 export interface TrainScheduleSlot {
@@ -97,21 +140,23 @@ export interface TrainScheduleSlot {
   isDelayTolerant: boolean;        // False for passenger, True for freight
   maxAllowableDelayMinutes: number;// 0 for passenger, 30 for freight
   priorityRank: number;            // 1 (Highest: Rajdhani) to 5 (Freight)
+  metadata?: Record<string, unknown>;
 }
 ```
 
 ---
 
-## 🧩 4. Joint Shadow-Block & Optimization Models
+## 🧩 5. Joint Shadow-Block & Optimization Models `[Grounded Core]`
 
 ```typescript
 // ============================================================================
-// 4. Bundled Joint Shadow-Block Plan Model (Solver Output)
+// 5. Bundled Joint Shadow-Block Plan Model (Solver Output)
 // ============================================================================
 
 export interface JointBlockSchedule {
   blockId: string;                 // e.g. "BLK-JOINT-0906-01"
   sectionId: string;               // e.g. "CSMT-KYN-UP"
+  policyId?: string;               // Policy configuration used for optimization
   trackCircuits: string[];         // ["TC-03", "TC-04"]
   startTime: string;               // e.g. "01:30 IST"
   endTime: string;                 // e.g. "04:45 IST"
@@ -120,34 +165,36 @@ export interface JointBlockSchedule {
   bundledDemands?: MaintenanceDemand[];
   downtimeSavedMinutes: number;    // Co-located bundling savings (e.g. 85m)
   corridorDowntimeSavedPct: number;// e.g. 38.4%
-  passengerDelays: number;         // Strictly 0
-  passengerClearanceBufferMinutes: number; // Mandatory >= 15m (G&SR)
+  passengerDelays: number;         // Strictly 0 (Grounded Invariant)
+  passengerClearanceBufferMinutes: number; // Configurable (default: 15m)
   freightDelayMinutes: number;     // e.g. 12m
-  kavachTsrSpeedKmh: number;       // e.g. 30 km/h (RDSO TSRMS)
+  kavachTsrSpeedKmh: number;       // e.g. 30 km/h (Configurable)
   cautionOrderForm: 'T/409';
   disconnectionForm: 'S&T/T-351';
   sanctionStatus: BlockSanctionStatus;
   sanctionedBy?: string;           // "CTRL-MUM-402"
   sha256AuditSeal: string;         // Hexadecimal cryptographic signature
+  metadata?: Record<string, unknown>;
 }
 ```
 
 ---
 
-## 🛡️ 5. Safety, Kavach TSR & Interlocking Models
+## 🛡️ 6. Safety, Kavach TSR & Interlocking Models
 
 ```typescript
 // ============================================================================
-// 5. Safety Telemetry, Kavach TSR & Interlocking Data Contracts
+// 6. Safety Telemetry, Kavach TSR & Interlocking Data Contracts
 // ============================================================================
 
 export interface KavachTsrPacket {
   tsrId: string;                   // "TSR-KAVACH-104"
   trackCircuitId: string;          // "TC-03"
-  permittedSpeedKmh: number;       // 30
+  permittedSpeedKmh: number;       // Configurable (default: 30)
   activationTimestamp: string;
   expirationTimestamp: string;
   broadcastStatus: 'ARMED' | 'BROADCASTING' | 'CLEARED';
+  policyVersion?: string;
 }
 
 export interface TrackCircuitState {
@@ -158,25 +205,26 @@ export interface TrackCircuitState {
   signalAspect: SignalAspect;      // 'RED' | 'YELLOW' | 'DOUBLE_YELLOW' | 'GREEN'
   isClampedRed: boolean;           // True under Form S&T/T-351 lockout
   activeBlockId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CorridorKpiMetrics {
-  corridorDowntimeSavedPct: number;// 38.4%
-  assetAvailabilityIndexPct: number;// 96.2%
-  activeBlocksCount: number;       // 3
-  pendingDemandsCount: number;     // 8
-  whiteCorridorHeadwayMinutes: number; // 195 mins (3h 15m)
-  activeKavachTsrsCount: number;   // 2
+  corridorDowntimeSavedPct: number;
+  assetAvailabilityIndexPct: number;
+  activeBlocksCount: number;
+  pendingDemandsCount: number;
+  whiteCorridorHeadwayMinutes: number;
+  activeKavachTsrsCount: number;
 }
 ```
 
 ---
 
-## 📜 6. Explainable AI Decision Dossier Model
+## 📜 7. Explainable AI Decision Dossier Model
 
 ```typescript
 // ============================================================================
-// 6. Explainable 4-Step Decision Dossier (RDSO Form 14B Compliance)
+// 7. Explainable 4-Step Decision Dossier (RDSO Form 14B Compliance)
 // ============================================================================
 
 export interface DecisionStep {
@@ -198,5 +246,7 @@ export interface ExplainableDecisionDossier {
   formT409CautionBroadcast: boolean;
   kavachTsrArmed: boolean;
   rdsoForm14BValid: boolean;
+  policyVersionUsed?: string;
 }
 ```
+

@@ -1,4 +1,4 @@
-# RailSuraksha AI (Auto-BDMS): Comprehensive System Architecture & Research Dossier
+# IRIS AI (Intelligent Railway Inspection and Restoration AI): Comprehensive System Architecture & Research Dossier
 
 > **Problem Statement ID:** Smart India Hackathon (SIH) 26027  
 > **Official Title:** AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways  
@@ -9,7 +9,7 @@
 
 ## I. Title & System Identity
 
-* **Project Title:** RailSuraksha AI (रेल-सुरक्षा) — AI-Powered Automatic Block Planning and Corridor Optimization System.
+* **Project Title:** IRIS AI (Intelligent Railway Inspection and Restoration AI) — AI-Powered Automatic Block Planning and Corridor Optimization System.
 * **Target Classification:** Auto-BDMS (Automated Block & Disconnection Management System) with Integrated Kavach ATP Safety Swarm.
 * **Problem Scope:** Transforming manual, fragmented, inter-departmental railway maintenance requests into automated, constraint-optimized Joint Shadow Blocks across high-density corridors.
 * **Regulatory Compliance:** Engineered in strict accordance with the Indian Railways Permanent Way Manual (**IRPWM 2020**), AC Traction Manual (**ACTM Vol II**), Indian Railways Signal Engineering Manual (**IRSEM 2021**), General and Subsidiary Rules (**G&SR Chapter 15**), and RDSO TCAS Specifications (**RDSO/SPN/196/2020**).
@@ -50,13 +50,13 @@ gantt
 ```
 
 ### 3. The Solution: Automated Joint Shadow Blocking
-RailSuraksha AI (Auto-BDMS) introduces an automated mathematical solver that eliminates siloed planning. When an electrical power cutoff is approved for Section A-B, the solver checks TMS and SMMS for pending work on the same spatial track section. It automatically bundles all three maintenance tasks into a single **3.5-hour Joint Shadow Block** during natural nocturnal traffic lulls (01:30 AM to 05:00 AM).
+IRIS AI (Intelligent Railway Inspection and Restoration AI) introduces an automated mathematical solver that eliminates siloed planning. When an electrical power cutoff is approved for Section A-B, the solver checks TMS and SMMS for pending work on the same spatial track section. It automatically bundles all three maintenance tasks into a single **3.5-hour Joint Shadow Block** during natural nocturnal traffic lulls (01:30 AM to 05:00 AM).
 
 Civil track gangs and S&T technicians work safely underneath the de-energized electrical catenary wire simultaneously. The result is a **35% to 50% reduction in corridor downtime**, zero passenger train cancellations, and complete regulatory compliance.
 
 ```mermaid
 gantt
-    title RailSuraksha Joint Shadow Block (3.5 Hours Single Window)
+    title IRIS AI Joint Shadow Block (3.5 Hours Single Window)
     dateFormat X
     axisFormat %d
     section Primary Constraint
@@ -71,7 +71,7 @@ gantt
 
 ## III. Major Components & System Architecture
 
-RailSuraksha AI executes a continuous **4-Step Operational Loop**:
+IRIS AI executes a continuous **4-Step Operational Loop**:
 
 ```mermaid
 graph TD
@@ -217,7 +217,7 @@ The system was validated against four demanding operational scenarios:
 | **4. Platform Crowd Surge** | Platform CCTV optical flow detects density spike to **4.6 pers/m²** ($> 4.2$ threshold). | Exceeds safe passenger boarding threshold. | **PLATFORM HOLD:** Starter signal S-16 clamped Red; 3-minute hold countdown active. |
 
 ### 2. Environmental Weather & Friction Benchmarks
-Rail adhesion changes significantly under adverse weather. RailSuraksha AI dynamically expands the Emergency Braking Distance (EBD) formula:
+Rail adhesion changes significantly under adverse weather. IRIS AI dynamically expands the Emergency Braking Distance (EBD) formula:
 $$D_{\text{stop}} = \frac{V^2}{2g(\mu + G)} + V \cdot t_{\text{reaction}}$$
 
 | Weather Condition | Friction Coefficient ($\mu$) | Stopping Distance @ 130 km/h | Stopping Distance @ 100 km/h | Safety Behavior |
@@ -238,7 +238,7 @@ $$D_{\text{stop}} = \frac{V^2}{2g(\mu + G)} + V \cdot t_{\text{reaction}}$$
 ## VI. Conclusion & Primary Authoritative References
 
 ### 1. Transformational Impact
-RailSuraksha AI (Auto-BDMS) replaces decades of fragmented, manual maintenance scheduling on Indian Railways with an intelligent, mathematical optimization platform. By combining multi-department joint shadow blocking with real-time Kavach TCAS train protection, it delivers higher corridor throughput, lower maintenance backlog, and foolproof digital safety.
+IRIS AI (Intelligent Railway Inspection and Restoration AI) replaces decades of fragmented, manual maintenance scheduling on Indian Railways with an intelligent, mathematical optimization platform. By combining multi-department joint shadow blocking with real-time Kavach TCAS train protection, it delivers higher corridor throughput, lower maintenance backlog, and foolproof digital safety.
 
 ### 2. Primary Grounding References & Official Manuals
 1. **Indian Railways Permanent Way Manual (IRPWM 2020):** Chapters 5 & 6 governing Ultrasonic Flaw Detection (USFD) flaw categorisation (IMR/OBS/REM), Track Geometry Index (TGI) formulas ($\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$), and track tamping standards.

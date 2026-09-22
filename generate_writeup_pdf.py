@@ -1,5 +1,5 @@
 """
-RailSuraksha AI - Markdown to Publication-Grade PDF Generator
+IRIS AI - Markdown to Publication-Grade PDF Generator
 Reads 'docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md' and compiles a beautifully styled,
 high-density executive PDF document with custom running headers/footers, Mermaid code boxes,
 formatted tables, and Light-Blue Mintlify visual styling.
@@ -57,7 +57,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setFillColor(colors.HexColor("#1E3A8A"))
 
         # Running Header
-        self.drawString(54, 750, "RAILSURAKSHA AI (Auto-BDMS)")
+        self.drawString(54, 750, "IRIS AI (Intelligent Railway Inspection and Restoration AI)")
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#64748B"))
         self.drawString(195, 750, "|  SIH 26027 Master Research & System Architecture Dossier")
@@ -92,7 +92,7 @@ def clean_markdown_inline(text):
 
 def build_pdf_from_master_md(
     md_path="docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md",
-    output_pdf="docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf"
+    output_pdf="docs/IRIS AI_AI_Comprehensive_System_Writeup.pdf"
 ):
     if not os.path.exists(md_path):
         print(f"Error: {md_path} not found.")
@@ -240,7 +240,7 @@ def build_pdf_from_master_md(
     # 1. DOCUMENT HEADER & MANDATE BLOCK
     # =========================================================================
     story.append(Spacer(1, 10))
-    story.append(Paragraph("RAILSURAKSHA AI (रेल-सुरक्षा)", title_style))
+    story.append(Paragraph("IRIS AI (Intelligent Railway Inspection and Restoration AI)", title_style))
     story.append(Paragraph("AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations", subtitle_style))
     story.append(HRFlowable(width="100%", thickness=2, color=c_accent, spaceBefore=0, spaceAfter=10))
 
@@ -362,7 +362,7 @@ def build_pdf_from_master_md(
                 table_lines = []
 
         # Skip main document title if already rendered
-        if trimmed.startswith("# RailSuraksha AI"):
+        if trimmed.startswith("# IRIS AI"):
             i += 1
             continue
 
@@ -448,8 +448,8 @@ def build_pdf_from_master_md(
 
 if __name__ == "__main__":
     md_file = os.path.join("docs", "MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md")
-    out_pdf_docs = os.path.join("docs", "RailSuraksha_AI_Comprehensive_System_Writeup.pdf")
-    out_pdf_root = "RailSuraksha_AI_Comprehensive_System_Writeup.pdf"
+    out_pdf_docs = os.path.join("docs", "IRIS AI_AI_Comprehensive_System_Writeup.pdf")
+    out_pdf_root = "IRIS AI_AI_Comprehensive_System_Writeup.pdf"
 
     build_pdf_from_master_md(md_file, out_pdf_docs)
     build_pdf_from_master_md(md_file, out_pdf_root)

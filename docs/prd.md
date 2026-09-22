@@ -1,11 +1,14 @@
-# RailSuraksha AI — Product Requirements Document (PRD)
+# IRIS AI — Product Requirements Document (PRD)
 
-**Project Name:** RailSuraksha AI (रेल-सुरक्षा): Automated Block Planning & Corridor Optimization System (Auto-BDMS)  
+**Project Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automated Block Planning & Corridor Optimization System (Auto-BDMS)  
 **SIH Problem Statement:** 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-**Document Version:** 2.2.0 (Grounded Primary Source Architecture)  
+**Document Version:** 3.1.0 (Grounded Multi-Horizon Core & Fully Decoupled Policy Specification)  
 **Target Platform:** National Railway Corridor Operations & Divisional Control Centers  
-**Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 (Kavach Ver 4.0), and Google OR-Tools CP-SAT  
+**Governing Standards & Foundation:** Multi-Horizon Rolling Planning Framework (CP-SAT Interval Scheduling), IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 (Kavach Ver 4.0)  
 **Target Framework:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, FastAPI / Python CP-SAT Solver (Google OR-Tools)
+
+> **Architectural Decoupling Notice:**  
+> All numerical metrics (e.g. 38.4% downtime reduction, 96.2% availability index), urgency weights ($w_1, w_2, w_3$), safety headway buffers ($\Delta t_{\text{headway}}$), earthing durations ($\Delta_{\text{earth}}$), and TSR speeds are parameterized via dynamic `DivisionalPolicyProfile` configurations and Hexagonal `IIngestionAdapter` interfaces. The verified mathematical core is the Multi-Horizon Rolling Horizon framework.
 
 ---
 
@@ -23,7 +26,7 @@ Currently, each department requests line disconnections independently through th
 3. **Severe Asset Downtime & Throughput Loss:** Suboptimal block allocation results in cancelled freight paths, passenger punctuality loss, or deferred maintenance leading to emergency Temporary Speed Restrictions (TSRs).
 
 ### 1.2 The Solution Vision: Auto-BDMS
-**RailSuraksha AI** is an AI-driven, constraint-optimized Automatic Block Planning System that:
+**IRIS AI** is an AI-driven, constraint-optimized Automatic Block Planning System that:
 * Ingests and normalizes maintenance requests across TMS, SMMS, TDMS, and train paths from COA.
 * Clusters co-located demands into **Automated Multi-Department Joint Shadow Blocks** (Civil + S&T working underneath de-energized OHE windows).
 * Solves corridor time-distance scheduling using Google OR-Tools CP-SAT disjunctive interval scheduling to minimize downtime and eliminate passenger delays.

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screen 3: Defect Vision & Cab Telemetry — Claymorphic IRIS AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clayBg: '#E8F1FA',
+            signalBlue: '#2B7FFF',
+            twilight: '#334E68',
+            inkSlate: '#0F172A',
+            mutedSlate: '#486581',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #E8F1FA; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .clay-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 
+        inset -5px -5px 12px rgba(15, 23, 42, 0.03),
+        inset 5px 5px 12px rgba(255, 255, 255, 0.95),
+        12px 18px 36px -6px rgba(43, 127, 255, 0.09),
+        0 4px 12px rgba(15, 23, 42, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .clay-card-dark {
+      background: #0F172A;
+      border-radius: 24px;
+      box-shadow: 
+        inset -4px -4px 10px rgba(0, 0, 0, 0.5),
+        inset 4px 4px 10px rgba(51, 65, 85, 0.4),
+        12px 18px 36px -6px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    .clay-card-elevated {
+      background: #EDF5FD;
+      border-radius: 20px;
+      box-shadow: 
+        inset -4px -4px 10px rgba(43, 127, 255, 0.08),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.95),
+        8px 14px 28px -4px rgba(43, 127, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+    .clay-btn-primary {
+      background: linear-gradient(145deg, #3D8CFF, #1E6DE3);
+      color: #FFFFFF;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 6px rgba(0, 0, 0, 0.22),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.45),
+        4px 8px 20px rgba(43, 127, 255, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-btn-surface {
+      background: #F4F8FD;
+      color: #0F172A;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 7px rgba(15, 23, 42, 0.04),
+        inset 3px 3px 7px rgba(255, 255, 255, 0.95),
+        4px 8px 18px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(208, 223, 238, 0.6);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-inset {
+      background: #E2EEFA;
+      border-radius: 16px;
+      box-shadow: 
+        inset 4px 4px 10px rgba(15, 23, 42, 0.06),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8 min-h-screen">
+
+  <!-- APP BAR -->
+  <header class="max-w-7xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 clay-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-[18px] bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-lg border border-white/40">
+        📹
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">Defect Vision & Loco Cab Telemetry Console</h1>
+          <span class="px-2.5 py-0.5 text-xs font-black text-red-600 bg-red-100 rounded-[10px] mono">KAVACH TCAS ACTIVE</span>
+        </div>
+        <p class="text-xs text-mutedSlate font-medium">Onboard Locomotive WAP-7 #30412 • Section: Dadar TC-03 Approaching</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="screen1_master_corridor_cockpit.html" class="px-4 py-2 clay-btn-surface text-signalBlue font-bold text-xs">
+        ← Master Cockpit
+      </a>
+      <div class="px-4 py-2 bg-red-100 border border-red-300 text-red-600 text-xs font-black rounded-[12px] mono animate-pulse">
+        ⚠️ TSR 30 KM/H ENFORCED
+      </div>
+    </div>
+  </header>
+
+  <!-- 4-PANE CLAY TACTICAL GRID -->
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- PANE 1: USFD VISION AI WITH ACTUAL TRACK CORRIDOR FEED (6 COLS) -->
+    <div class="lg:col-span-6 clay-card p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <h2 class="text-sm font-extrabold text-inkSlate flex items-center gap-1.5">
+            <span>🔬</span> 1. TMS Civil Track Cam (USFD Vision AI)
+          </h2>
+          <span class="px-3 py-1 text-[10px] font-black bg-red-100 text-red-700 rounded-[10px] mono">CONFIDENCE: 98.2%</span>
+        </div>
+
+        <!-- Real Photographic Track Feed Container -->
+        <div class="relative w-full h-56 bg-slate-950 rounded-[18px] overflow-hidden border border-slate-700 flex items-center justify-center shadow-lg">
+          <img src="assets/track_corridor.jpg" alt="Live Track Corridor Feed" class="w-full h-full object-cover" />
+
+          <!-- Dynamic Bounding Box Overlay on Rail Joint -->
+          <div class="absolute bottom-6 left-32 w-28 h-16 border-2 border-red-500 bg-red-500/25 rounded-[6px] flex flex-col justify-between p-1.5 shadow-xl backdrop-blur-[1px]">
+            <span class="text-[9px] font-bold text-white bg-red-600 px-1 py-0.5 rounded mono">IMR FLAW #804</span>
+            <span class="text-[9px] font-mono text-white text-right font-black">98.2% USFD</span>
+          </div>
+
+          <div class="absolute top-2 left-2 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-[10px] text-emerald-400 font-mono rounded-[8px]">
+            ● REC [LIVE FEED 1080p 60FPS]
+          </div>
+          <div class="absolute bottom-2 right-2 px-2.5 py-1 bg-black/75 text-[10px] text-sky-300 font-mono rounded-[8px]">
+            KM 9/2 Dadar Up Fast
+          </div>
+        </div>
+
+        <div class="mt-4 text-xs text-mutedSlate space-y-1.5">
+          <div class="flex justify-between">
+            <span>Defect Classification:</span>
+            <strong class="text-red-600 font-mono font-bold">Transverse Fracture (IRPWM Ch 5)</strong>
+          </div>
+          <div class="flex justify-between">
+            <span>Remediation Machine:</span>
+            <strong class="text-inkSlate">CSM Tamper #98 + Rail Joint Clamp</strong>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="alert('Defect imagery dispatched to Civil Permanent Way Inspector (PW-09)')" class="mt-4 w-full py-2.5 clay-btn-surface text-signalBlue text-xs font-black">
+        Disseminate Defect Telemetry to P-Way
+      </button>
+    </div>
+
+    <!-- PANE 2: KAVACH SPEEDOMETER & HUD (6 COLS) -->
+    <div class="lg:col-span-6 clay-card-dark text-slate-100 p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+          <h2 class="text-sm font-extrabold text-white flex items-center gap-1.5">
+            <span>⚡</span> 2. Kavach TCAS Cab Speedometer & Braking Curve
+          </h2>
+          <span class="px-3 py-1 text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-[10px] mono">BRAKE ENFORCED</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 my-2">
+          <div class="p-4 bg-slate-900/90 rounded-[18px] border border-slate-800 text-center shadow-inner">
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Speed</div>
+            <div id="live-speed" class="text-4xl font-black text-sky-400 mono mt-1">68 <span class="text-sm font-normal text-slate-400">km/h</span></div>
+            <div class="text-[10px] text-emerald-400 font-semibold mt-1">Decelerating at 0.72 m/s²</div>
+          </div>
+          <div class="p-4 bg-slate-900/90 rounded-[18px] border border-red-500/40 text-center shadow-inner">
+            <div class="text-[10px] text-red-300 uppercase font-bold tracking-wider">Target TSR Limit</div>
+            <div class="text-4xl font-black text-red-500 mono mt-1">30 <span class="text-sm font-normal text-slate-400">km/h</span></div>
+            <div class="text-[10px] text-red-400 font-semibold mt-1">Target Distance: 420m</div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-900/60 rounded-[18px] border border-slate-800 mt-3 text-xs space-y-2">
+          <div class="flex justify-between text-slate-300">
+            <span>Emergency Braking Distance (EBD):</span>
+            <span class="font-mono font-bold text-white">480 meters</span>
+          </div>
+          <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div class="bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 h-full w-[72%] rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+        <span>Kavach Radio: <strong class="text-emerald-400">450 MHz UHF Locked</strong></span>
+        <button onclick="simulateBraking()" class="px-4 py-2 clay-btn-primary text-xs font-black">
+          Simulate Braking Step
+        </button>
+      </div>
+    </div>
+
+    <!-- PANE 3: TDMS 25kV PANTOGRAPH & SHADOW BLOCK WORK CAM (6 COLS) -->
+    <div class="lg:col-span-6 clay-card p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <h2 class="text-sm font-extrabold text-inkSlate flex items-center gap-1.5">
+            <span>⚡</span> 3. TDMS Pantograph Cam & Joint Shadow Block Cam
+          </h2>
+          <span class="px-3 py-1 text-[10px] font-black bg-amber-100 text-amber-800 rounded-[10px] mono">DE-ENERGIZED</span>
+        </div>
+
+        <!-- Real Photographic Shadow Block Maintenance Feed -->
+        <div class="relative w-full h-44 bg-slate-950 rounded-[18px] overflow-hidden border border-slate-700 flex items-center justify-center shadow-lg">
+          <img src="assets/shadow_block_work.jpg" alt="Active Joint Shadow Block Maintenance (CSM Tamper + OHE Wagon)" class="w-full h-full object-cover" />
+          <div class="absolute top-2 left-2 px-2.5 py-1 bg-red-600 text-white text-[10px] font-black rounded-[8px] mono">
+            ● OHE TOWER WAGON #60515 ACTIVE
+          </div>
+          <div class="absolute bottom-2 left-2 right-2 p-2 bg-gradient-to-t from-black/80 to-transparent text-white text-[11px] rounded-[10px]">
+            <div class="font-bold">25kV OHE Catenary + Track Tamping Concurrent Window</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-between items-center text-xs text-mutedSlate font-semibold">
+        <span>Permit to Work: <strong class="text-inkSlate mono">PTW-TRD-0906-88</strong></span>
+        <span class="text-emerald-600 font-extrabold">10m Buffer Active</span>
+      </div>
+    </div>
+
+    <!-- PANE 4: RDSO CAB ALARM SYNTHESIZER (6 COLS) -->
+    <div class="lg:col-span-6 clay-card p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <h2 class="text-sm font-extrabold text-inkSlate flex items-center gap-1.5">
+            <span>🔊</span> 4. RDSO Cab Alarm Synthesizer
+          </h2>
+          <span class="px-3 py-1 text-[10px] font-black text-signalBlue clay-inset mono">WEB AUDIO API</span>
+        </div>
+
+        <p class="text-xs text-mutedSlate mb-4">Authentic RDSO-calibrated locomotive acoustic warning chimes:</p>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <button onclick="playCautionChime()" class="p-4 clay-card-elevated border border-amber-200 text-left hover:translate-y-[-2px] transition-all">
+            <div class="font-extrabold text-xs text-amber-900">🔔 1200 Hz Caution Chime</div>
+            <div class="text-[10px] text-amber-700 mt-1">300ms Sine Tone (TSR Approach)</div>
+          </button>
+          <button onclick="playEmergencyChime()" class="p-4 clay-card-elevated border border-red-200 text-left hover:translate-y-[-2px] transition-all">
+            <div class="font-extrabold text-xs text-red-900">🚨 800 Hz Dual Alarm</div>
+            <div class="text-[10px] text-red-700 mt-1">Emergency Brake Warning</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-[11px] text-mutedSlate font-semibold">Synthesizer: <strong class="text-emerald-600">Online</strong></span>
+        <a href="screen4_auditor_workspace.html" class="px-4 py-2 clay-btn-primary text-white text-xs font-extrabold">
+          Auditor Workspace →
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let speed = 68;
+    function simulateBraking() {
+      if (speed > 30) {
+        speed -= 8;
+        if (speed < 30) speed = 30;
+        document.getElementById('live-speed').innerHTML = `${speed} <span class="text-sm font-normal text-slate-400">km/h</span>`;
+      } else {
+        alert('Train successfully stabilized at Kavach TSR speed ceiling: 30 km/h.');
+      }
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playCautionChime() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function playEmergencyChime() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc1.type = 'sawtooth';
+      osc2.type = 'square';
+      osc1.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc2.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc1.start();
+      osc2.start();
+      osc1.stop(audioCtx.currentTime + 0.5);
+      osc2.stop(audioCtx.currentTime + 0.5);
+    }
+  </script>
+</body>
+</html>

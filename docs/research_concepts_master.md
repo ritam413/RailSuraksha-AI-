@@ -1,4 +1,4 @@
-# RailSuraksha AI (Auto-BDMS): Master Research & Grounded Concepts Dossier
+# IRIS AI (Intelligent Railway Inspection and Restoration AI): Master Research & Grounded Concepts Dossier
 
 > **Problem Statement:** Smart India Hackathon (SIH) 26027 — *AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways*  
 > **Target Platform:** Auto-BDMS (Automated Block & Disconnection Management System) & Joint Multi-Department Corridor Optimizer  
@@ -9,7 +9,7 @@
 
 ## 🏛️ 1. Primary Source Grounding Index
 
-Every engineering assertion, mathematical formula, and operational protocol in RailSuraksha AI is grounded in official Indian Railways primary documentation:
+Every engineering assertion, mathematical formula, and operational protocol in IRIS AI is grounded in official Indian Railways primary documentation:
 
 | Domain / Concept | Primary Authority & Manual | Official Document / Specification Reference | Grounded Ground-Truth Finding |
 | :--- | :--- | :--- | :--- |

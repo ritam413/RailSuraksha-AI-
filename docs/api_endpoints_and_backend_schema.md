@@ -1,31 +1,26 @@
-# RailSuraksha AI — API Endpoints & Backend Data Structure Specification
+# IRIS AI — API Endpoints & Backend Data Structure Specification
 
 > **Location:** `docs/api_endpoints_and_backend_schema.md`  
-> **System:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+> **System:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-> **Document Version:** 2.0.0 (SIH 26027 Refactored Architecture)
+> **Document Version:** 3.1.0 (Grounded Multi-Horizon Core & Fully Decoupled Policy Specification)
 
 ---
 
 ## 🌐 1. API Endpoints Specification
 
-### 1.1 Multi-Source Departmental Ingestion Endpoints
-* `POST /api/v1/ingestion/tms/sync`
-  * **Purpose:** Ingests civil track defect alerts, ultrasonic flaw detection (USFD) records, and Track Geometry Index (TGI) deficits.
-  * **Request Payload:** `TmsIngestionPayload`
-  * **Response:** `{ success: true, ingestedCount: 14, normalizedSection: "CSMT-KYN" }`
-* `POST /api/v1/ingestion/smms/sync`
-  * **Purpose:** Ingests S&T point machine cycle counts, track circuit relay alerts, and electronic interlocking disconnection requests.
-  * **Request Payload:** `SmmsIngestionPayload`
-  * **Response:** `{ success: true, ingestedCount: 8 }`
-* `POST /api/v1/ingestion/tdms/sync`
-  * **Purpose:** Ingests electrical TRD 25kV OHE catenary/contact wire wear logs, neutral section overhauls, and power block demands.
-  * **Request Payload:** `TdmsIngestionPayload`
-  * **Response:** `{ success: true, ingestedCount: 6 }`
-* `POST /api/v1/ingestion/coa/timetables`
-  * **Purpose:** Ingests real-time train positions, scheduled timetables, and freight path forecasts from Control Office Application.
-  * **Request Payload:** `CoaTimetablePayload`
-  * **Response:** `{ success: true, activeTrains: 42, freightRakesForecasted: 18 }`
+### 1.1 Decoupled Dynamic Ingestion & Policy Endpoints
+* `POST /api/v1/ingestion/:sourceSystem/events`
+  * **Purpose:** Unified ingestion endpoint supporting pluggable adapters (`TMS`, `SMMS`, `TDMS`, `COA`, `IOT`). Stores unstructured data in `rawPayload` for dynamic field transformation.
+  * **Request Payload:** `BaseIngestionPayload`
+  * **Response:** `{ success: true, ingestedCount: 14, normalizedSection: "CSMT-KYN", quarantineCount: 0 }`
+* `GET /api/v1/config/policy/:divisionId`
+  * **Purpose:** Retrieves active divisional policy profile (safety buffers, weights, TSR parameters, horizon windows).
+  * **Response:** `DivisionalPolicyProfile`
+* `PUT /api/v1/config/policy/:divisionId`
+  * **Purpose:** Dynamically updates divisional policy configuration without requiring code deployment or solver restarts.
+* `GET /api/v1/sync/events`
+  * **Purpose:** State catch-up replay endpoint for disconnected UI clients (`?since_seq=N&section_id=SEC-01`).
 
 ---
 

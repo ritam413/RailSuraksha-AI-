@@ -1,4 +1,4 @@
-# RailSuraksha AI (Auto-BDMS): The Ultimate Master Briefing Dossier
+# IRIS AI (Intelligent Railway Inspection and Restoration AI): The Ultimate Master Briefing Dossier
 > **Problem Statement ID:** SIH 26027 | **Title:** *AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways*  
 > **Prepared For:** NotebookLM Self-Study, Team Teaching, and Stakeholder / Judge Defense  
 > **Target System:** Automatic Block Demand Management System (Auto-BDMS) & Joint Corridor Time-Distance Optimizer  
@@ -46,7 +46,7 @@ Currently, each department submits separate paper or standalone digital requests
 
 To explain this clearly, you must master the 4 core CRIS / Railway systems:
 
-| System | Directorate / Dept | What It Manages | Data Ingested by RailSuraksha AI |
+| System | Directorate / Dept | What It Manages | Data Ingested by IRIS AI |
 | :--- | :--- | :--- | :--- |
 | **TMS** *(Track Management System)* | Civil / Permanent Way (P-Way) | Track flaws, Ultrasonic Rail Flaw Detection (USFD), Track Geometry Index (TGI), track tamping machines (CSM, BCM). | Flaw coordinates, Chainage KM (`KM 108/4 - 112/2`), track wear severity, urgent tamping needs. |
 | **TDMS** *(Traction Distribution Mgmt System)* | Electrical / Traction (TRD) | 25kV OHE catenary & contact wires, insulator cleanliness, Tower Wagons, traction substations (TSS). | Power block requisitions (OHE de-energization), insulator wash schedules, catenary defect locations. |
@@ -65,7 +65,7 @@ To explain this clearly, you must master the 4 core CRIS / Railway systems:
 
 # 3. The End-to-End Solution Architecture (Auto-BDMS)
 
-RailSuraksha AI automates the entire planning lifecycle across a continuous **4-Step Operational Loop**:
+IRIS AI automates the entire planning lifecycle across a continuous **4-Step Operational Loop**:
 
 ```
 [ TMS (P-Way) ]   [ TDMS (TRD) ]   [ SMMS (S&T) ]   [ COA (Traffic) ]
@@ -148,7 +148,7 @@ This section prepares you for any hard question a teammate, mentor, railway engi
 ### 🚨 Critical Vulnerability 3: Controller Discretion vs. Autonomous AI
 * **The Attack:** *"Will railway section controllers ever trust an AI to automatically block lines when human lives and passenger safety are at stake?"*
 * **The System Defense:**
-  - RailSuraksha AI features a strict dual-mode architecture:
+  - IRIS AI features a strict dual-mode architecture:
     - **Advisory Mode (Default & Safe):** AI acts as a decision-support co-pilot. It prepares the optimized schedule and highlights conflict-free gaps. The human Section Controller retains 100% authority and must explicitly click `[APPROVE ACTION]` / `[SANCTION BLOCK]`.
     - **Autonomous Simulation Mode:** Used for offline 30-day capacity planning and what-if stress testing.
   - Every recommendation includes an **Explainable Decision Dossier** detailing *why* the slot was chosen (headway gap analysis, alternative routes evaluated, safety margin verified).
@@ -187,7 +187,7 @@ Step 3: The "What" (5 mins) ──> Assign clear, conflict-free coding domains t
 When studying this document inside NotebookLM on your mobile device, copy-paste these exact queries to get instant, razor-sharp explanations:
 
 ### 🎓 Foundational Learning Queries:
-1. *"Explain the RailSuraksha AI project in simple terms like I'm a first-year engineering student."*
+1. *"Explain the IRIS AI project in simple terms like I'm a first-year engineering student."*
 2. *"What are the exact differences between TMS, TDMS, SMMS, and COA, and why does their lack of integration cause problems in Indian Railways?"*
 3. *"What is a Shadow Block and how does it save corridor downtime?"*
 
@@ -197,7 +197,7 @@ When studying this document inside NotebookLM on your mobile device, copy-paste 
 6. *"How does the system ensure that high-priority passenger trains like Rajdhani Express are never delayed?"*
 
 ### ⚔️ Adversarial & Defense Queries:
-7. *"What are the top 3 failure modes of this block planning system and how does RailSuraksha AI mitigate them?"*
+7. *"What are the top 3 failure modes of this block planning system and how does IRIS AI mitigate them?"*
 8. *"If a hackathon judge asks 'Why can't Section Controllers just continue using COA and BDMS manually?', what is my winning response?"*
 9. *"How does the Advisory vs Autonomous mode switch protect railway operations from algorithmic hallucinations?"*
 

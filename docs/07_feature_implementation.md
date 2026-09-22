@@ -1,22 +1,27 @@
-# RailSuraksha AI — Feature Implementation & Engineering Specification
+# IRIS AI — Feature Implementation & Engineering Specification
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-**Document Version:** 3.0.0 (Unified Grounded Specification)  
-**Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0, and Google OR-Tools CP-SAT.
+**Document Version:** 3.1.0 (Grounded Multi-Horizon & Decoupled Architecture Specification)  
+**Governing Standards Reference:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0, and Google OR-Tools CP-SAT.
 
 ---
 
-## 🛠️ 1. Multi-Source Ingestion & Spatial Normalization Pipeline
+## 🛠️ 1. Pluggable Ingestion & Spatial Normalization Pipeline
 
-### 1.1 Ingestion Flow
-The ingestion layer continuously normalizes unstructured data across three independent maintenance portals and one traffic dispatching portal:
+### 1.1 Decoupled Ingestion Architecture (Ports & Adapters)
+The ingestion layer normalizes external data feeds via pluggable adapter classes implementing `IIngestionAdapter`:
 
 ```text
 ┌─────────────────┐   ┌──────────────────┐   ┌─────────────────┐   ┌─────────────────┐
 │ TMS (IRPWM 2020)│   │TDMS (ACTM Vol II)│   │SMMS (IRSEM 2021)│   │   COA (G&SR)    │
 │ • USFD IMR/OBS  │   │• 25kV OHE Wear   │   │• Point Machines │   │ • Live GPS Pos  │
 │ • TGI Deficits  │   │• Insulator Wash  │   │• Form S&T/T-351 │   │ • Working Times │
+└────────┬────────┘   └────────┬─────────┘   └────────┬────────┘   └────────┬────────┘
+         │                     │                      │                     │
+         ▼                     ▼                      ▼                     ▼
+┌─────────────────┐   ┌──────────────────┐   ┌─────────────────┐   ┌─────────────────┐
+│  TMS Adapter    │   │   TDMS Adapter   │   │  SMMS Adapter   │   │   COA Adapter   │
 └────────┬────────┘   └────────┬─────────┘   └────────┬────────┘   └────────┬────────┘
          │                     │                      │                     │
          └─────────────────────┼──────────────────────┴─────────────────────┘
@@ -28,8 +33,25 @@ The ingestion layer continuously normalizes unstructured data across three indep
 └────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 Spatial Chainage Converter Algorithm
-Linear railway kilometer posts are mapped into discrete electrical Track Circuits (`TC-01` through `TC-06`):
+### 1.2 Ingestion Adapter Base Contract
+```typescript
+export interface BaseIngestionPayload {
+  sourceSystem: 'TMS' | 'TDMS' | 'SMMS' | 'COA' | 'CSV_FEED' | 'SIMULATOR';
+  schemaVersion: string;
+  rawPayload: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export abstract class BaseIngestionAdapter<TRaw, TNormalized> {
+  abstract readonly adapterName: string;
+  abstract readonly schemaVersion: string;
+  abstract validate(raw: TRaw): Promise<boolean>;
+  abstract transform(raw: TRaw, policy: DivisionalPolicyProfile): Promise<TNormalized[]>;
+}
+```
+
+### 1.3 Spatial Chainage Converter Algorithm
+Linear railway kilometer posts are mapped into discrete electrical Track Circuits (`TC-01` through `TC-06`) via decoupled lookup:
 ```typescript
 export function normalizeChainageToTrackCircuit(
   chainageStartKm: number,
@@ -38,7 +60,6 @@ export function normalizeChainageToTrackCircuit(
 ): string[] {
   const matchedCircuitIds: string[] = [];
   for (const tc of corridorCircuits) {
-    // Check spatial overlap between demand chainage and track circuit boundaries
     if (chainageStartKm < tc.endKm && chainageEndKm > tc.startKm) {
       matchedCircuitIds.push(tc.id);
     }
@@ -49,15 +70,14 @@ export function normalizeChainageToTrackCircuit(
 
 ---
 
-## 🧮 2. ML Urgency Triage & Priority Scoring Algorithm
+## 🧮 2. Configurable Priority Scoring & Rules Engine
 
-### 2.1 Dynamic Priority Formula
-Every maintenance demand is scored based on safety criticality, asset degradation rate, and time overdue:
-$$\text{Urgency Score } S_i = w_1 \cdot \text{SafetyRisk} + w_2 \cdot \text{DegradationRate} \cdot \Delta t + w_3 \cdot \frac{\text{OverdueDays}}{\text{TargetCycleDays}}$$
-* Calibrated Weights: $w_1 = 0.40$, $w_2 = 0.35$, $w_3 = 0.25$.
+### 2.1 Dynamic Priority Scoring Formula (Policy Injected)
+Every maintenance demand is scored based on safety criticality, asset degradation rate, and time overdue using weights dynamically supplied by the active `DivisionalPolicyProfile`:
+$$\text{Urgency Score } S_i = w_{\text{safety}} \cdot \text{SafetyRisk} + w_{\text{degrade}} \cdot \text{DegradationRate} \cdot \Delta t + w_{\text{overdue}} \cdot \frac{\text{OverdueDays}}{\text{TargetCycleDays}}$$
+* **Default Reference Baseline:** $w_{\text{safety}} = 0.40$, $w_{\text{degrade}} = 0.35$, $w_{\text{overdue}} = 0.25$ (Configurable per division).
 
-### 2.2 Grounded Track Geometry Index (TGI) Integration (IRPWM 2020)
-Track quality is computed via Track Recording Car standard deviation indexes:
+### 2.2 Track Geometry Index (TGI) Integration (IRPWM 2020 Reference)
 $$\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$$
 * $\text{TGI} \ge 80$: Good (Maintenance-free).
 * $50 \le \text{TGI} < 80$: Fair (P3 Routine Maintenance within 30 days).
@@ -68,26 +88,32 @@ $$\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$$
 
 ## ⚙️ 3. Google OR-Tools CP-SAT Joint Shadow-Block Optimizer
 
-### 3.1 Model Formulation
-The mathematical core utilizes the Constraint Programming Satisfaction (`ortools.sat.python.cp_model`) disjunctive interval framework:
+### 3.1 Policy-Parameterized Model Formulation
+The mathematical core utilizes Google OR-Tools CP-SAT with constraints parameterized by the active policy profile:
 
 ```python
 from ortools.sat.python import cp_model
 
-model = cp_model.CpModel()
-
-# 1. Variables: Define Interval Variables for Train Movements & Maintenance Tasks
-# task_interval = model.NewIntervalVar(start_var, duration_val, end_var, f"task_{i}")
-
-# 2. Hard Disjunctive Constraint: No train movement and work crew on same section
-# model.AddNoOverlap([train_interval_j, maintenance_interval_b])
-
-# 3. Hard Safety Headway: 15 min clearance buffer before passenger train arrives
-# model.Add(passenger_start_time >= block_end_time + 15)
-
-# 4. Co-Location Earthing Buffer (ACTM Vol II):
-# model.Add(civil_start >= ohe_start + 10) # 10 min discharge earthing
-# model.Add(civil_end <= ohe_end - 10)     # 10 min restoration buffer
+def build_corridor_model(demands, train_paths, policy_config):
+    model = cp_model.CpModel()
+    
+    # 1. Variables: Define Interval Variables for Train Movements & Maintenance Tasks
+    # task_interval = model.NewIntervalVar(start_var, duration_val, end_var, f"task_{i}")
+    
+    # 2. Hard Disjunctive Constraint: No train movement and work crew on same section
+    # model.AddNoOverlap([train_interval_j, maintenance_interval_b])
+    
+    # 3. Parameterized Safety Headway (Delta_clear from policy):
+    # min_clearance = policy_config.get("min_passenger_clearance_min", 15)
+    # model.Add(passenger_start_time >= block_end_time + min_clearance)
+    
+    # 4. Parameterized Co-Location Earthing Buffer (ACTM Vol II Reference):
+    # earthing_buffer = policy_config.get("ohe_earthing_buffer_min", 10)
+    # restore_buffer = policy_config.get("ohe_restoration_buffer_min", 10)
+    # model.Add(civil_start >= ohe_start + earthing_buffer)
+    # model.Add(civil_end <= ohe_end - restore_buffer)
+    
+    return model
 ```
 
 ### 3.2 Optimization Objective
@@ -95,9 +121,9 @@ $$\min Z = \alpha \sum_{b \in \mathcal{B}} \text{Duration}(b) + \beta \sum_{t \i
 
 ---
 
-## 🔄 4. Rolling Horizon Framework (RHF) Engine
+## 🔄 4. Multi-Horizon Rolling Planning Framework `[Grounded Core]`
 
-To avoid brittle schedules, RailSuraksha AI uses a rolling framework parameterized by a prediction horizon $H$ and a control step $\Delta t$:
+IRIS AI operates across three grounded rolling horizons parameterized by prediction horizon $H$ and control step $\Delta t$:
 
 | Horizon Tier | Scope ($H$) | Freeze Step ($\Delta t$) | Operational Invariants |
 | :--- | :--- | :--- | :--- |
@@ -109,18 +135,18 @@ To avoid brittle schedules, RailSuraksha AI uses a rolling framework parameteriz
 
 ## 🛡️ 5. Safety Actuation, Kavach TSR & Interlocking Dispatch
 
-### 5.1 Kavach Wireless TSRMS Injection (`RDSO/SPN/196/2020`)
-Upon block sanction, the system formats a digital Temporary Speed Restriction packet transmitted over UHF/LTE radio to approaching locomotive cab units:
+### 5.1 Kavach Wireless TSRMS Injection Adapter (`RDSO/SPN/196/2020`)
 ```typescript
 export interface KavachTsrPacket {
   tsrId: string;
   trackCircuitId: string;
   chainageStartKm: number;
   chainageEndKm: number;
-  permittedSpeedKmh: number; // e.g. 30 km/h or 15 km/h
+  permittedSpeedKmh: number; // Configurable (default: 30 km/h)
   activationTimestamp: string;
   expirationTimestamp: string;
   broadcastStatus: 'ARMED' | 'BROADCASTING' | 'CLEARED';
+  policyVersion: string;
 }
 ```
 
@@ -129,6 +155,6 @@ $$D_{\text{stop}} = \frac{V^2}{2g(\mu + G_s)} + V \cdot t_{\text{reaction}} + d_
 * Friction $\mu$: Standard Dry $0.134$, Monsoon Rain $0.095$, Winter Fog $0.115$.
 * $t_{\text{reaction}} = 1.2\text{s}$ autonomous, $2.5\text{s}$ advisory. $d_{\text{buffer}} = 100\text{m}$.
 
-### 5.3 Electronic Interlocking Lockout (Form S&T/T-351)
+### 5.3 Electronic Interlocking Lockout Adapter (Form S&T/T-351)
 * Clamps entrance signals (`S-12`, `S-14`) to danger (`RED`) in electronic interlocking relay logic.
 * Padlocks motorized switch points (`SW-04`) to prevent conflicting route clearance into the active maintenance block.

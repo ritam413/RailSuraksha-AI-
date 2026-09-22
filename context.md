@@ -1,16 +1,21 @@
-# Project Context: RailSuraksha AI (रेल-सुरक्षा)
+# Project Context: IRIS AI (Intelligent Railway Inspection and Restoration AI)
 
 ## 1. Project Overview & SIH 26027 Problem Statement
-RailSuraksha AI (Auto-BDMS) is an AI-powered Automatic Block Planning and Corridor Optimization System aligned with **Smart India Hackathon (SIH) Problem Statement 26027**: *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*. 
+IRIS AI (Intelligent Railway Inspection and Restoration AI) is an AI-powered Automatic Block Planning and Corridor Optimization System aligned with **Smart India Hackathon (SIH) Problem Statement 26027**: *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*. 
 
-It transforms decentralized, manual maintenance scheduling into a data-driven, coordinated process by integrating maintenance defect data across Civil Engineering (**TMS**), Electrical TRD (**TDMS**), and Signaling & Telecom (**SMMS**) with live corridor availability from the Control Office Application (**COA**). It uses Google OR-Tools CP-SAT and a **Rolling Horizon Framework (RHF)** (grounded in Indian Railways General Rules GR 15.02, Operating Manual Chapter 22, CRIS Rolling Block System, Consilvio et al. IEEE T-Rel 2020, and Indian Railways Double-Stack CTLP research) to bundle co-located maintenance into multi-department **joint shadow blocks**, operates across multi-horizon planning (24h Tactical, 7-Day Operational, 26-Week Strategic Rolling Block Programme), and disseminates Temporary Speed Restrictions (TSRs) directly to locomotive **Kavach TCAS** units.
+It transforms decentralized, manual maintenance scheduling into a data-driven, coordinated process by integrating maintenance defect data across Civil Engineering (**TMS**), Electrical TRD (**TDMS**), and Signaling & Telecom (**SMMS**) with live corridor availability from the Control Office Application (**COA**). It uses Google OR-Tools CP-SAT and a **Rolling Horizon Framework (RHF)** (24h Tactical, 7-Day Operational, 30-Day Strategic) to bundle co-located maintenance into multi-department **joint shadow blocks**, and disseminates Temporary Speed Restrictions (TSRs) directly to locomotive **Kavach TCAS** units.
 
-## 2. Team Architecture & Ownership Matrix
+## 2. Grounding Status & Decoupled Architecture
+* **Grounded Core Paradigm:** Multi-Horizon Rolling Planning (24h Tactical, 7D Operational, 30D Strategic) + Mathematical Constraint Programming (Google OR-Tools CP-SAT Disjunctive Graph) + Cryptographic Explainable Audit Trails (SHA-256).
+* **Decoupled Swappable Layers:** Ingestion Adapters (`IIngestionAdapter`) and Dynamic Safety Policy Engine (`DivisionalPolicyProfile`). Specific numerical values (e.g. 15-min train clearance, 10-min earthing buffers, 30 km/h TSR default, urgency weights `0.40/0.35/0.25`) are provisional reference baselines drawn from railway manuals (IRPWM, ACTM, IRSEM) and are externalized into configurable policy profiles rather than hardcoded in source code.
+
+## 3. Team Architecture & Ownership Matrix
 - **Developer 1 (Lead / Integrator):** `src/app/page.tsx`, `src/components/Navbar.tsx`, `src/components/LocoCameraFeed.tsx`, `src/components/AgentPipelineCanvas.tsx`, `src/components/PlatformGatewayFeed.tsx`, `src/app/globals.css`.
 - **Developer 2 (UI Components Lead):** `src/components/Overview/KpiStrip.tsx`, `src/components/Overview/IncidentQueue.tsx`, `src/components/Overview/InterlockingMap.tsx`, `src/components/Auditor/DecisionLogModal.tsx`, `src/components/Common/**`.
 - **Developer 3 (ML / AI / Physics Lead):** `src/lib/agents/**`, `src/lib/physics/**`, `src/lib/vision/**`.
 
-## 3. Architecture & Tech Stack
+## 4. Architecture & Tech Stack
+- **Architecture Style:** Hexagonal (Ports & Adapters) with externalized policy configuration.
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
 - **Styling:** Tailwind CSS v4 with Light-Blue Mintlify Design Tokens:
   - Base Canvas (Surface 0): `#F0F6FC`
@@ -23,7 +28,7 @@ It transforms decentralized, manual maintenance scheduling into a data-driven, c
 - **State Management & Agent Flow:** Modular pure TypeScript agents in `src/lib/agents/` communicating with React UI components.
 - **Contracts & Data:** Shared interface contracts in `src/types/apiContracts.ts` and static mock data generator in `src/lib/mockData.ts`.
 
-## 4. Directory Structure
+## 5. Directory Structure
 ```
 src/
 ├── app/
@@ -58,17 +63,10 @@ src/
     └── apiContracts.ts               # Shared TypeScript interfaces & types (weather, sensor angles, contracts)
 ```
 
-## 5. Key Rules & Constraints
+## 6. Key Rules & Constraints
 - Strict role boundaries according to the team ownership matrix.
 - Zero pill buttons across all components (strictly 4px radius).
 - All AI automated interventions must produce an immutable 4-step explainable decision log.
+- Domain rules and parameters must be configurable via policy profiles rather than hardcoded in business logic.
 
-## 6. Multi-Agent Skills & Workflow Execution Engine
-The workspace contains an integrated 28-skill execution suite located in `.agents/skills/` orchestrated via `.agents/rules/session-init.md`:
-- **Meta-Orchestration & Routing:** `claude-code-route`, `/ask-matt`, `/wayfinder`, `vibe-kanban`.
-- **Deliberation & Consensus:** `beads` (behavior contracts), `multica` (multi-agent rooms), `/council-review`, `/adversarial-review`, `system-prompts-ai`.
-- **Role Specialization:** `wshobson-agents` (Architect, Implementation Dev, QA Engineer, Security Lead, Staff Optimizer, UI/UX Designer).
-- **Code Execution & Quality:** `/tdd`, `/ponytail` (stdlib/YAGNI first), `/10x-dev` (hot-path $O(1)$ optimizer), `/diagnosing-bugs`.
-- **Context, Scraping & Tools:** `repomix` (CLI installed), `playwright` (CLI installed), `firecrawl`, `codegraph`, `headroom`, `claude-mem`.
-- **UI/UX & Motion:** `/taste`, `/awesome-design`, `/impeccable`, `/animate`.
 

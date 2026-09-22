@@ -1,93 +1,109 @@
-# RailSuraksha AI (Auto-BDMS) — Product Requirements Document (PRD)
+# IRIS AI (Intelligent Railway Inspection and Restoration AI) — Product Requirements Document (PRD)
 
-**System Name:** RailSuraksha AI (रेल-सुरक्षा): Automated Block Planning & Corridor Optimization System (Auto-BDMS)  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automated Block Planning & Corridor Optimization System (Auto-BDMS)  
 **Smart India Hackathon (SIH) Problem Statement:** 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-**Document Version:** 3.0.0 (Unified Grounded Specification)  
+**Document Version:** 3.1.0 (Grounded Multi-Horizon & Decoupled Architecture Specification)  
 **Target Platform:** National Railway Corridor Operations, Divisional Control Centers (Sr. DOM / Section Controllers), and Maintenance Directorates  
-**Governing Standards:** Indian Railways Permanent Way Manual (**IRPWM 2020**), AC Traction Manual (**ACTM Vol II**), Indian Railways Signal Engineering Manual (**IRSEM 2021**), General and Subsidiary Rules (**G&SR Chapter 15**), RDSO TCAS Specification (**RDSO/SPN/196/2020 Kavach Ver 4.0**), and Google OR-Tools CP-SAT.
+**Governing Standards Reference:** Indian Railways Permanent Way Manual (**IRPWM 2020**), AC Traction Manual (**ACTM Vol II**), Indian Railways Signal Engineering Manual (**IRSEM 2021**), General and Subsidiary Rules (**G&SR Chapter 15**), RDSO TCAS Specification (**RDSO/SPN/196/2020 Kavach Ver 4.0**), and Google OR-Tools CP-SAT.
 
 ---
 
-## 1. Executive Summary & Problem Understanding
+## 1. Executive Summary & Architectural Grounding
 
 ### 1.1 The Operational Challenge on Indian Railways
-Indian Railways is the fourth-largest rail network in the world, operating over 13,000 passenger trains and 8,000 freight rakes daily across 68,000+ route kilometers. To maintain track geometry, overhead equipment (OHE), and signaling infrastructure, railway engineering departments require scheduled track possessions known as **maintenance blocks**.
+Indian Railways operates over 13,000 passenger trains and 8,000 freight rakes daily across 68,000+ route kilometers. To maintain track geometry, overhead equipment (OHE), and signaling infrastructure, railway engineering departments require scheduled track possessions known as **maintenance blocks**.
 
-Currently, fixed railway infrastructure is maintained by three separate engineering directorates:
-1. **Civil / P-Way Engineering (Track Management System - TMS):** Governed by *IRPWM 2020* (Chapters 5 & 6). Manages rails, sleepers, ballast beds, points, crossings, ultrasonic flaw detection (USFD), and Track Geometry Index (TGI) deficits.
-2. **Electrical / TRD (Traction Distribution Management System - TDMS):** Governed by *ACTM Vol II*. Manages 25kV AC Overhead Equipment (OHE), catenary/contact wire wear, neutral sections, and insulator washing.
-3. **Signal & Telecom / S&T (Signalling Maintenance & Management System - SMMS):** Governed by *IRSEM 2021* (Part II). Manages electronic interlocking (EI), point machines, track circuits, axle counters, and statutory **Form S&T/T-351** disconnection notices.
-4. **Operating / Traffic Directorate:** Governed by *G&SR Chapter 15*. Section Controllers in Divisional Control Offices manage live train dispatching, timetables, and train precedence via the **Control Office Application (COA)**.
+Currently, fixed infrastructure is maintained across separate engineering directorates (Civil/TMS, Electrical/TDMS, Signal/SMMS, Traffic/COA). Without centralized cross-departmental coordination, lines are repeatedly blocked independently, creating excessive cumulative disruption, deferred maintenance backlogs, and emergency speed restrictions.
 
-### 1.2 Systemic Failure Modes of Legacy Operations
-Under the existing Block & Disconnection Management System (BDMS / e-BDMS), each department requests line disconnections independently without cross-departmental alignment:
-* **Departmental Silos & Corridor Fragmentation:** A single track section is frequently blocked three separate times in a single week (e.g., Civil tamping for 3.0h on Monday, Electrical OHE inspection for 2.5h on Wednesday, S&T point overhaul for 2.0h on Friday), accumulating **7.5+ hours of weekly disruption per 100 km section**.
-* **Section Controller Cognitive Overload:** Controllers manually evaluate complex train timetables against pending block memos. Under intense pressure to prevent passenger punctuality loss, controllers frequently reject or truncate maintenance requests, resulting in dangerous **deferred maintenance backlogs**.
-* **Unplanned Speed Restrictions & Capacity Loss:** Deferred maintenance leads to acute rail flaws and emergency **Temporary Speed Restrictions (TSRs)**, permanently slowing corridor speeds and cancelling scheduled freight paths.
-* **Safety Disconnect in Field Dissemination:** Speed restrictions and caution orders rely on manual paperwork (**Form T/409**), creating risks of driver non-compliance and track gang accidents.
+### 1.2 Grounding Status: Core Paradigm vs Provisional Domain Reference
+To maintain maximum engineering rigor and production adaptability, this system makes an explicit architectural distinction between **Grounded Core Principles** and **Provisional Domain Parameters**:
 
----
+1. **Grounded Core Architecture (Validated Foundation):**
+   * **Multi-Horizon Rolling Planning Framework (RHF):** 24-Hour Tactical, 7-Day Operational, and 30-Day Strategic rolling horizons.
+   * **Mathematical Constraint Satisfaction:** Time-Space Disjunctive Interval Scheduling via Google OR-Tools CP-SAT.
+   * **Joint Co-Location Bundling:** Mathematically overlapping concurrent multi-department maintenance tasks within unified block windows.
+   * **Explainable Cryptographic Audit Trails:** Immutable multi-step decision dossiers.
 
-## 2. Product Vision & Value Proposition: Auto-BDMS
+2. **Provisional / Configurable Domain Parameters (Decoupled & Swappable):**
+   * Specific numerical parameters (e.g., 15-min train clearance headway, 10-min OHE earthing buffers, 30 km/h default TSR speed, urgency score weight coefficients) and sensor threshold defaults (e.g., point stroke time $>4.5\text{s}$, contact wire wear $<74\text{ mm}^2$) are **provisional reference baselines** drawn from public Indian Railways manuals.
+   * **Decoupling Mandate:** These domain parameters and raw data schemas are **NEVER hardcoded** into application logic. They are managed through pluggable data adapters and an externalized policy engine, ensuring seamless adjustment as real divisional data and CRIS APIs become available.
 
-**RailSuraksha AI (Auto-BDMS)** is an AI-driven, constraint-optimized Automatic Block Planning System that unifies maintenance requisitions across all three engineering directorates and synchronizes them with real-time train paths from COA:
-
-1. **Multi-Source Ingestion & Spatial Normalization:** Ingests live defect logs from TMS, TDMS, and SMMS, automatically mapping physical linear chainages (`KM 108/4 to 112/2`) into discrete electrical **Track Circuit IDs** (`TC-01` through `TC-06`).
-2. **Automated Multi-Department Joint Shadow Blocking:** Clusters co-located demands into coordinated **Joint Shadow Blocks** where Civil track gangs and S&T crews work concurrently underneath de-energized OHE windows during natural nocturnal traffic lulls (01:30 AM to 05:00 AM).
-3. **Google OR-Tools CP-SAT Disjunctive Optimization:** Solves corridor time-distance scheduling via mathematical constraint programming, guaranteeing zero passenger train cancellations, minimum safety headways ($\Delta_{\text{clear}} \ge 15\text{ min}$), and double-discharge earthing buffers ($\Delta_{\text{earth}} \ge 10\text{ min}$, $\Delta_{\text{restore}} \ge 10\text{ min}$).
-4. **Multi-Horizon Rolling Framework (RHF):** Operates seamlessly across **24-Hour Tactical**, **7-Day Operational**, and **30-Day Strategic** planning horizons.
-5. **Direct Safety Integration via RDSO Kavach TCAS:** Direct electronic transmission of Temporary Speed Restrictions ($30\text{ km/h}$) via the **Kavach TSRMS** to locomotive cab units, automated **Form S&T/T-351** electronic interlocking lockouts, **Form T/409** Caution Order generation, and immutable **SHA-256** audit dossiers complying with RDSO Form 14B.
+### 1.3 Decoupled & Pluggable Architecture (Ports & Adapters)
+The platform follows a strict **Hexagonal Architecture (Ports & Adapters)**:
+* **Pluggable Data Adapters:** Abstract ingestion interfaces (`TMSAdapter`, `TDMSAdapter`, `SMMSAdapter`, `COAAdapter`, `KavachAdapter`) allow zero-code swapping between synthetic simulation datasets, CSV/JSON file feeds, and live CRIS enterprise APIs.
+* **Externalized Policy & Constraint Engine:** All safety buffers, urgency weights, operational penalty coefficients, and dispatch rules reside in configurable policy profiles (`DivisionalPolicyProfile`), dynamically injected into the solver at runtime.
+* **Extensible Data Contracts:** All core data models carry generic `metadata: JSONB` and `rawPayload: JSONB` fields with schema versioning to accommodate evolving external data formats without database migrations.
 
 ```mermaid
 graph TD
-    subgraph "1. Multi-Source CRIS Ingestion"
-        TMS["TMS (Civil USFD IMR/OBS/REM, TGI)"] --> Ingest["Unified Ingestion & Spatial Adapter"]
-        SMMS["SMMS (Point Machine Stroke, S&T/T-351)"] --> Ingest
-        TDMS["TDMS (25kV OHE Contact Wire Wear)"] --> Ingest
-        COA["COA (Working Timetables & Freight Paths)"] --> Ingest
+    subgraph "1. Pluggable Ingestion Adapters (Ports & Adapters)"
+        TMS["TMS Feed / Simulator"] -->|TMS Adapter| Ingest["Ingestion Port & Normalizer"]
+        SMMS["SMMS Feed / Simulator"] -->|SMMS Adapter| Ingest
+        TDMS["TDMS Feed / Simulator"] -->|TDMS Adapter| Ingest
+        COA["COA Timetables / Simulator"] -->|COA Adapter| Ingest
     end
 
-    subgraph "2. Core Optimization Engine"
-        Ingest --> Triage["ML Urgency Triage (P1 Critical / P2 / P3)"]
-        Triage --> Solver["Google OR-Tools CP-SAT Disjunctive Solver"]
+    subgraph "2. Dynamic Policy & Configuration Engine"
+        PolicyFile["Divisional Policy Profile (JSON/DB)"] -->|Injects Buffers & Weights| PolicyService["Policy & Rules Provider"]
+    end
+
+    subgraph "3. Grounded Optimization & Multi-Horizon Core"
+        Ingest --> Triage["Configurable ML/Heuristic Urgency Triage"]
+        PolicyService --> Triage
+        PolicyService --> Solver["Google OR-Tools CP-SAT Disjunctive Solver"]
+        Triage --> Solver
         Solver --> Bundler["Multi-Department Joint Shadow Bundler"]
+        Bundler --> HorizonEngine["Multi-Horizon Engine (24h / 7D / 30D)"]
     end
 
-    subgraph "3. Operator Cockpit & UI Surfaces"
-        Bundler --> Gantt["Corridor Time-Distance String Chart"]
-        Bundler --> Queue["Department Demand Triage Queue"]
-        Bundler --> Switcher["Multi-Horizon Switcher (24h / 7D / 30D)"]
-        Bundler --> Interlocking["Track Interlocking & Circuit Map"]
+    subgraph "4. Operator Cockpit & Extensible UI"
+        HorizonEngine --> Gantt["Corridor Time-Distance String Chart"]
+        HorizonEngine --> Queue["Department Demand Triage Queue"]
+        HorizonEngine --> Interlocking["Track Interlocking & Circuit Map"]
+        HorizonEngine --> PolicyUI["Policy & Parameter Tuning Surface"]
     end
 
-    subgraph "4. Safety & Compliance Dispatch"
+    subgraph "5. Safety & Actuation Adapters"
         Gantt --> Sanction{"Controller Sanction Gate"}
-        Sanction -->|Sanctioned| Kavach["Kavach TSRMS Wireless Cab Broadcast (30 km/h)"]
-        Sanction -->|Sanctioned| InterlockLock["Form S&T/T-351 Electronic Interlocking Lockout"]
-        Sanction -->|Sanctioned| CautionOrder["Form T/409 Digital Caution Order Generation"]
-        Sanction -->|Sanctioned| Dossier["4-Step Explainable Decision Dossier (SHA-256)"]
+        Sanction -->|Actuation Port| Kavach["Kavach TSR Broadcast Adapter"]
+        Sanction -->|Actuation Port| InterlockLock["Interlocking Lockout Adapter (S&T/T-351)"]
+        Sanction -->|Document Port| CautionOrder["Caution Order Adapter (Form T/409)"]
+        Sanction -->|Audit Port| Dossier["4-Step SHA-256 Decision Dossier"]
     end
 ```
 
 ---
 
-## 3. Key Operational Invariants & Governing Constraints
+## 2. Product Vision & Value Proposition: Auto-BDMS
 
-1. **Zero Passenger Train Cancellation:** The mathematical solver strictly enforces that no scheduled passenger or express train path is cancelled or truncated.
-2. **Passenger Safety Clearance Headway ($\Delta_{\text{clear}}$):** A mandatory minimum buffer of **$\ge 15\text{ minutes}$** is enforced between the formal termination of a maintenance block and the arrival of any high-priority passenger train.
-3. **OHE Power Block Earthing Buffers ($\Delta_{\text{earth}}, \Delta_{\text{restore}}$):** Per *ACTM Vol II*, civil and signaling work beneath 25kV OHE can only commence $\ge 10\text{ minutes}$ after power isolation and double-discharge earthing, and must conclude $\ge 10\text{ minutes}$ prior to re-energization.
-4. **Machine Turnaround & Gradient-Aware Kinematics:** Heavy track tampers (CSM, Duomatic) and Tower Wagons cannot teleport; transit velocities between stations are dynamically modeled accounting for track gradients ($G_s$) and curve resistance ($r_c$).
-5. **Electronic Interlocking Fail-Safe State:** Upon block sanction, conflicting signal aspects (`S-12`, `S-14`) are clamped to danger (`RED`) in electronic interlocking relay logic to physically protect track gangs.
+**IRIS AI (Intelligent Railway Inspection and Restoration AI)** unifies maintenance requisitions across all engineering directorates and synchronizes them with real-time train paths from COA:
+
+1. **Pluggable Multi-Source Ingestion:** Ingests defect logs from TMS, TDMS, and SMMS, automatically mapping physical linear chainages into discrete electrical Track Circuit IDs via configurable spatial lookup tables.
+2. **Automated Joint Shadow Blocking:** Clusters co-located demands into coordinated Joint Shadow Blocks underneath de-energized OHE windows during natural nocturnal traffic lulls.
+3. **CP-SAT Disjunctive Optimization:** Solves corridor time-distance scheduling with zero passenger train cancellations, configurable safety headways, and parameter-driven earthing buffers.
+4. **Multi-Horizon Rolling Framework (RHF):** Grounded planning across **24-Hour Tactical**, **7-Day Operational**, and **30-Day Strategic** rolling horizons.
+5. **Decoupled Safety Dispatch & Compliance:** Emits speed restrictions via Kavach adapters, interlocking lockouts, caution orders, and immutable SHA-256 audit dossiers.
 
 ---
 
-## 4. Quantifiable Target Success Metrics
+## 3. Key Operational Invariants & Grounded Constraints
 
-| Metric | Legacy BDMS Operations | RailSuraksha AI (Auto-BDMS) | Impact Delta |
-| :--- | :--- | :--- | :--- |
-| **Weekly Corridor Downtime** | 7.5 to 12.0 hours / 100km | 3.5 to 4.5 hours / 100km | **35% to 50% Reduction** |
-| **Corridor Path Capacity** | Baseline congested | +18% commercial paths | **+18% Capacity Increase** |
-| **Passenger Delay Propagation** | 12 to 18 mins / block | < 1.2% secondary delay | **~65% Delay Reduction** |
-| **Optimization Solver Latency** | 2 to 3 days manual coordination | < 30 seconds (OR-Tools) | **Near Real-Time** |
-| **TSR Compliance & Safety** | Manual paper caution orders | 100% Wireless Kavach TCAS | **Zero Human Error Margin** |
-| **Audit Verification** | Manual register entries | SHA-256 Cryptographic Dossier | **100% Tamper-Evident** |
+1. **Zero Passenger Train Cancellation (Grounded Invariant):** The solver strictly enforces that no scheduled passenger train path is cancelled or truncated.
+2. **Configurable Passenger Safety Clearance Headway ($\Delta_{\text{clear}}$):** Enforces a parameter-driven buffer (default reference: $\ge 15\text{ min}$) between block termination and high-priority train arrivals.
+3. **Configurable OHE Power Block Earthing Buffers ($\Delta_{\text{earth}}, \Delta_{\text{restore}}$):** Work beneath 25kV OHE begins after power isolation & earthing (default reference: $\ge 10\text{ min}$), concluding prior to re-energization (default reference: $\ge 10\text{ min}$).
+4. **Gradient-Aware Machine Kinematics:** Machine transit velocities between sidings and worksites factor in locomotive tractive effort, track gradients ($G_s$), and curve resistance ($r_c$).
+5. **Fail-Safe Interlocking State:** Conflicting signals are clamped to danger (`RED`) upon block sanction to protect track crews.
+
+---
+
+## 4. Target Success Metrics (Provisional Reference Baselines)
+
+| Metric | Legacy BDMS Operations | IRIS AI (Intelligent Railway Inspection and Restoration AI) | Target Delta | Grounding Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Weekly Corridor Downtime** | 7.5 to 12.0 hours / 100km | 3.5 to 4.5 hours / 100km | **35% to 50% Reduction** | Simulated / Reference Model |
+| **Corridor Path Capacity** | Baseline congested | +18% commercial paths | **+18% Capacity Increase** | Simulated / Reference Model |
+| **Passenger Delay Propagation** | 12 to 18 mins / block | < 1.2% secondary delay | **~65% Delay Reduction** | Simulated / Reference Model |
+| **Optimization Solver Latency** | 2 to 3 days manual coordination | < 30 seconds (OR-Tools) | **Near Real-Time** | Verified (Benchmark) |
+| **Multi-Horizon Rolling Planning** | Disjointed ad-hoc memos | Unified 24h / 7D / 30D | **100% Horizon Coverage** | Grounded Architecture |
+| **Audit Verification** | Manual register entries | SHA-256 Cryptographic Dossier | **100% Tamper-Evident** | Verified (Cryptographic) |
+

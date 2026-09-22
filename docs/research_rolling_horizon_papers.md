@@ -75,9 +75,9 @@ Paper 2 analyzes container train load planning (CTLP) and multi-train dispatch o
 
 ---
 
-## 4. Synthesis: Grounding Multi-Horizon Block Planning in RailSuraksha AI
+## 4. Synthesis: Grounding Multi-Horizon Block Planning in IRIS AI
 
-By integrating the theoretical and empirical findings of both papers with Indian Railways standard operating procedures (IRPWM, ACTM, IRSEM, G&SR, CRIS RBS), the **Multi-Horizon Block Planning Architecture** of RailSuraksha AI is structured as follows:
+By integrating the theoretical and empirical findings of both papers with Indian Railways standard operating procedures (IRPWM, ACTM, IRSEM, G&SR, CRIS RBS), the **Multi-Horizon Block Planning Architecture** of IRIS AI is structured as follows:
 
 ```mermaid
 flowchart TD

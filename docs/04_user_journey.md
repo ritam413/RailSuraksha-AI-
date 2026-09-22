@@ -1,6 +1,6 @@
-# RailSuraksha AI — User Journeys & Operational Workflows
+# IRIS AI — User Journeys & Operational Workflows
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 **Document Version:** 3.0.0 (Unified Grounded Specification)  
 **Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
@@ -14,19 +14,19 @@ journey
     title Section Controller Daily Maintenance & Block Sanction Workflow
     section 1. Ingestion & Triage
       CRIS streams TMS flaws, TDMS wear, SMMS logs: 5: CRIS Systems
-      Adapter maps KM chainage to Track Circuits: 5: RailSuraksha AI
-      ML engine triages demands into P1, P2, P3 tiers: 5: RailSuraksha AI
+      Adapter maps KM chainage to Track Circuits: 5: IRIS AI
+      ML engine triages demands into P1, P2, P3 tiers: 5: IRIS AI
     section 2. AI Optimization
       Solver identifies 01:30-04:45 AM white corridor: 5: CP-SAT Engine
       Civil, Electrical & S&T bundled into 1 shadow block: 5: CP-SAT Engine
-      Corridor String Chart renders bundled window: 5: RailSuraksha AI
+      Corridor String Chart renders bundled window: 5: IRIS AI
     section 3. Controller Sanction
       Controller reviews 38.4% downtime savings: 4: Section Controller
       Controller clicks [SANCTION BLOCK]: 5: Section Controller
     section 4. Safety & Actuation
       Kavach TSR 30 km/h pushed to approaching trains: 5: Kavach TCAS
       Electronic Interlocking clamps S-12 signal RED: 5: Station Interlocking
-      Digital Form T/409 Caution Order generated: 5: RailSuraksha AI
+      Digital Form T/409 Caution Order generated: 5: IRIS AI
       SHA-256 Decision Dossier sealed & archived: 5: Safety Auditor
 ```
 
@@ -76,7 +76,7 @@ journey
 2. **Instant Emergency Triage:**
    * ML Urgency Triage immediately flags the defect as **P1 Critical (Score 0.98)**.
 3. **Automated Safety Protection:**
-   * RailSuraksha AI immediately triggers an emergency Kavach TSR broadcast capping section speed to **$15\text{ km/h}$** per *IRPWM 2020*.
+   * IRIS AI immediately triggers an emergency Kavach TSR broadcast capping section speed to **$15\text{ km/h}$** per *IRPWM 2020*.
    * Approaching Locomotive Cab displays 1200Hz audible warning tone and overlays the safe deceleration braking curve.
 4. **Dynamic Rescheduling:**
    * The CP-SAT solver automatically adjusts the tactical 24h schedule, routing freight rakes to loop sidings and allocating an emergency 60-minute clamping window in the nearest 45-minute traffic gap.

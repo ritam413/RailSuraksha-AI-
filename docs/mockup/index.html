@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRIS AI — 4-Screen Claymorphic Prototype Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clayBg: '#E8F1FA',
+            signalBlue: '#2B7FFF',
+            twilight: '#334E68',
+            inkSlate: '#0F172A',
+            mutedSlate: '#486581',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #E8F1FA; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .clay-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 
+        inset -5px -5px 12px rgba(15, 23, 42, 0.03),
+        inset 5px 5px 12px rgba(255, 255, 255, 0.95),
+        12px 18px 36px -6px rgba(43, 127, 255, 0.09),
+        0 4px 12px rgba(15, 23, 42, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .clay-btn-primary {
+      background: linear-gradient(145deg, #3D8CFF, #1E6DE3);
+      color: #FFFFFF;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 6px rgba(0, 0, 0, 0.22),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.45),
+        4px 8px 20px rgba(43, 127, 255, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-btn-surface {
+      background: #F4F8FD;
+      color: #0F172A;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 7px rgba(15, 23, 42, 0.04),
+        inset 3px 3px 7px rgba(255, 255, 255, 0.95),
+        4px 8px 18px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(208, 223, 238, 0.6);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-inset {
+      background: #E2EEFA;
+      border-radius: 16px;
+      box-shadow: 
+        inset 4px 4px 10px rgba(15, 23, 42, 0.06),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8 min-h-screen flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="max-w-7xl mx-auto w-full mb-6 clay-card p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-[18px] bg-gradient-to-br from-blue-500 to-signalBlue text-white flex items-center justify-center font-extrabold text-2xl shadow-lg border border-white/40">
+        🚆
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">IRIS AI (Intelligent Railway Inspection and Restoration AI)</h1>
+          <span class="px-2.5 py-0.5 text-xs font-black text-signalBlue clay-inset mono">CLAYMORPHIC SUITE</span>
+        </div>
+        <p class="text-xs text-mutedSlate font-medium">Tactile 3D Soft-Lit Prototypes for SIH Problem Statement 26027</p>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex flex-wrap items-center gap-2 clay-inset p-1.5 rounded-[18px] w-full md:w-auto">
+      <button onclick="loadScreen('screen1_master_corridor_cockpit.html', this)" class="screen-tab px-4 py-2 text-xs font-black clay-btn-primary">
+        🖥️ Screen 1: Master Cockpit
+      </button>
+      <button onclick="loadScreen('screen2_interlocking_track_map.html', this)" class="screen-tab px-4 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate transition-all">
+        🚦 Screen 2: Interlocking Map
+      </button>
+      <button onclick="loadScreen('screen3_defect_vision_telemetry.html', this)" class="screen-tab px-4 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate transition-all">
+        📹 Screen 3: Cab Telemetry
+      </button>
+      <button onclick="loadScreen('screen4_auditor_workspace.html', this)" class="screen-tab px-4 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate transition-all">
+        ⚖️ Screen 4: Auditor Workspace
+      </button>
+    </div>
+  </header>
+
+  <!-- LIVE IFRAME PREVIEW CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full flex-1 clay-card p-4 flex flex-col min-h-[780px]">
+    <div class="px-4 py-2.5 clay-inset mb-3 flex items-center justify-between text-xs text-mutedSlate font-semibold">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm"></span>
+        <span id="current-screen-title" class="font-extrabold text-inkSlate">Screen 1: Master Corridor Block Command Cockpit (/)</span>
+      </div>
+      <a id="direct-link" href="screen1_master_corridor_cockpit.html" target="_blank" class="text-signalBlue font-extrabold hover:underline flex items-center gap-1">
+        Open Screen Standalone ↗
+      </a>
+    </div>
+
+    <iframe id="preview-frame" src="screen1_master_corridor_cockpit.html" class="w-full flex-1 border-0 rounded-[18px] min-h-[720px] shadow-inner bg-slate-50"></iframe>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full mt-6 text-center text-xs text-mutedSlate font-medium">
+    Design Aesthetic: High-Craft Claymorphism • Soft Inset & Drop Shadows • Tactile Press Interactions • Plus Jakarta Sans & JetBrains Mono
+  </footer>
+
+  <script>
+    function loadScreen(url, tabElement) {
+      document.getElementById('preview-frame').src = url;
+      document.getElementById('direct-link').href = url;
+      
+      const titles = {
+        'screen1_master_corridor_cockpit.html': 'Screen 1: Master Corridor Block Command Cockpit (/)',
+        'screen2_interlocking_track_map.html': 'Screen 2: Section Interlocking & Track Circuit Map (/interlocking)',
+        'screen3_defect_vision_telemetry.html': 'Screen 3: Defect Vision & Cab Telemetry Console (/vision-telemetry)',
+        'screen4_auditor_workspace.html': 'Screen 4: Auditor Workspace & Explainable Decision Dossier (/auditor-workspace)'
+      };
+      document.getElementById('current-screen-title').textContent = titles[url] || url;
+
+      document.querySelectorAll('.screen-tab').forEach(t => {
+        t.className = 'screen-tab px-4 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate transition-all';
+      });
+      tabElement.className = 'screen-tab px-4 py-2 text-xs font-black clay-btn-primary';
+    }
+  </script>
+</body>
+</html>

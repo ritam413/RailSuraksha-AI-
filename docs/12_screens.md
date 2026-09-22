@@ -1,6 +1,6 @@
-# RailSuraksha AI — Screen Specifications & RBAC Layouts
+# IRIS AI — Screen Specifications & RBAC Layouts
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 **Document Version:** 3.0.0 (Unified Grounded Specification)  
 **Design System:** Light-Blue Mintlify Theme (Canvas `#F0F6FC`, Card `#FFFFFF`, Border `#D0DFEE`, Accent `#2B7FFF`, 4px radii)  
@@ -20,7 +20,7 @@
 ### 1.2 Layout & UI Components
 ```text
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ NAVBAR: [RailSuraksha AI Auto-BDMS] | [24h Tactical | 7D | 30D] | [Mode: Advisory]     │
+│ NAVBAR: [IRIS AI Auto-BDMS] | [24h Tactical | 7D | 30D] | [Mode: Advisory]     │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ KPI STRIP: [38.4% Downtime Saved] [96.2% Availability] [03 Active Blocks] [08 Demands] │
 ├──────────────────────────────────────────────────────────┬─────────────────────────────┤

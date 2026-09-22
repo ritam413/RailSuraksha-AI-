@@ -45,7 +45,7 @@ Currently, each department requests track disconnections/traffic blocks independ
 
 ## 3. The Solution: The Continuous 4-Step Operational Loop
 
-To put it in exact railway operational terms, the **RailSuraksha AI (Auto-BDMS)** system executes four interconnected steps in a continuous automated loop:
+To put it in exact railway operational terms, the **IRIS AI (Intelligent Railway Inspection and Restoration AI)** system executes four interconnected steps in a continuous automated loop:
 
 ```mermaid
 graph TD
@@ -102,7 +102,7 @@ When the Section Controller clicks `[SANCTION BLOCK]`:
 
 ## 4. Multi-Horizon Block Planning via Rolling Horizon Framework
 
-Instead of relying on static, fragile long-term schedules or myopic day-to-day decisions, RailSuraksha AI uses a **Rolling Horizon Framework (RHF)** to solve multi-horizon block planning. The engine optimizes over a forward-looking prediction window ($H$), locks in immediate actions during an execution window ($\Delta t$), and continuously rolls forward as live telemetry updates.
+Instead of relying on static, fragile long-term schedules or myopic day-to-day decisions, IRIS AI uses a **Rolling Horizon Framework (RHF)** to solve multi-horizon block planning. The engine optimizes over a forward-looking prediction window ($H$), locks in immediate actions during an execution window ($\Delta t$), and continuously rolls forward as live telemetry updates.
 
 | Horizon | Scope ($H$) | Step / Freeze ($\Delta t$) | Primary Objective & Assets | Mathematical & Regulatory Driver |
 | :--- | :--- | :--- | :--- | :--- |

@@ -1,10 +1,10 @@
-# RailSuraksha AI — Database Schema & Data Models
+# IRIS AI — Database Schema & Data Models
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
-**Document Version:** 3.0.0 (Unified Grounded Specification)  
+**Document Version:** 3.1.0 (Grounded Multi-Horizon & Decoupled Architecture Specification)  
 **Database Engine:** PostgreSQL 16 / Supabase / Embedded SQLite (Local Dev)  
-**Governing Standards:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
+**Governing Standards Reference:** IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0.
 
 ---
 
@@ -12,6 +12,8 @@
 
 ```mermaid
 erDiagram
+    POLICY_CONFIGURATIONS ||--o{ JOINT_BLOCK_PLANS : governs
+    ADAPTER_MAPPINGS ||--o{ MAINTENANCE_DEMANDS : transforms
     DEPARTMENTS ||--o{ MAINTENANCE_DEMANDS : submits
     TRACK_SECTIONS ||--|{ TRACK_CIRCUITS : contains
     TRACK_CIRCUITS ||--o{ MAINTENANCE_DEMANDS : maps_to
@@ -21,6 +23,27 @@ erDiagram
     JOINT_BLOCK_PLANS ||--o{ KAVACH_TSR_RECORDS : generates
     JOINT_BLOCK_PLANS ||--|| DECISION_DOSSIERS : seals
     TRAIN_SCHEDULES ||--o{ TRACK_CIRCUITS : occupies
+
+    POLICY_CONFIGURATIONS {
+        string id PK "POL-CR-MUMBAI-2026-V1"
+        string division_code "CR_MUMBAI"
+        string version "1.2.0"
+        int min_passenger_clearance_min "15"
+        int ohe_earthing_buffer_min "10"
+        int ohe_restoration_buffer_min "10"
+        int default_tsr_speed_kmh "30"
+        jsonb urgency_weights
+        decimal secondary_delay_penalty_weight
+        boolean is_locked
+    }
+
+    ADAPTER_MAPPINGS {
+        string id PK
+        string source_system "TMS | TDMS | SMMS | COA | CSV"
+        string schema_version "1.0.0"
+        jsonb field_mappings
+        jsonb transformation_rules
+    }
 
     DEPARTMENTS {
         string id PK
@@ -35,6 +58,7 @@ erDiagram
         decimal start_km
         decimal end_km
         int track_count
+        jsonb metadata
     }
 
     TRACK_CIRCUITS {
@@ -45,6 +69,7 @@ erDiagram
         decimal end_km
         string status "CLEAR | OCCUPIED | BLOCKED_TSR"
         string signal_aspect "GREEN | YELLOW | DOUBLE_YELLOW | RED"
+        jsonb metadata
     }
 
     MAINTENANCE_DEMANDS {
@@ -61,6 +86,8 @@ erDiagram
         jsonb required_assets "['CSM_TAMPER', 'GANG_04']"
         boolean can_shadow_block
         string status "PENDING_TRIAGE | SLOTTED | SANCTIONED | COMPLETED"
+        jsonb raw_payload
+        jsonb metadata
         timestamp created_at
     }
 
@@ -74,11 +101,13 @@ erDiagram
         timestamp entry_time
         timestamp exit_time
         int max_allowable_delay_min
+        jsonb metadata
     }
 
     JOINT_BLOCK_PLANS {
         string id PK "BLK-JOINT-0906-01"
         string section_id FK
+        string policy_id FK
         timestamp start_time
         timestamp end_time
         int duration_minutes
@@ -89,6 +118,7 @@ erDiagram
         string sanction_status "RECOMMENDED | SANCTIONED | REJECTED"
         string sanctioned_by "CTRL-MUM-402"
         string sha256_audit_seal
+        jsonb metadata
         timestamp sanctioned_at
     }
 
@@ -124,7 +154,33 @@ erDiagram
 ## 📜 2. SQL Schema DDL Definitions
 
 ```sql
--- 1. Departments Table
+-- 1. Policy Configurations Table (Decoupled Rules)
+CREATE TABLE policy_configurations (
+    id VARCHAR(50) PRIMARY KEY, -- 'POL-CR-MUMBAI-2026-V1'
+    division_code VARCHAR(30) NOT NULL,
+    version VARCHAR(20) NOT NULL,
+    min_passenger_clearance_min INTEGER DEFAULT 15,
+    ohe_earthing_buffer_min INTEGER DEFAULT 10,
+    ohe_restoration_buffer_min INTEGER DEFAULT 10,
+    default_tsr_speed_kmh INTEGER DEFAULT 30,
+    urgency_weights JSONB DEFAULT '{"safety": 0.40, "overdue": 0.35, "traffic": 0.25}'::jsonb,
+    secondary_delay_penalty_weight NUMERIC(4, 2) DEFAULT 1.50,
+    is_locked BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Adapter Mappings Table (Pluggable Ingestion Schemas)
+CREATE TABLE adapter_mappings (
+    id VARCHAR(50) PRIMARY KEY,
+    source_system VARCHAR(30) NOT NULL, -- 'TMS', 'TDMS', 'SMMS', 'COA'
+    schema_version VARCHAR(20) NOT NULL,
+    field_mappings JSONB NOT NULL,
+    transformation_rules JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Departments Table
 CREATE TABLE departments (
     id VARCHAR(36) PRIMARY KEY,
     code VARCHAR(30) UNIQUE NOT NULL, -- 'TMS_CIVIL', 'TDMS_ELECTRICAL', 'SMMS_SIGNAL'
@@ -132,16 +188,17 @@ CREATE TABLE departments (
     directorate VARCHAR(100) NOT NULL
 );
 
--- 2. Track Sections Table
+-- 4. Track Sections Table
 CREATE TABLE track_sections (
     id VARCHAR(50) PRIMARY KEY,
     corridor_name VARCHAR(100) NOT NULL,
     start_km NUMERIC(7, 3) NOT NULL,
     end_km NUMERIC(7, 3) NOT NULL,
-    track_count INTEGER DEFAULT 2
+    track_count INTEGER DEFAULT 2,
+    metadata JSONB DEFAULT '{}'::jsonb
 );
 
--- 3. Track Circuits Table
+-- 5. Track Circuits Table
 CREATE TABLE track_circuits (
     id VARCHAR(50) PRIMARY KEY, -- 'TC-01' .. 'TC-06'
     section_id VARCHAR(50) REFERENCES track_sections(id) ON DELETE CASCADE,
@@ -149,10 +206,11 @@ CREATE TABLE track_circuits (
     start_km NUMERIC(7, 3) NOT NULL,
     end_km NUMERIC(7, 3) NOT NULL,
     status VARCHAR(30) DEFAULT 'CLEAR', -- 'CLEAR', 'OCCUPIED', 'BLOCKED_TSR'
-    signal_aspect VARCHAR(30) DEFAULT 'GREEN' -- 'GREEN', 'YELLOW', 'DOUBLE_YELLOW', 'RED'
+    signal_aspect VARCHAR(30) DEFAULT 'GREEN', -- 'GREEN', 'YELLOW', 'DOUBLE_YELLOW', 'RED'
+    metadata JSONB DEFAULT '{}'::jsonb
 );
 
--- 4. Maintenance Demands Table
+-- 6. Maintenance Demands Table
 CREATE TABLE maintenance_demands (
     id VARCHAR(50) PRIMARY KEY, -- 'TMS-2026-804'
     department_code VARCHAR(30) REFERENCES departments(code),
@@ -167,13 +225,17 @@ CREATE TABLE maintenance_demands (
     required_assets JSONB DEFAULT '[]'::jsonb,
     can_shadow_block BOOLEAN DEFAULT true,
     status VARCHAR(30) DEFAULT 'PENDING_TRIAGE',
+    raw_payload JSONB DEFAULT '{}'::jsonb,
+    metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Joint Block Plans Table
+-- 7. Joint Block Plans Table
 CREATE TABLE joint_block_plans (
     id VARCHAR(50) PRIMARY KEY, -- 'BLK-JOINT-0906-01'
     section_id VARCHAR(50) REFERENCES track_sections(id),
+    policy_id VARCHAR(50) REFERENCES policy_configurations(id),
+    version INTEGER DEFAULT 1, -- Optimistic concurrency lock token
     start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time TIMESTAMP WITH TIME ZONE NOT NULL,
     duration_minutes INTEGER NOT NULL,
@@ -184,17 +246,18 @@ CREATE TABLE joint_block_plans (
     sanction_status VARCHAR(30) DEFAULT 'RECOMMENDED',
     sanctioned_by VARCHAR(50),
     sha256_audit_seal VARCHAR(64),
+    metadata JSONB DEFAULT '{}'::jsonb,
     sanctioned_at TIMESTAMP WITH TIME ZONE
 );
 
--- 6. Bundled Demand Mappings Table
+-- 8. Bundled Demand Mappings Table
 CREATE TABLE bundled_demand_mappings (
     id VARCHAR(36) PRIMARY KEY,
     block_id VARCHAR(50) REFERENCES joint_block_plans(id) ON DELETE CASCADE,
     demand_id VARCHAR(50) REFERENCES maintenance_demands(id) ON DELETE CASCADE
 );
 
--- 7. Kavach TSR Records Table
+-- 9. Kavach TSR Records Table
 CREATE TABLE kavach_tsr_records (
     id VARCHAR(50) PRIMARY KEY,
     block_id VARCHAR(50) REFERENCES joint_block_plans(id) ON DELETE CASCADE,
@@ -204,7 +267,7 @@ CREATE TABLE kavach_tsr_records (
     broadcast_timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 8. Explainable Decision Dossiers Table
+-- 10. Explainable Decision Dossiers Table
 CREATE TABLE decision_dossiers (
     id VARCHAR(36) PRIMARY KEY,
     block_id VARCHAR(50) UNIQUE REFERENCES joint_block_plans(id) ON DELETE CASCADE,
@@ -215,4 +278,18 @@ CREATE TABLE decision_dossiers (
     sha256_verification_hash VARCHAR(64) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 11. Dead-Letter Ingestion Queue Table (Unparseable / Corrupt Feeds)
+CREATE TABLE dead_letter_ingestion_queue (
+    id VARCHAR(50) PRIMARY KEY,
+    source_system VARCHAR(30) NOT NULL, -- 'TMS', 'TDMS', 'SMMS', 'COA'
+    error_reason VARCHAR(255) NOT NULL, -- 'UNRESOLVED_SPATIAL_CHAINAGE', 'MALFORMED_SCHEMA'
+    raw_payload JSONB NOT NULL,
+    received_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    resolved BOOLEAN DEFAULT false,
+    resolved_by VARCHAR(50),
+    resolved_at TIMESTAMP WITH TIME ZONE
+);
 ```
+
+

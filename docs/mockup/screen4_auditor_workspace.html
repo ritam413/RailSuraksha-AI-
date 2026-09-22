@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screen 4: Auditor Workspace — Claymorphic IRIS AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clayBg: '#E8F1FA',
+            signalBlue: '#2B7FFF',
+            twilight: '#334E68',
+            inkSlate: '#0F172A',
+            mutedSlate: '#486581',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #E8F1FA; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    .clay-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 
+        inset -5px -5px 12px rgba(15, 23, 42, 0.03),
+        inset 5px 5px 12px rgba(255, 255, 255, 0.95),
+        12px 18px 36px -6px rgba(43, 127, 255, 0.09),
+        0 4px 12px rgba(15, 23, 42, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+    .clay-card-elevated {
+      background: #EDF5FD;
+      border-radius: 20px;
+      box-shadow: 
+        inset -4px -4px 10px rgba(43, 127, 255, 0.08),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.95),
+        8px 14px 28px -4px rgba(43, 127, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+    }
+    .clay-btn-primary {
+      background: linear-gradient(145deg, #3D8CFF, #1E6DE3);
+      color: #FFFFFF;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 6px rgba(0, 0, 0, 0.22),
+        inset 3px 3px 6px rgba(255, 255, 255, 0.45),
+        4px 8px 20px rgba(43, 127, 255, 0.38);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-btn-surface {
+      background: #F4F8FD;
+      color: #0F172A;
+      border-radius: 14px;
+      box-shadow: 
+        inset -3px -3px 7px rgba(15, 23, 42, 0.04),
+        inset 3px 3px 7px rgba(255, 255, 255, 0.95),
+        4px 8px 18px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(208, 223, 238, 0.6);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .clay-inset {
+      background: #E2EEFA;
+      border-radius: 16px;
+      box-shadow: 
+        inset 4px 4px 10px rgba(15, 23, 42, 0.06),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8 min-h-screen">
+
+  <!-- APP BAR -->
+  <header class="max-w-7xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 clay-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-[18px] bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-extrabold text-2xl shadow-lg border border-white/40">
+        ⚖️
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">Auditor Workspace & Regulatory Terminal</h1>
+          <span class="px-2.5 py-0.5 text-xs font-bold text-emerald-800 bg-emerald-100 rounded-[10px] mono">CRS & RDSO COMPLIANT</span>
+        </div>
+        <p class="text-xs text-mutedSlate font-medium">Commissioner of Railway Safety (CRS) Statutory Decision Log & Cryptographic Ledger</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="screen1_master_corridor_cockpit.html" class="px-4 py-2 clay-btn-surface text-signalBlue font-bold text-xs">
+        ← Master Cockpit
+      </a>
+      <div class="px-4 py-2 clay-inset text-signalBlue text-xs font-extrabold mono">
+        👤 Role: Safety Auditor
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT: RECENT DECISION LEDGER (5 COLS) -->
+    <div class="lg:col-span-5 clay-card p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <h2 class="text-sm font-extrabold text-inkSlate flex items-center gap-1.5">
+            <span>📜</span> Immutable Decision Ledger
+          </h2>
+          <span class="px-3 py-1 text-[10px] font-black clay-inset text-slate-700 mono">142 Records</span>
+        </div>
+
+        <div class="space-y-3.5">
+          <!-- Log 1 (Active) -->
+          <div onclick="selectLog(1)" class="p-4 clay-card-elevated border-2 border-signalBlue cursor-pointer hover:translate-y-[-2px] transition-all">
+            <div class="flex justify-between items-center text-[10px] text-mutedSlate mb-1 font-semibold">
+              <span class="font-mono font-black text-signalBlue">#BLK-JOINT-0906-01</span>
+              <span>2026-09-06 01:28 IST</span>
+            </div>
+            <h3 class="text-xs font-black text-inkSlate">Dadar TC-03 Joint Track + OHE Shadow Block</h3>
+            <div class="text-[11px] text-emerald-700 font-extrabold mt-1">Saved 85 mins (38.4%) • Sanctioned</div>
+          </div>
+
+          <!-- Log 2 -->
+          <div onclick="selectLog(2)" class="p-4 clay-card-elevated cursor-pointer hover:translate-y-[-2px] transition-all">
+            <div class="flex justify-between items-center text-[10px] text-mutedSlate mb-1 font-semibold">
+              <span class="font-mono font-bold text-slate-600">#BLK-SIG-0905-88</span>
+              <span>2026-09-05 23:14 IST</span>
+            </div>
+            <h3 class="text-xs font-bold text-inkSlate">Kurla TC-04 Interlocking Relay Overhaul</h3>
+            <div class="text-[11px] text-mutedSlate mt-1">Duration: 60 mins • Form S&T/T-351</div>
+          </div>
+
+          <!-- Log 3 -->
+          <div onclick="selectLog(3)" class="p-4 clay-card-elevated cursor-pointer hover:translate-y-[-2px] transition-all">
+            <div class="flex justify-between items-center text-[10px] text-mutedSlate mb-1 font-semibold">
+              <span class="font-mono font-bold text-slate-600">#BLK-TRD-0905-12</span>
+              <span>2026-09-05 03:00 IST</span>
+            </div>
+            <h3 class="text-xs font-bold text-inkSlate">Thane-Kalyan 25kV Catenary Routine Inspection</h3>
+            <div class="text-[11px] text-mutedSlate mt-1">Duration: 120 mins • Clean Window</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-mutedSlate font-semibold">
+        <span>Hash Engine: <strong class="text-inkSlate mono">SHA-256</strong></span>
+        <button onclick="alert('Cryptographic ledger integrity verified: 100% valid.')" class="text-signalBlue font-extrabold hover:underline">
+          Verify Chain →
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: EXPLAINABLE DOSSIER (7 COLS) -->
+    <div class="lg:col-span-7 clay-card p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <div>
+            <span class="px-3 py-1 text-[10px] font-black bg-emerald-100 text-emerald-800 rounded-[10px] mono">RDSO FORM 14B</span>
+            <h2 class="text-base font-black text-inkSlate mt-1.5">Explainable AI Decision Dossier</h2>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-mutedSlate font-semibold">Sanctioning Officer</div>
+            <div class="text-xs font-black text-inkSlate mono">CTRL-MUM-402 (Sr. DOM)</div>
+          </div>
+        </div>
+
+        <!-- Cryptographic Seal -->
+        <div class="p-4 bg-slate-950 text-slate-100 rounded-[18px] mb-4 border border-slate-800 shadow-2xl">
+          <div class="text-[10px] text-sky-400 font-mono font-black uppercase tracking-wider">SHA-256 Cryptographic Audit Seal</div>
+          <div id="active-hash" class="text-xs font-mono font-black text-emerald-400 break-all mt-1">
+            e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+          </div>
+          <div class="text-[10px] text-slate-400 font-semibold mt-1 flex justify-between">
+            <span>Canonical Block ID: <strong class="text-white mono">BLK-JOINT-0906-01</strong></span>
+            <span>Timestamp: <strong class="text-white mono">2026-09-06 01:28:14 IST</strong></span>
+          </div>
+        </div>
+
+        <!-- 4-STEP REASONING PIPELINE -->
+        <h3 class="text-xs font-extrabold text-mutedSlate uppercase tracking-wider mb-2.5">4-Step Explainable Reasoning Pipeline</h3>
+        <div class="space-y-3">
+          
+          <div class="flex gap-3.5 p-3 clay-card-elevated">
+            <div class="w-7 h-7 rounded-[10px] bg-signalBlue text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-md">1</div>
+            <div class="text-xs">
+              <strong class="text-inkSlate">Multi-Source Ingestion & Co-Location:</strong>
+              <p class="text-mutedSlate mt-0.5">Aggregated TMS flaw (IMR #804) on TC-03 Dadar with TDMS 25kV catenary maintenance demand.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3.5 p-3 clay-card-elevated">
+            <div class="w-7 h-7 rounded-[10px] bg-signalBlue text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-md">2</div>
+            <div class="text-xs">
+              <strong class="text-inkSlate">Corridor Headway & Conflict Check:</strong>
+              <p class="text-mutedSlate mt-0.5">Scanned COA timetable. Identified zero-conflict nocturnal lull between Rajdhani #22221 and Konark Exp #11020.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3.5 p-3 clay-card-elevated">
+            <div class="w-7 h-7 rounded-[10px] bg-signalBlue text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-md">3</div>
+            <div class="text-xs">
+              <strong class="text-inkSlate">Joint Shadow-Block Bundling:</strong>
+              <p class="text-mutedSlate mt-0.5">Bundled TMS (180m) & TDMS (150m) into single window with 10m earthing buffer; saved 85 mins downtime (38.4%).</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3.5 p-3 clay-card-elevated">
+            <div class="w-7 h-7 rounded-[10px] bg-signalBlue text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-md">4</div>
+            <div class="text-xs">
+              <strong class="text-inkSlate">Safety Dissemination & Sanction:</strong>
+              <p class="text-mutedSlate mt-0.5">Injected Kavach TSR 30 km/h packet, clamped Signal S-12 at RED, and issued Form S&T/T-351.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AUDITOR ACTION BUTTONS -->
+      <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 mt-4">
+        <button onclick="alert('Digital Cryptographic Seal Validated with 100% Integrity ✅')" class="px-4 py-2 clay-btn-surface text-inkSlate text-xs font-bold">
+          🔒 Verify SHA-256 Hash
+        </button>
+        <div class="flex gap-2">
+          <button onclick="navigator.clipboard.writeText('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'); alert('Audit Token Copied to Clipboard!');" class="px-4 py-2 clay-btn-surface text-signalBlue text-xs font-bold">
+            📋 Copy Token
+          </button>
+          <button onclick="alert('Exporting Official RDSO Form 14B Certificate (PDF)...')" class="px-4 py-2 clay-btn-primary text-white text-xs font-extrabold">
+            📄 Export Form 14B (PDF)
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    function selectLog(id) {
+      alert(`Loaded Decision Log #${id} for detailed statutory audit inspection.`);
+    }
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
-# RailSuraksha AI — Design System & Visual Style Guide (DESIGN.md)
+# IRIS AI — Design System & Visual Style Guide (DESIGN.md)
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Design Theme:** Light-Blue Mintlify Discipline  
 **Document Version:** 3.0.0 (Unified Grounded Specification)  
 **Governing Aesthetics:** Clean, authoritative, atmospheric light-blue canvas, crisp borders, precision data typography, zero AI-slop, strictly 4px button/input radius, strictly zero pill buttons.

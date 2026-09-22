@@ -47,3 +47,8 @@ docs/tracker/
 .system_generated/
 *.log
 
+# Agent Customizations, Rules & Skills
+.agents/
+.gemini/
+
+

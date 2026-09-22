@@ -1,4 +1,4 @@
-# RailSuraksha AI — Mock Data & Corridor Simulation Resources (SIH 26027)
+# IRIS AI — Mock Data & Corridor Simulation Resources (SIH 26027)
 
 > **Location:** `docs/mock_data_resources.md`  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  

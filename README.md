@@ -1,4 +1,4 @@
-# RailSuraksha AI (रेल-सुरक्षा)
+# IRIS AI (Intelligent Railway Inspection and Restoration AI)
 ### National-Grade Railway Safety, Interlocking Monitoring & Incident Intelligence Platform
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16%20(App%20Router)-black?style=flat&logo=next.js)](https://nextjs.org/)
@@ -14,7 +14,7 @@
 
 Indian Railways operates one of the world's most dense rail networks. Critical safety vulnerabilities such as **track obstruction (boulders, stray cattle, rail fractures)** and **platform foot-over-bridge (FOB) crowd surges** require sub-second detection and fail-safe deterministic intervention.
 
-**RailSuraksha AI (रेल-सुरक्षा)** bridges:
+**IRIS AI (Intelligent Railway Inspection and Restoration AI)** bridges:
 1. **Edge Computer Vision (YOLOv11 & Optical Flow)** for low-latency obstacle and crowd hazard detection.
 2. **Deterministic RDSO-Standard Physics Engine (Kavach EBD)** calculating Emergency Braking Distances based on kinematic train dynamics.
 3. **Station Section Dispatch & Platform Hold Engine** preventing stampedes and platform crowd surges.
@@ -96,7 +96,7 @@ flowchart TB
 
 ## 📹 How the Cameras Work (Vision Pipeline Architecture)
 
-RailSuraksha AI ingests two synchronized optical edge streams:
+IRIS AI ingests two synchronized optical edge streams:
 
 ### A. Loco-Cab Forward Vision Camera (`LocoCameraFeed.tsx`)
 - **Mount & Capture:** Windshield-mounted camera in locomotive cab #204 streaming 1080p @ 60fps covering up to $1,000\text{m}$ forward track section.
@@ -160,7 +160,7 @@ Where:
 
 ```mermaid
 graph TD
-    A[Launch RailSuraksha AI Command Center] --> B{Choose Global Mode}
+    A[Launch IRIS AI Command Center] --> B{Choose Global Mode}
     B -->|Phase 1 Trial| C[ADVISORY MODE: Controller Gate Required]
     B -->|Full Failsafe| D[AUTONOMOUS MODE: Instant Solenoid Trigger]
 
@@ -270,7 +270,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 📁 Repository Structure
 
 ```
-RailSuraksha-AI-/
+IRIS AI-AI-/
 ├── docs/
 │   ├── system_architecture_and_user_guide.md    # Master architecture & user guide
 │   ├── three_developer_execution_plan.md        # 3-developer team execution plan
@@ -303,7 +303,7 @@ RailSuraksha-AI-/
 │   └── types/
 │       └── apiContracts.ts                      # Shared TypeScript interfaces & types
 ├── tests/
-│   ├── railsuraksha.test.ts                     # Kavach physics & triage agent test suite
+│   ├── IRIS AI.test.ts                     # Kavach physics & triage agent test suite
 │   └── feature3_interlocking_compliance.test.ts # Interlocking & compliance audit test suite
 ├── context.md                                   # Persistent project context
 ├── features_implemented.md                      # Implemented features tracking

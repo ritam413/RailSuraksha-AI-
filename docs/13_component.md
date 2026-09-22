@@ -1,6 +1,6 @@
-# RailSuraksha AI — Component Library & UI Architecture
+# IRIS AI — Component Library & UI Architecture
 
-**System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+**System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 **Document Version:** 3.0.0 (Unified Grounded Specification)  
 **Design System:** Light-Blue Mintlify Discipline (`#F0F6FC` Base, `#FFFFFF` Cards, `#D0DFEE` Border, `#2B7FFF` Accent, 4px button/input radius, 16px card radius, strictly zero pill buttons)  

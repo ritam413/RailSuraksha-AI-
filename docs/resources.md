@@ -1,7 +1,7 @@
-# RailSuraksha AI — Central Resource Directory (SIH 26027)
+# IRIS AI — Central Resource Directory (SIH 26027)
 
 > **Location:** `docs/resources.md`  
-> **System:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+> **System:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 > **Document Version:** 2.0.0 (SIH 26027 Refactored Architecture)
 
@@ -9,7 +9,7 @@
 
 ## 🏛️ 1. Official Indian Railways & CRIS Primary Sources
 
-| System / Manual | Directorate / Organization | Role in RailSuraksha AI Architecture | Reference Link |
+| System / Manual | Directorate / Organization | Role in IRIS AI Architecture | Reference Link |
 | :--- | :--- | :--- | :--- |
 | **COA** (Control Office Application) | Operations Information Systems (CRIS) | Real-time train movement tracking, electronic charting, passenger timetables & freight forecasts. | [cris.org.in/COA](https://cris.org.in) |
 | **TMS** (Track Management System) | Civil Engineering Directorate | Ultrasonic flaw detection (USFD) logs, rail fracture alerts, Track Geometry Index (TGI), track tamping. | [cris.org.in/TMS](https://cris.org.in) |

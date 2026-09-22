@@ -1,6 +1,6 @@
-# RailSuraksha AI — Architecture & Technical Walkthrough
+# IRIS AI — Architecture & Technical Walkthrough
 
-> **System Name:** RailSuraksha AI (Auto-BDMS): Automatic Block Planning & Corridor Optimization  
+> **System Name:** IRIS AI (Intelligent Railway Inspection and Restoration AI): Automatic Block Planning & Corridor Optimization  
 > **Problem Statement:** SIH 26027 — *"AI-Powered Automatic Block Planning to Maximize Asset Availability for Train Operations on Indian Railways"*  
 > **Document Version:** 2.0.0 (SIH 26027 Refactored Architecture)  
 > **Target Framework:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, FastAPI / Python MILP (OR-Tools)
@@ -9,7 +9,7 @@
 
 ## 🏗️ 1. High-Level System Architecture
 
-RailSuraksha AI utilizes an **Event-Driven Service-Oriented Architecture** connected to an **Optimization Core** and **Real-Time Controller Cockpit**:
+IRIS AI utilizes an **Event-Driven Service-Oriented Architecture** connected to an **Optimization Core** and **Real-Time Controller Cockpit**:
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
