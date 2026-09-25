@@ -7,7 +7,59 @@
 
 ---
 
-## 🗺️ 1. Master Operational Journey Map
+## 📐 1. Persona-Driven UML Use Case Diagram
+
+```mermaid
+flowchart LR
+    %% 4 Input Personas
+    subgraph Personas ["👥 4 Core Stakeholder Personas (Inputs)"]
+        P1["👤 Persona 1: Section Controller<br/><b>(Sr. DOM / Section Dispatcher)</b><br/>• Traffic Precedence & Punctuality<br/>• Evaluates Corridor Capacity"]
+        P2["👷 Persona 2: Maintenance Planners<br/><b>(Civil P-Way, Electrical TRD, S&T SSEs)</b><br/>• Defect Logs & Power Blocks<br/>• Heavy Machine & Gang Rosters"]
+        P3["🚂 Persona 3: Field Operators & Loco Pilots<br/><b>(Loco Pilot Cab & Station Master)</b><br/>• Physical Possession & Track Clamping<br/>• Caution Orders & Speed Enforcements"]
+        P4["📋 Persona 4: Safety & RDSO Auditor<br/><b>(CRS & Regulatory Inspector)</b><br/>• Compliance Verification<br/>• Statutory Incident Post-Mortems"]
+    end
+
+    %% AI Optimization Platform Boundary
+    subgraph PlatformBoundary ["⚙️ TrackX / IRIS AI Optimization Platform (System Boundary)"]
+        UC1(["UC-1: Ingest & Triage Asset Demands<br/><i>(TMS Flaws, TDMS Wear, SMMS Strokes)</i>"])
+        UC2(["UC-2: Ingest Live COA Timetables & Delays<br/><i>(Freight Paths & Passenger Schedules)</i>"])
+        UC3(["UC-3: Run Shadow Block Clustering & CP-SAT Solver<br/><i>(Min Corridor Downtime, Joint Possessions)</i>"])
+        UC4(["UC-4: Review & Sanction Master Corridor Plan<br/><i>(Interactive String Chart & One-Click Sanction)</i>"])
+        UC5(["UC-5: Disseminate Fail-Safe Safety Protocols<br/><i>(Kavach Wireless TSR & Form S&T/T-351)</i>"])
+        UC6(["UC-6: Generate Cryptographic Audit Dossiers<br/><i>(SHA-256 Seal & RDSO Form 14B Certificate)</i>"])
+    end
+
+    %% Persona Interactions & Data Flow
+    P2 -->|1. Submits Work Demands & Rosters| UC1
+    P1 -->|2. Configures Corridor Constraints| UC2
+    UC1 -->|Demands| UC3
+    UC2 -->|Live Paths| UC3
+
+    UC3 -->|Bundled Schedules| UC4
+    P1 -->|3. Approves / Sanctions Block| UC4
+
+    UC4 -->|Triggers Actuation| UC5
+    UC5 -->|4. Receives Cab TSR & Clamps Signals| P3
+
+    UC4 -.->|Archives Decision Log| UC6
+    UC5 -.->|Telemetry Proof| UC6
+    P4 -->|5. Inspects Audit Trails & Exports Form 14B| UC6
+```
+
+---
+
+## 🎯 2. Pitch Matrix: "For Whom & How We Solve It" (Judge Reference)
+
+| Stakeholder Persona | Legacy Pain Point (The "Why") | How IRIS AI Solves It (The "How") | Concrete Outcome & Output |
+| :--- | :--- | :--- | :--- |
+| **1. Divisional Section Controller** *(Sr. DOM / Dispatcher)* | • Fear of punctuality loss causes frequent block cancellations.<br/>• Bombarded by manual, uncoordinated block memos from 3 departments. | • **Interactive String Chart:** Visualizes train trajectories against maintenance windows.<br/>• **One-Click Sanction:** Instant validation of 15m train clearance headways. | **Zero passenger train delays** & sub-second conflict-free block approval. |
+| **2. Departmental Maintenance Planners** *(Civil, Electrical, S&T SSEs)* | • Sits through contentious divisional daily block meetings.<br/>• Gangs and multi-crore machines (CSM, Tower Wagons) sit idle. | • **Shadow-Block Clustering:** Automatically merges Civil tamping and S&T overhauls inside Electrical OHE power cuts. | **35%–40% reduction in track downtime** & guaranteed maintenance slots. |
+| **3. Field Operators & Loco Pilots** *(Loco Cab & Station Master)* | • Reliance on physical paper Caution Orders (**Form T/409**).<br/>• Risk of sudden unexpected red signals causing false SPAD. | • **Kavach TCAS Wireless TSR Injection:** Sends 30 km/h speed restrictions straight to cab display.<br/>• **Station Interlocking:** Auto-locks signals to RED per **Form S&T/T-351**. | **Elimination of human handover errors** & automatic train speed governing. |
+| **4. Safety Compliance Auditor** *(RDSO & CRS Inspectors)* | • Fragmented paper registers make post-incident audit impossible.<br/>• Unverified driver compliance on speed restrictions. | • **Explainable AI Decision Dossier:** 4-step chronological audit trail.<br/>• **Cryptographic Sealing:** SHA-256 hash stamped with one-click **RDSO Form 14B** export. | **100% tamper-evident compliance** & instantaneous regulatory reporting. |
+
+---
+
+## 🗺️ 3. Master Operational Journey Map
 
 ```mermaid
 journey
@@ -32,7 +84,7 @@ journey
 
 ---
 
-## 🛤️ 2. Detailed End-to-End Operational Journeys
+## 🛤️ 4. Detailed End-to-End Operational Journeys
 
 ---
 

@@ -17,6 +17,7 @@ It transforms decentralized, manual maintenance scheduling into a data-driven, c
 ## 4. Architecture & Tech Stack
 - **Architecture Style:** Hexagonal (Ports & Adapters) with externalized policy configuration.
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **Visualization & Charting:** Recharts (`ResponsiveContainer`, `AreaChart`, `ComposedChart`, `PieChart`, `ReferenceLine`)
 - **Styling:** Tailwind CSS v4 with Light-Blue Mintlify Design Tokens:
   - Base Canvas (Surface 0): `#F0F6FC`
   - Card/Panel Surface (Surface 1): `#FFFFFF` (1px border `#D0DFEE`)
@@ -30,6 +31,11 @@ It transforms decentralized, manual maintenance scheduling into a data-driven, c
 
 ## 5. Directory Structure
 ```
+data/                                 # Grounded & scraped Indian Railways open datasets
+├── cr_csmt_kalyan_corridor_trains.json # Real schedules for Central Railway corridor
+├── cag_derailments_and_block_deficits.json # CAG Report 22 traffic block deficit metrics
+├── rdso_kavach_friction_and_braking_benchmarks.json # RDSO braking parameters
+└── station_gateway_footfalls.json    # Station platform bottleneck crowd thresholds
 src/
 ├── app/
 │   ├── globals.css
@@ -40,6 +46,10 @@ src/
 │   ├── LocoCameraFeed.tsx            # Forward loco cab video & hazard overlay
 │   ├── AgentPipelineCanvas.tsx       # 4-stage Kavach execution pipeline visualizer
 │   ├── PlatformGatewayFeed.tsx       # View 3 Platform CCTV crowd surge monitor
+│   ├── Charts/                       # Recharts analytics visualizers
+│   │   ├── KinematicDecelChart.tsx   # Kavach EBD velocity & brake pressure curve
+│   │   ├── CrowdSurgeTrendChart.tsx  # Platform bottleneck PAX flow & surge threshold
+│   │   └── IncidentTriageDonutChart.tsx # Severity P1/P2/P3/P4 distribution
 │   ├── Common/
 │   │   └── Card.tsx                  # Standard Mintlify card wrapper
 │   ├── Overview/

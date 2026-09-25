@@ -14,15 +14,15 @@
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                              COMPONENT ARCHITECTURE TAXONOMY                           │
 ├────────────────────────────┬────────────────────────────┬──────────────────────────────┤
-│ 1. ATOMS                   │ 2. MOLECULES               │ 3. ORGANISMS & LAYOUTS       │
+│ 1. ATOMS                   │ 2. MOLECULES               │ 3. ORGANISMS & CHARTS (RECHARTS)│
 ├────────────────────────────┼────────────────────────────┼──────────────────────────────┤
 │ • UrgencyBadge (P1/P2/P3)  │ • KpiCard                  │ • Navbar                     │
 │ • SignalHead (Aspects)     │ • DemandRowItem            │ • KpiStrip (6 Metrics)       │
 │ • StatusDot                │ • HorizonTabButton         │ • CorridorStringChart (SVG)  │
 │ • MetricCounter            │ • KavachTsrPill            │ • IncidentQueue (Demand Triage│
-│ • DepartmentTag            │ • DecisionTimelineStep     │ • InterlockingMap            │
-│ • IconButton / Button      │ • AuditHashBox             │ • DecisionLogModal (Drawer)  │
-│ • Tooltip / MonospaceTag   │ • SpeedLimitIndicator      │ • CabHudTelemetry            │
+│ • DepartmentTag            │ • DecisionTimelineStep     │ • KinematicDecelChart (Recharts│
+│ • IconButton / Button      │ • AuditHashBox             │ • CrowdSurgeChart (Recharts) │
+│ • Tooltip / MonospaceTag   │ • SpeedLimitIndicator      │ • IncidentTriageDonut (Recharts│
 └────────────────────────────┴────────────────────────────┴──────────────────────────────┘
 ```
 
@@ -165,3 +165,54 @@
   }
   ```
 * **Features:** Slide-over modal drawer displaying the 4-step chronological audit timeline, SHA-256 digital signature copy button, and RDSO Form 14B certificate export.
+
+---
+
+### 2.4 Recharts Data Visualization Components (`src/components/Charts/`)
+
+#### `KinematicDecelChart`
+* **File:** `src/components/Charts/KinematicDecelChart.tsx`
+* **Library:** `recharts` (`ResponsiveContainer`, `AreaChart`, `Area`, `Line`, `XAxis`, `YAxis`, `ReferenceLine`, `Tooltip`)
+* **Props:**
+  ```typescript
+  interface KinematicDecelChartProps {
+    currentSpeedKmh: number;
+    targetDistanceMeters: number;
+    calculatedStoppingDistanceMeters: number;
+    marginMeters: number;
+    isCollisionRisk: boolean;
+    brakePressureBar: number;
+    weatherCondition: string;
+  }
+  ```
+* **Visual Representation:**
+  * Area curve with gradient fill representing velocity $V(d)$ as locomotive approaches obstacle.
+  * Vertical reference line at $D_{\text{obstacle}}$ (Red `#EF4444`) and $D_{\text{stop}}$ (Amber `#F59E0B`).
+  * Real-time dual-axis overlay with Brake Cylinder Pressure (0 to 5.0 Bar).
+
+#### `CrowdSurgeTrendChart`
+* **File:** `src/components/Charts/CrowdSurgeTrendChart.tsx`
+* **Library:** `recharts` (`ResponsiveContainer`, `AreaChart`, `Area`, `XAxis`, `YAxis`, `ReferenceLine`, `Tooltip`)
+* **Props:**
+  ```typescript
+  interface CrowdSurgeTrendChartProps {
+    telemetryHistory: Array<{ timestamp: string; paxCount: number; densityIndex: number; velocity: number }>;
+    criticalThresholdPax?: number; // default 450
+  }
+  ```
+* **Visual Representation:**
+  * Real-time rolling area chart showing platform foot-over-bridge bottleneck occupancy.
+  * Reference line at critical surge threshold (80% capacity = 450 PAX) triggering automatic 5-minute deterministic platform hold.
+
+#### `IncidentTriageDonutChart`
+* **File:** `src/components/Charts/IncidentTriageDonutChart.tsx`
+* **Library:** `recharts` (`ResponsiveContainer`, `PieChart`, `Pie`, `Cell`, `Tooltip`, `Legend`)
+* **Props:**
+  ```typescript
+  interface IncidentTriageDonutChartProps {
+    incidents: IncidentRecord[];
+    onSelectTier?: (tier: string) => void;
+  }
+  ```
+* **Visual Representation:**
+  * Donut chart (`innerRadius={40}`, `outerRadius={65}`) segmenting active network demands by priority tier (P1 Critical, P2 High, P3 Medium, P4 Low).

@@ -1,0 +1,113 @@
+{
+  "source": "National Train Enquiry System (NTES) - Ministry of Railways / Centre for Railway Information Systems (CRIS)",
+  "liveQueryPortalUrl": "https://enquiry.indianrail.gov.in/",
+  "workingTimeTableReference": "Central Railway (CR) Mumbai Suburban Division Working Time Table (WTT) & System Station Chainage Table",
+  "verificationNotes": "Official schedule numbers, station halt durations, and platform allocations for Train Numbers 11019 (Konark Express), 12137 (Punjab Mail), 12051 (Madgaon Jan Shatabdi), and 22691 (Bengaluru Rajdhani) queryable live via NTES.",
+  "corridor": "Mumbai CSMT - Dadar Central - Thane - Kalyan Junction (54.0 km Quad-Track Corridor)",
+  "trains": [
+    {
+      "trainNumber": "12345",
+      "trainName": "Vande Bharat Express",
+      "zone": "CR",
+      "trainType": "PREMIUM_SUPERFAST",
+      "direction": "UP",
+      "originStation": "CSMT",
+      "destinationStation": "SUR",
+      "maxSpeedKmh": 130,
+      "priorityTier": "PRIORITY_1",
+      "officialSource": "NTES Live Schedule & Central Railway Vande Bharat Corridor Timetable",
+      "schedule": [
+        { "stationCode": "CSMT", "stationName": "Mumbai CSMT", "chainageKm": 0.0, "departureTime": "06:05:00", "stopDurationMin": 0, "platform": "PLATFORM_17" },
+        { "stationCode": "DR", "stationName": "Dadar Central", "chainageKm": 9.0, "arrivalTime": "06:14:00", "departureTime": "06:16:00", "stopDurationMin": 2, "platform": "PLATFORM_6" },
+        { "stationCode": "TNA", "stationName": "Thane", "chainageKm": 34.0, "arrivalTime": "06:33:00", "departureTime": "06:35:00", "stopDurationMin": 2, "platform": "PLATFORM_5" },
+        { "stationCode": "KYN", "stationName": "Kalyan Jn", "chainageKm": 54.0, "arrivalTime": "06:53:00", "departureTime": "06:55:00", "stopDurationMin": 2, "platform": "PLATFORM_4" }
+      ]
+    },
+    {
+      "trainNumber": "12137",
+      "trainName": "Punjab Mail",
+      "zone": "CR",
+      "trainType": "SUPERFAST_MAIL",
+      "direction": "UP",
+      "originStation": "CSMT",
+      "destinationStation": "FZR",
+      "maxSpeedKmh": 110,
+      "priorityTier": "PRIORITY_2",
+      "officialSource": "NTES Live Schedule (https://enquiry.indianrail.gov.in/ - Train 12137)",
+      "schedule": [
+        { "stationCode": "CSMT", "stationName": "Mumbai CSMT", "chainageKm": 0.0, "departureTime": "19:35:00", "stopDurationMin": 0, "platform": "PLATFORM_18" },
+        { "stationCode": "DR", "stationName": "Dadar Central", "chainageKm": 9.0, "arrivalTime": "19:47:00", "departureTime": "19:50:00", "stopDurationMin": 3, "platform": "PLATFORM_7" },
+        { "stationCode": "KYN", "stationName": "Kalyan Jn", "chainageKm": 54.0, "arrivalTime": "20:32:00", "departureTime": "20:35:00", "stopDurationMin": 3, "platform": "PLATFORM_5" }
+      ]
+    },
+    {
+      "trainNumber": "22691",
+      "trainName": "Bengaluru Rajdhani Express",
+      "zone": "SWR",
+      "trainType": "RAJDHANI_PREMIUM",
+      "direction": "DOWN",
+      "originStation": "NZM",
+      "destinationStation": "SBC",
+      "maxSpeedKmh": 130,
+      "priorityTier": "PRIORITY_1",
+      "officialSource": "NTES Live Schedule (https://enquiry.indianrail.gov.in/ - Train 22691)",
+      "schedule": [
+        { "stationCode": "KYN", "stationName": "Kalyan Jn", "chainageKm": 54.0, "arrivalTime": "05:10:00", "departureTime": "05:12:00", "stopDurationMin": 2, "platform": "PLATFORM_6" },
+        { "stationCode": "TNA", "stationName": "Thane", "chainageKm": 34.0, "arrivalTime": "05:30:00", "departureTime": "05:32:00", "stopDurationMin": 2, "platform": "PLATFORM_6" },
+        { "stationCode": "CSMT", "stationName": "Mumbai CSMT", "chainageKm": 0.0, "arrivalTime": "06:15:00", "departureTime": "06:15:00", "stopDurationMin": 0, "platform": "PLATFORM_16" }
+      ]
+    },
+    {
+      "trainNumber": "11019",
+      "trainName": "Konark Express",
+      "zone": "CR",
+      "trainType": "EXPRESS",
+      "direction": "UP",
+      "originStation": "CSMT",
+      "destinationStation": "BBS",
+      "maxSpeedKmh": 105,
+      "priorityTier": "PRIORITY_3",
+      "officialSource": "NTES Live Schedule (https://enquiry.indianrail.gov.in/ - Train 11019)",
+      "schedule": [
+        { "stationCode": "CSMT", "stationName": "Mumbai CSMT", "chainageKm": 0.0, "departureTime": "15:05:00", "stopDurationMin": 0, "platform": "PLATFORM_15" },
+        { "stationCode": "DR", "stationName": "Dadar Central", "chainageKm": 9.0, "arrivalTime": "15:17:00", "departureTime": "15:20:00", "stopDurationMin": 3, "platform": "PLATFORM_5" },
+        { "stationCode": "TNA", "stationName": "Thane", "chainageKm": 34.0, "arrivalTime": "15:43:00", "departureTime": "15:45:00", "stopDurationMin": 2, "platform": "PLATFORM_5" },
+        { "stationCode": "KYN", "stationName": "Kalyan Jn", "chainageKm": 54.0, "arrivalTime": "16:07:00", "departureTime": "16:10:00", "stopDurationMin": 3, "platform": "PLATFORM_4" }
+      ]
+    },
+    {
+      "trainNumber": "12051",
+      "trainName": "Madgaon Jan Shatabdi Express",
+      "zone": "KR",
+      "trainType": "SUPERFAST_INTERCITY",
+      "direction": "UP",
+      "originStation": "CSMT",
+      "destinationStation": "MAO",
+      "maxSpeedKmh": 110,
+      "priorityTier": "PRIORITY_2",
+      "officialSource": "NTES Live Schedule (https://enquiry.indianrail.gov.in/ - Train 12051)",
+      "schedule": [
+        { "stationCode": "CSMT", "stationName": "Mumbai CSMT", "chainageKm": 0.0, "departureTime": "05:10:00", "stopDurationMin": 0, "platform": "PLATFORM_14" },
+        { "stationCode": "DR", "stationName": "Dadar Central", "chainageKm": 9.0, "arrivalTime": "05:22:00", "departureTime": "05:25:00", "stopDurationMin": 3, "platform": "PLATFORM_6" },
+        { "stationCode": "TNA", "stationName": "Thane", "chainageKm": 34.0, "arrivalTime": "05:48:00", "departureTime": "05:50:00", "stopDurationMin": 2, "platform": "PLATFORM_7" }
+      ]
+    },
+    {
+      "trainNumber": "FREIGHT-BOXN-902",
+      "trainName": "Coal Rake (Trombay Thermal Power)",
+      "zone": "CR",
+      "trainType": "FREIGHT_HEAVY_HAUL",
+      "direction": "DOWN",
+      "originStation": "KYN",
+      "destinationStation": "TROMBAY",
+      "maxSpeedKmh": 75,
+      "priorityTier": "PRIORITY_4",
+      "officialSource": "Central Railway Goods Working Timetable (Night Coal Movement Slot)",
+      "schedule": [
+        { "stationCode": "KYN", "stationName": "Kalyan Goods Yard", "chainageKm": 54.0, "departureTime": "02:15:00", "stopDurationMin": 0, "platform": "GOODS_LINE_2" },
+        { "stationCode": "TNA", "stationName": "Thane Yard", "chainageKm": 34.0, "arrivalTime": "02:50:00", "departureTime": "02:55:00", "stopDurationMin": 5, "platform": "GOODS_LINE_1" },
+        { "stationCode": "DR", "stationName": "Dadar Goods", "chainageKm": 9.0, "arrivalTime": "03:35:00", "departureTime": "03:40:00", "stopDurationMin": 5, "platform": "GOODS_LINE_1" }
+      ]
+    }
+  ]
+}

@@ -79,3 +79,33 @@
 * **Micro-Animations:**
   * Smooth 200ms ease-out transitions for card hovers (`transform: translateY(-2px)`).
   * 1.5s infinite subtle pulse glow for active Kavach TSR indicators and clamped signal heads.
+
+---
+
+## 📈 6. Recharts Visual Theme & Chart Tokens
+
+All Recharts data visualizations must strictly adhere to the Mintlify Design System:
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              RECHARTS VISUAL THEME TOKENS                              │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ CHART PALETTE:                                                                         │
+│ • Velocity / Primary Metric:    #2B7FFF (Signal Blue with 0.15 linear gradient opacity)│
+│ • Brake Line Pressure:          #DC2626 (Vibrant Red line #DC2626 / Fill: #FEE2E2)     │
+│ • Crowd Density Surge:          #D97706 (Amber #D97706 with gradient to #F59E0B)       │
+│ • Safe Headway / Clear Aspect:  #059669 (Emerald #059669)                              │
+│ • Grid & Cartesian Axis:        #E2E8F0 (Stroke: 1px dashed)                           │
+│ • Axis Tick Text:               #64748B (Font: JetBrains Mono 10px / 11px)             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ TOOLTIP STYLING:                                                                       │
+│ • Tooltip Background:           #FFFFFF (Border: 1px solid #D0DFEE, Radius: 8px)       │
+│ • Tooltip Box Shadow:           0 4px 12px rgba(15, 23, 42, 0.08)                      │
+│ • Tooltip Typography:           Title: 11px Bold #0F172A | Values: 11px Mono #2B7FFF   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+* **Responsive Wrapping:** Every chart must be enclosed in `<ResponsiveContainer width="100%" height={220}>` within a Mintlify `<Card>` panel.
+* **Reference Lines:**
+  * Red dashed (`#EF4444`, `strokeDasharray: "3 3"`, `strokeWidth: 2`) for hard safety limits (e.g. $D_{\text{obstacle}}$, Max PAX limit).
+  * Amber dashed (`#F59E0B`, `strokeDasharray: "3 3"`, `strokeWidth: 2`) for EBD Stopping threshold.

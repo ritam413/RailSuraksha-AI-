@@ -1,0 +1,70 @@
+{
+  "source": "Ministry of Railways (MoR) / Mumbai Railway Vikas Corporation (MRVC - MUTP) & PIB Official Press Releases",
+  "governingEngineeringStandards": [
+    "RDSO Station Planning & Schedule of Dimensions (SOD) FOB Guidelines",
+    "Fruin's Level of Service (LOS E/F) Transit Pedestrian Flow Dynamics (1.25 m/s free flow -> 0.42 m/s crush flow at >2.5 pax/m^2)",
+    "Central Railway Mumbai Suburban Division Passenger Survey & Station Crowd Management Manual"
+  ],
+  "officialPortals": {
+    "pressInformationBureau": "https://pib.gov.in",
+    "mumbaiRailwayVikasCorp": "https://mrvc.indianrailways.gov.in",
+    "rdsoCivilPortal": "https://rdso.indianrailways.gov.in"
+  },
+  "corridor": "Mumbai Suburban Central Railway Main Line",
+  "dataSamplingInterval": "Peak Hour 08:00 - 10:30 IST & 17:30 - 20:30 IST",
+  "stations": [
+    {
+      "stationCode": "CSMT",
+      "stationName": "Chhatrapati Shivaji Maharaj Terminus",
+      "dailyFootfallPax": 850000,
+      "officialSource": "Central Railway Suburban Traffic Census & MRVC MUTP Passenger Volume Surveys",
+      "bottleneckLocations": [
+        {
+          "locationId": "FOB_P17_P18_STAIR_3A",
+          "name": "Foot Over Bridge Staircase 3A (Platform 17/18 Junction)",
+          "criticalCapacityPaxPerMin": 450,
+          "criticalDensityIndex": 0.80,
+          "normalOpticalFlowVelocityMs": 1.25,
+          "congestedOpticalFlowVelocityMs": 0.42,
+          "deterministicHoldRequiredSeconds": 300,
+          "holdingSignals": ["S-16 (Platform 18 Outer Advance)"],
+          "pedestrianStandard": "Fruin LOS F Stairway Saturation (>45 pax/min/meter effective stair width)"
+        }
+      ]
+    },
+    {
+      "stationCode": "DR",
+      "stationName": "Dadar Central",
+      "dailyFootfallPax": 580000,
+      "officialSource": "Central Railway / Western Railway Dadar Interchange Traffic Census",
+      "bottleneckLocations": [
+        {
+          "locationId": "FOB_NORTH_P5_P6",
+          "name": "North Foot Over Bridge Platform 5/6",
+          "criticalCapacityPaxPerMin": 520,
+          "criticalDensityIndex": 0.85,
+          "deterministicHoldRequiredSeconds": 240,
+          "holdingSignals": ["S-22 (Platform 6 Starter)"],
+          "pedestrianStandard": "RDSO 6-meter Suburban FOB Deck Stairway Capacity Benchmark"
+        }
+      ]
+    },
+    {
+      "stationCode": "TNA",
+      "stationName": "Thane",
+      "dailyFootfallPax": 620000,
+      "officialSource": "Central Railway Mumbai Division Thane Junction Commuter Census",
+      "bottleneckLocations": [
+        {
+          "locationId": "FOB_SOUTH_P3_P4",
+          "name": "South Elevated Deck Platform 3/4",
+          "criticalCapacityPaxPerMin": 480,
+          "criticalDensityIndex": 0.80,
+          "deterministicHoldRequiredSeconds": 300,
+          "holdingSignals": ["S-30 (Down Slow Main)"],
+          "pedestrianStandard": "MUTP Elevated Deck Evacuation Rate Benchmark"
+        }
+      ]
+    }
+  ]
+}

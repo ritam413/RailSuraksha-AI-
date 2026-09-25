@@ -18,7 +18,7 @@
 │ Architecture Style         │ Hexagonal Ports & Adapters │ Pluggable Ingestion/Actuation│
 │ Frontend Web App           │ Next.js 16 (App Router)    │ React 19, TypeScript 5+      │
 │ Styling & Tokens           │ Tailwind CSS v4            │ Vanilla CSS, Mintlify Theme  │
-│ Charts & Graph Visualizer  │ High-Performance SVG / D3  │ Lucide React, Framer Motion  │
+│ Charting & Data Visualizer │ Recharts + High-Perf SVG   │ recharts, Lucide, Framer Mot.│
 │ Backend API Services       │ FastAPI (Python 3.12) / TS │ Pydantic v2, Uvicorn, SSE    │
 │ Mathematical Solver        │ Google OR-Tools CP-SAT     │ ortools.sat.python.cp_model  │
 │ Policy & Config Engine     │ Externalized Config/JSONB  │ Pydantic Settings, Redis 7   │
@@ -63,8 +63,9 @@ export interface IIngestionAdapter<TRawPayload, TNormalizedEntity> {
 * **Solver Determinism & Feasibility:** Incorporates continuous soft slack penalties ($q_i = \max(0, c_i - \tau_i^S)$) ensuring it never crashes or returns an empty/infeasible result under extreme network degradation.
 
 ### 3.2 Frontend Responsiveness & Rendering Performance
+* **Recharts Client Rendering & SSR Isolation:** All charting components utilize `'use client'` boundaries and client-only dynamic loading (`next/dynamic` with `ssr: false`) to avoid SVG hydration mismatch between server and client.
 * **SVG String Chart Smoothness:** Must maintain **60 fps** hardware-accelerated rendering during time-scrubbing, zooming, and panning.
-* **Zero Cumulative Layout Shift (CLS):** Dynamic train path line rendering must not cause layout jumping ($\text{CLS} < 0.05$).
+* **Zero Cumulative Layout Shift (CLS):** Dynamic train path line rendering and Recharts `ResponsiveContainer` wrapping must not cause layout jumping ($\text{CLS} < 0.05$).
 * **First Contentful Paint (FCP):** $\text{FCP} < 1.2\text{ seconds}$ on standard railway division broadband networks.
 
 ### 3.3 Real-Time Safety & Actuation Latencies

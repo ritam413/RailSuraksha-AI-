@@ -1,0 +1,53 @@
+{
+  "source": "Comptroller and Auditor General of India (CAG Report No. 22 of 2022 on Derailment in Indian Railways)",
+  "officialPortalUrl": "https://cag.gov.in",
+  "auditReportRetrievalInstructions": "Direct Search on CAG Portal (https://cag.gov.in) -> Go to Audit Reports -> Search for keyword: 'Report No. 22 of 2022 Derailment'",
+  "cagAuditReportsDirectoryUrl": "https://cag.gov.in/en/audit-reports?type=1&union_state=1&department=18",
+  "periodCovered": "April 2017 to March 2021 (with 2022-2024 extensions)",
+  "nationalSummary": {
+    "totalDerailmentInquiryReportsAnalyzed": 1129,
+    "zonalRailwaysCovered": 16,
+    "rootCauses": {
+      "trackMaintenanceAndDefectsPercent": 54.8,
+      "locomotiveAndRollingStockDefectsPercent": 18.2,
+      "signallingAndInterlockingFailuresPercent": 14.6,
+      "humanErrorAndOperationalOversightPercent": 12.4
+    },
+    "trafficBlockDeficitMetrics": {
+      "hoursRequestedByEngineeringDirectorates": 124190,
+      "hoursSanctionedByOperatingDirectorate": 76115,
+      "blockDeficitPercent": 38.7,
+      "onTrackTampingMachineIdlingPercent": 42.1
+    },
+    "usfdFlawPendency": {
+      "imrDefectsOverdueRemediationDays": 14.2,
+      "trackGeometryRecordingCarShortfallPercent": 32.5
+    }
+  },
+  "sampleDerailmentIncidents": [
+    {
+      "incidentId": "CAG-DER-2021-084",
+      "zone": "CR",
+      "division": "Mumbai",
+      "section": "Kalyan-Kasara Ghat Section (KM 118/4)",
+      "causeCategory": "TRACK_DEFECT",
+      "detailedCause": "Undetected transverse fatigue crack at thermit weld joint under continuous heavy axle load",
+      "speedRestrictionPrior": "None (Line Clear 105 km/h)",
+      "consequence": "4 coaches derailed, 18h line blockage, 42 trains delayed",
+      "preventableBy": "Kavach TSRMS 30 km/h clamp + Automated USFD Triage Slotted Block",
+      "sourceReport": "CAG Report No. 22 of 2022 (Chapter 2 & 3 Accident Inquiry Cases)"
+    },
+    {
+      "incidentId": "CAG-DER-2022-119",
+      "zone": "WR",
+      "division": "Vadodara",
+      "section": "Surat-Vadodara Section (KM 264/2)",
+      "causeCategory": "S&T_FAILURE",
+      "detailedCause": "Point machine stroke obstruction due to mechanical linkage misalignment (SW-12)",
+      "speedRestrictionPrior": "Caution Order 50 km/h",
+      "consequence": "Leading bogie derailment during turnout traversal",
+      "preventableBy": "SMMS Form S&T/T-351 Disconnection Block Coordination",
+      "sourceReport": "CAG Report No. 22 of 2022 (Chapter 2 & 3 Accident Inquiry Cases)"
+    }
+  ]
+}

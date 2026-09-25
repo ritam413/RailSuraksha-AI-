@@ -1,0 +1,54 @@
+{
+  "governingStandard": "RDSO/SPN/196/2020 Ver 4.0 (Functional Requirements Specification of KAVACH - The Indian Railway Automatic Train Protection System)",
+  "officialPortals": {
+    "rdsoSignalDirectorate": "https://rdso.indianrailways.gov.in",
+    "irisetTrainingManuals": "https://iriset.indianrailways.gov.in",
+    "pibKavachApprovalRelease": "https://pib.gov.in/PressReleasePage.aspx?PRID=2033878"
+  },
+  "retrievalInstructions": "Search 'RDSO/SPN/196/2020' on rdso.indianrailways.gov.in under Signal Directorate Specifications or IRISET Kavach Technical Handbook",
+  "formula": "D_stop = (V^2 / (2 * g * (mu + G))) + (V * t_reaction)",
+  "gravityConstantG": 9.81,
+  "trainMassTonnes": 1400,
+  "weatherFrictionBenchmarks": [
+    {
+      "weatherCondition": "DRY",
+      "frictionCoefficientMu": 0.134,
+      "reactionTimeSeconds": 1.20,
+      "typicalBrakingDistance110KmhMeters": 382.4,
+      "description": "Standard dry rail head condition with nominal adhesion",
+      "source": "RDSO Braking Distance Curves for Air-Braked ICF/LHB Rakes (RDSO/SPN/196)"
+    },
+    {
+      "weatherCondition": "WET_MONSOON",
+      "frictionCoefficientMu": 0.095,
+      "reactionTimeSeconds": 1.56,
+      "typicalBrakingDistance110KmhMeters": 548.6,
+      "description": "Heavy water lubrication and slurry on rail head reducing adhesion by 29%",
+      "source": "RDSO TCAS Wet Rail Adhesion Derating Factor"
+    },
+    {
+      "weatherCondition": "DENSE_FOG",
+      "frictionCoefficientMu": 0.115,
+      "reactionTimeSeconds": 1.80,
+      "typicalBrakingDistance110KmhMeters": 465.2,
+      "description": "Sub-zero / winter morning moisture condensation and reduced optical sighting",
+      "source": "RDSO Winter Safety & Fog Braking Margins"
+    },
+    {
+      "weatherCondition": "NIGHT_IR",
+      "frictionCoefficientMu": 0.125,
+      "reactionTimeSeconds": 1.30,
+      "typicalBrakingDistance110KmhMeters": 415.8,
+      "description": "Night thermal contraction with dew deposition on head",
+      "source": "RDSO Night Running Friction Baseline"
+    }
+  ],
+  "tsrSpeedCapsKmh": {
+    "P1_CRITICAL_RAIL_FRACTURE": 0,
+    "P1_USFD_IMR_FLAW": 30,
+    "P2_DEEP_SCREENING_TAMPER": 20,
+    "P2_OHE_WIRE_REPLACEMENT": 45,
+    "P3_ROUTINE_BALLAST_CLEANING": 50
+  },
+  "tsrStandardReference": "Indian Railways Permanent Way Manual (IRPWM 2020 Chapter 15) & G&SR Form T/409 Caution Order Broadcasts"
+}
