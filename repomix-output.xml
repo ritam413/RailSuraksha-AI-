@@ -6889,7 +6889,7 @@ repository: "https://github.com/agentops-ai/agentmemory"
 
 ## Official Ecosystem References
 - **Official Repository:** [`agentops-ai/agentmemory`](https://github.com/agentops-ai/agentmemory) (Python Package: `pip install agentmemory`)
-- **Memory Invariant Companion:** [`claude-mem`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/claude-mem/SKILL.md) & [`context.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/context.md)
+- **Memory Invariant Companion:** [`claude-mem`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/claude-mem/SKILL.md) & [`context.md`](file:///d:/Games/Hckthons/IRIS_ai/context.md)
 
 ## Mental Model
 `agentmemory` provides persistent vector and key-value memory across agent executions. It enables agents to remember past debugging breakthroughs, recurring anti-patterns, and domain invariants across independent subagent instances.
@@ -9513,7 +9513,7 @@ repository: "https://github.com/chroma-core/chroma"
 
 ## Official Ecosystem References
 - **Vector & Chunking Foundation:** [`chroma-core/chroma`](https://github.com/chroma-core/chroma) & [`langchain-ai/langchain`](https://github.com/langchain-ai/langchain)
-- **Token Budget Companion:** [`headroom`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/headroom/SKILL.md)
+- **Token Budget Companion:** [`headroom`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/headroom/SKILL.md)
 
 ## Mental Model
 Dumping full 1,000-line source files into working memory dilutes attention and burns token budgets rapidly. `context7` extracts only the relevant function definitions, interface boundaries, and symbol signatures required for the immediate task.
@@ -11558,7 +11558,7 @@ repository: "https://github.com/mermaid-js/mermaid"
 
 ## Official Ecosystem References
 - **Diagram Engines:** [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) & [`d3/d3`](https://github.com/d3/d3)
-- **Codebase Mapping:** [`codegraph`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/codegraph/SKILL.md)
+- **Codebase Mapping:** [`codegraph`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/codegraph/SKILL.md)
 
 ## Mental Model
 Complex software systems and multi-agent loops are difficult to comprehend in pure text. `graphify` transforms file dependencies, API contract flows, and multi-agent interaction pipelines into clear, structured Mermaid and ASCII node graphs.
@@ -94166,7 +94166,7 @@ repository: "https://github.com/sourcegraph/cody"
 
 ## Official Ecosystem References
 - **Repository Architecture:** [`sourcegraph/cody`](https://github.com/sourcegraph/cody) & [`tree-sitter/tree-sitter`](https://github.com/tree-sitter/tree-sitter)
-- **AST Static Companion:** [`codegraph`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/codegraph/SKILL.md)
+- **AST Static Companion:** [`codegraph`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/codegraph/SKILL.md)
 
 ## Mental Model
 Where exact grep searches fail on synonyms, refactored variables, or conceptual logic (e.g. *"where do we calculate the stopping distance?"* vs `calculateEmergencyBrakingDistance`), `serena` indexes semantic meaning across functions and comments.
@@ -96150,7 +96150,7 @@ repository: "https://github.com/shadcn/ui"
 
 ## Official Ecosystem References
 - **Repository:** [`shadcn/ui`](https://github.com/shadcn/ui) & [`radix-ui/primitives`](https://github.com/radix-ui/primitives)
-- **Design Tokens:** [Light-Blue Mintlify Design System](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/DESIGN.md)
+- **Design Tokens:** [Light-Blue Mintlify Design System](file:///d:/Games/Hckthons/IRIS_ai/DESIGN.md)
 
 ## Mental Model
 `ui-ux-pro-max` elevates standard web UI beyond template-grade minimum viable products into enterprise-grade, visually stunning software interfaces. It enforces strict typography hierarchy, intentional spacing tokens, semantic color palettes, and accessible component architectures.
@@ -97815,7 +97815,7 @@ repository: "https://github.com/agentops-ai/agentmemory"
 
 ## Official Ecosystem References
 - **Official Repository:** [`agentops-ai/agentmemory`](https://github.com/agentops-ai/agentmemory) (Python Package: `pip install agentmemory`)
-- **Memory Invariant Companion:** [`claude-mem`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/claude-mem/SKILL.md) & [`context.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/context.md)
+- **Memory Invariant Companion:** [`claude-mem`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/claude-mem/SKILL.md) & [`context.md`](file:///d:/Games/Hckthons/IRIS_ai/context.md)
 
 ## Mental Model
 `agentmemory` provides persistent vector and key-value memory across agent executions. It enables agents to remember past debugging breakthroughs, recurring anti-patterns, and domain invariants across independent subagent instances.
@@ -100439,7 +100439,7 @@ repository: "https://github.com/chroma-core/chroma"
 
 ## Official Ecosystem References
 - **Vector & Chunking Foundation:** [`chroma-core/chroma`](https://github.com/chroma-core/chroma) & [`langchain-ai/langchain`](https://github.com/langchain-ai/langchain)
-- **Token Budget Companion:** [`headroom`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/headroom/SKILL.md)
+- **Token Budget Companion:** [`headroom`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/headroom/SKILL.md)
 
 ## Mental Model
 Dumping full 1,000-line source files into working memory dilutes attention and burns token budgets rapidly. `context7` extracts only the relevant function definitions, interface boundaries, and symbol signatures required for the immediate task.
@@ -102484,7 +102484,7 @@ repository: "https://github.com/mermaid-js/mermaid"
 
 ## Official Ecosystem References
 - **Diagram Engines:** [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) & [`d3/d3`](https://github.com/d3/d3)
-- **Codebase Mapping:** [`codegraph`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/codegraph/SKILL.md)
+- **Codebase Mapping:** [`codegraph`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/codegraph/SKILL.md)
 
 ## Mental Model
 Complex software systems and multi-agent loops are difficult to comprehend in pure text. `graphify` transforms file dependencies, API contract flows, and multi-agent interaction pipelines into clear, structured Mermaid and ASCII node graphs.
@@ -185092,7 +185092,7 @@ repository: "https://github.com/sourcegraph/cody"
 
 ## Official Ecosystem References
 - **Repository Architecture:** [`sourcegraph/cody`](https://github.com/sourcegraph/cody) & [`tree-sitter/tree-sitter`](https://github.com/tree-sitter/tree-sitter)
-- **AST Static Companion:** [`codegraph`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/codegraph/SKILL.md)
+- **AST Static Companion:** [`codegraph`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/codegraph/SKILL.md)
 
 ## Mental Model
 Where exact grep searches fail on synonyms, refactored variables, or conceptual logic (e.g. *"where do we calculate the stopping distance?"* vs `calculateEmergencyBrakingDistance`), `serena` indexes semantic meaning across functions and comments.
@@ -187076,7 +187076,7 @@ repository: "https://github.com/shadcn/ui"
 
 ## Official Ecosystem References
 - **Repository:** [`shadcn/ui`](https://github.com/shadcn/ui) & [`radix-ui/primitives`](https://github.com/radix-ui/primitives)
-- **Design Tokens:** [Light-Blue Mintlify Design System](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/DESIGN.md)
+- **Design Tokens:** [Light-Blue Mintlify Design System](file:///d:/Games/Hckthons/IRIS_ai/DESIGN.md)
 
 ## Mental Model
 `ui-ux-pro-max` elevates standard web UI beyond template-grade minimum viable products into enterprise-grade, visually stunning software interfaces. It enforces strict typography hierarchy, intentional spacing tokens, semantic color palettes, and accessible component architectures.
@@ -198944,18 +198944,18 @@ Ground the **Multi-Horizon Block Planning** architecture and **Rolling Horizon F
 
 ### Changes Made
 - Extracted and analyzed the full contents of both research papers into `docs/extracted_horizon_paper.md` and `docs/extracted_rolling_horizon_paper.md`.
-- Authored master research grounding document [`docs/research_rolling_horizon_papers.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_rolling_horizon_papers.md):
+- Authored master research grounding document [`docs/research_rolling_horizon_papers.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/research_rolling_horizon_papers.md):
   - Formulated the stochastic track degradation process $\delta_i(\tau) = \delta_i(\tau_k^i) \exp(\alpha_i \tau) + \epsilon$, where $\epsilon \sim \mathcal{N}(0, \sigma^2)$.
   - Modeled ISO 55000 failure risk thresholds, hard deadlines $\tau_i^H$, soft deadlines $\tau_i^S$, and release dates $\tau_i^R$.
   - Detailed the MILP / CP-SAT rolling horizon window dynamics (prediction horizon $H$, execution freeze $\Delta t$, and event-triggered feedback loops).
   - Linked Indian Railways structural freight constraints (axle load, double-stack stability, position arbitrage, rail haulage cost schedules) with multi-train simultaneous rolling optimization.
   - Mapped the 3 operational planning tiers (Horizon 1: 24h Tactical / Kavach; Horizon 2: 7-Day Operational / CRIS RBS; Horizon 3: 26-Week Strategic / GR 15.02 Rolling Block Programme).
 - Ran `/serena` semantic scan across `docs/` and updated all Multi-Horizon sections to explicitly specify the Rolling Horizon Framework:
-  - [`docs/ideasUnderstanding.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/ideasUnderstanding.md)
-  - [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md)
-  - [`docs/milp_solver_use_case_diagram.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/milp_solver_use_case_diagram.md)
-  - [`docs/notebooklm_master_guide.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/notebooklm_master_guide.md)
-- Updated [`context.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/context.md), [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md), and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+  - [`docs/ideasUnderstanding.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/ideasUnderstanding.md)
+  - [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md)
+  - [`docs/milp_solver_use_case_diagram.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/milp_solver_use_case_diagram.md)
+  - [`docs/notebooklm_master_guide.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/notebooklm_master_guide.md)
+- Updated [`context.md`](file:///d:/Games/Hckthons/IRIS_ai/context.md), [`features_implemented.md`](file:///d:/Games/Hckthons/IRIS_ai/features_implemented.md), and [`tracker.md`](file:///d:/Games/Hckthons/IRIS_ai/tracker.md).
 
 ### Files Changed
 - `docs/extracted_horizon_paper.md` (Created)
@@ -198981,7 +198981,7 @@ Ground the **Multi-Horizon Block Planning** architecture and **Rolling Horizon F
 ## 2026-09-19 — Comprehensive System Writeup & Codebase Guide PDF Generation (/pdf, /humanizer, /write-well, /serena)
 
 ### Objective
-Generate a complete, publication-grade, accessible PDF writeup (`RailSuraksha_AI_Comprehensive_System_Writeup.pdf` and `docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf`) compiled directly from [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md). The document explains the system and research clearly for non-coders and evaluators using `/humanizer` and `/write-well` principles, provides Mermaid diagram codes, and covers:
+Generate a complete, publication-grade, accessible PDF writeup (`RailSuraksha_AI_Comprehensive_System_Writeup.pdf` and `docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf`) compiled directly from [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md). The document explains the system and research clearly for non-coders and evaluators using `/humanizer` and `/write-well` principles, provides Mermaid diagram codes, and covers:
 1. Title & SIH 26027 Mandate
 2. Description & Operational Problem (3 siloed directorates vs train traffic)
 3. Major Components & 4-Step Architecture Loop (with Mermaid diagram code)
@@ -198990,12 +198990,12 @@ Generate a complete, publication-grade, accessible PDF writeup (`RailSuraksha_AI
 6. Conclusion, Impact & Primary References (35%-50% downtime reduction, +18% asset availability, RDSO/CRIS/IRPWM/ACTM/IRSEM/G&SR citations)
 
 ### Changes Made
-- Created master research markdown file [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md).
-- Enhanced [`generate_writeup_pdf.py`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/generate_writeup_pdf.py) to directly parse and compile markdown tables, Mermaid blocks, callouts, and mathematical formulas into ReportLab flowables.
+- Created master research markdown file [`docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/MASTER_RESEARCH_AND_SYSTEM_WRITEUP.md).
+- Enhanced [`generate_writeup_pdf.py`](file:///d:/Games/Hckthons/IRIS_ai/generate_writeup_pdf.py) to directly parse and compile markdown tables, Mermaid blocks, callouts, and mathematical formulas into ReportLab flowables.
 - Generated output PDF files:
-  - [`RailSuraksha_AI_Comprehensive_System_Writeup.pdf`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/RailSuraksha_AI_Comprehensive_System_Writeup.pdf) (Root)
-  - [`docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf) (Docs directory)
-- Updated [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md) and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+  - [`RailSuraksha_AI_Comprehensive_System_Writeup.pdf`](file:///d:/Games/Hckthons/IRIS_ai/RailSuraksha_AI_Comprehensive_System_Writeup.pdf) (Root)
+  - [`docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf`](file:///d:/Games/Hckthons/IRIS_ai/docs/RailSuraksha_AI_Comprehensive_System_Writeup.pdf) (Docs directory)
+- Updated [`features_implemented.md`](file:///d:/Games/Hckthons/IRIS_ai/features_implemented.md) and [`tracker.md`](file:///d:/Games/Hckthons/IRIS_ai/tracker.md).
 
 ### Files Changed
 - `generate_writeup_pdf.py` (Created)
@@ -199044,24 +199044,24 @@ Pack the entire repository into a single, structured XML context snapshot (`repo
 ## 2026-09-19 — Grounded Documentation Update across `docs/` (/context7 & /research)
 
 ### Objective
-Apply the verified primary research grounding (IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0, CRIS BDMS/COA/TMS/TDMS/SMMS, and Google OR-Tools CP-SAT) across [`docs/ideasUnderstanding.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/ideasUnderstanding.md), [`docs/prd.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/prd.md), [`docs/mock_data_resources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/mock_data_resources.md), and [`docs/milp_solver_use_case_diagram.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/milp_solver_use_case_diagram.md) using `/context7` precise slicing.
+Apply the verified primary research grounding (IRPWM 2020, ACTM Vol II, IRSEM 2021, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0, CRIS BDMS/COA/TMS/TDMS/SMMS, and Google OR-Tools CP-SAT) across [`docs/ideasUnderstanding.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/ideasUnderstanding.md), [`docs/prd.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/prd.md), [`docs/mock_data_resources.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/mock_data_resources.md), and [`docs/milp_solver_use_case_diagram.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/milp_solver_use_case_diagram.md) using `/context7` precise slicing.
 
 ### Changes Made
-- Updated [`docs/ideasUnderstanding.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/ideasUnderstanding.md):
+- Updated [`docs/ideasUnderstanding.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/ideasUnderstanding.md):
   - Formally integrated CRIS BDMS (*Block & Disconnection Management System*).
   - Grounded Civil P-Way with IRPWM 2020 Chapters 5 & 6, USFD IMR/OBS/REM defect tiers, and TGI composite formula ($\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$).
   - Grounded Electrical TRD with ACTM Vol II contact wire wear (< 74 mm²) and $\ge 10\text{ min}$ earthing buffers ($\Delta_{\text{earth}}$, $\Delta_{\text{restore}}$).
   - Grounded S&T with IRSEM 2021 Form S&T/T-351 Disconnection Notice and point machine stroke/current telemetry.
   - Grounded Section Controller sanction gate with Form T/409 Caution Order generation and RDSO Kavach `RDSO/SPN/196/2020` TSRMS wireless injection.
-- Updated [`docs/prd.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/prd.md):
+- Updated [`docs/prd.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/prd.md):
   - Aligned Product Requirements Document (v2.2.0) with Google OR-Tools CP-SAT disjunctive scheduling (`IntervalVar`, `AddNoOverlap`).
   - Added statutory safety form generation (Form S&T/T-351 electronic interlock lockout and Form T/409 Caution Order emission).
   - Updated MoSCoW matrix and performance impact metrics (35% to 50% corridor downtime reduction).
-- Updated [`docs/mock_data_resources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/mock_data_resources.md):
+- Updated [`docs/mock_data_resources.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/mock_data_resources.md):
   - Added grounded engineering fields: `usfdClassification` (IMR), `tgiScore` (32.4), `contactWireResidualAreaSqMm` (71.5), `powerBlockEarthingMinutes` (10), `formST351Required` (true), `cautionOrderForm` ("T/409"), and `sha256AuditSeal`.
-- Updated [`docs/milp_solver_use_case_diagram.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/milp_solver_use_case_diagram.md):
+- Updated [`docs/milp_solver_use_case_diagram.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/milp_solver_use_case_diagram.md):
   - Grounded UML use-case diagram and elaborations (UC-01 through UC-09) with Google OR-Tools CP-SAT, IRPWM 2020 TGI formulas, ACTM earthing rules, IRSEM Form S&T/T-351 lockouts, and RDSO Kavach TSRMS wireless broadcasts.
-- Updated [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md) and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+- Updated [`features_implemented.md`](file:///d:/Games/Hckthons/IRIS_ai/features_implemented.md) and [`tracker.md`](file:///d:/Games/Hckthons/IRIS_ai/tracker.md).
 
 ### Files Changed
 - `docs/ideasUnderstanding.md` (Modified)
@@ -199086,15 +199086,15 @@ Apply the verified primary research grounding (IRPWM 2020, ACTM Vol II, IRSEM 20
 Execute deep `/research` grounding of all concepts gathered via `/firecrawl` against authoritative primary sources (IRPWM 2020, IRSEM 2021, ACTM Vol II, G&SR Chapter 15, RDSO/SPN/196/2020 Kavach Ver 4.0, CRIS BDMS/COA/TMS/TDMS/SMMS architecture, and Google OR-Tools CP-SAT) and update the `docs/` folder.
 
 ### Changes Made
-- Grounded [`docs/research_concepts_master.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_concepts_master.md):
+- Grounded [`docs/research_concepts_master.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/research_concepts_master.md):
   - Added Primary Source Grounding Index mapping every formula, concept, and protocol to authoritative railway manuals.
   - Formally grounded CRIS BDMS (*Block & Disconnection Management System*) architecture, TMS USFD classifications (IMR/OBS/REM), TDMS contact wire wear limits (< 74 mm²), and SMMS motor stroke/current diagnostic parameters.
   - Grounded RDSO Kavach `RDSO/SPN/196/2020` TSRMS wireless injection, RFID balise positioning exclusions (turnout switches), and EBD physics formula with monsoon/dry friction coefficients.
   - Grounded statutory operating forms: Form S&T/T-351 (Disconnection/Reconnection Notice) and Form T/409 series (Caution Orders).
   - Grounded Google OR-Tools CP-SAT disjunctive interval scheduling (`NewIntervalVar`, `AddNoOverlap`) and multi-objective weights.
   - Grounded IRPWM 2020 Track Geometry Index (TGI) equation ($\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$) and condition classification thresholds.
-- Grounded [`docs/research_sources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_sources.md) with verified primary manual citations and official CRIS/RDSO portal references.
-- Updated [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md) and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+- Grounded [`docs/research_sources.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/research_sources.md) with verified primary manual citations and official CRIS/RDSO portal references.
+- Updated [`features_implemented.md`](file:///d:/Games/Hckthons/IRIS_ai/features_implemented.md) and [`tracker.md`](file:///d:/Games/Hckthons/IRIS_ai/tracker.md).
 
 ### Files Changed
 - `docs/research_concepts_master.md` (Modified)
@@ -199117,13 +199117,13 @@ Execute deep `/research` grounding of all concepts gathered via `/firecrawl` aga
 Extract, compile, and structure all official research concepts, mathematical formulas, Indian Railways engineering manuals (IRPWM, IRSEM, ACTM, G&SR Chapter 15), CRIS systems specifications (TMS, TDMS, SMMS, COA, BDMS), RDSO Kavach TCAS (`RDSO/SPN/196/2020`) specifications, and Google OR-Tools CP-SAT / MILP optimization models into a comprehensive master research dossier (`docs/research_concepts_master.md`).
 
 ### Changes Made
-- Created [`docs/research_concepts_master.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_concepts_master.md) covering:
+- Created [`docs/research_concepts_master.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/research_concepts_master.md) covering:
   1. **CRIS Operational Information Systems & Silos**: In-depth breakdowns of TMS (Civil P-Way), TDMS (Electrical TRD), SMMS (S&T), COA (Operations Train Charting), and BDMS/e-BDMS.
   2. **RDSO Regulatory & Safety Standards**: Kavach TCAS Specification `RDSO/SPN/196/2020`, Temporary Speed Restriction Management System (TSRMS), RFID balise positioning constraints, EBD dynamic braking curve formulas, and statutory operating forms (S&T/T-351 Disconnection Notice, T/409 Caution Order series).
   3. **Mathematical Optimization & MILP Formulations**: Multi-objective function $\min Z = \alpha \sum \text{Duration} + \beta \sum \text{Delay} + \gamma \sum \text{Risk} - \delta \sum \text{Synergy}$, disjunctive `NoOverlap` safety headways, power block coupling equations, and machine turnaround routing in Google OR-Tools CP-SAT.
   4. **Machine Learning & Track Health Triage**: RDSO standard Track Geometry Index (TGI) equation ($\text{TGI} = \frac{2U_I + T_I + 6A_I + G_I}{10}$), standard deviation baselines, and dynamic multi-factor urgency scoring for P1/P2/P3 classification.
   5. **Multi-Horizon Planning Framework**: 24h Tactical (night lulls & dynamic TSRs), 7-Day Operational (rolling corridor shadow blocks), and 30-Day Strategic (cyclical machine routing & TGI recovery).
-- Updated [`docs/resources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/resources.md), [`features_implemented.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/features_implemented.md), and [`tracker.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/tracker.md).
+- Updated [`docs/resources.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/resources.md), [`features_implemented.md`](file:///d:/Games/Hckthons/IRIS_ai/features_implemented.md), and [`tracker.md`](file:///d:/Games/Hckthons/IRIS_ai/tracker.md).
 
 ### Files Changed
 - `docs/research_concepts_master.md` (Created)
@@ -199222,7 +199222,7 @@ Fetch and pull the latest commits from the remote GitHub repository (`ritam413/R
 Synthesize a publication-grade, humanized architectural and regulatory whitepaper (`docs/sih_26027_architecture_and_regulatory_whitepaper.md`) covering CRIS silo integration (TMS/TDMS/SMMS/COA), MILP multi-department joint shadow blocking, multi-horizon planning matrices, and RDSO Kavach TCAS (`RDSO/SPN/196/2020`) compliance.
 
 ### Changes Made
-- Authored [`docs/sih_26027_architecture_and_regulatory_whitepaper.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/sih_26027_architecture_and_regulatory_whitepaper.md) containing:
+- Authored [`docs/sih_26027_architecture_and_regulatory_whitepaper.md`](file:///d:/Games/Hckthons/IRIS_ai27_architecture_and_regulatory_whitepaper.md) containing:
   1. Executive Summary of Indian Railways 68,000 km network maintenance challenges.
   2. 4-System CRIS Ingestion Architecture (TMS, TDMS, SMMS, COA).
   3. Multi-Department Joint Shadow Blocking operational comparison (50% disruption reduction).
@@ -199254,7 +199254,7 @@ Create a standalone, zero-network-dependency Node.js CLI package (`packages/setu
 - Scaffolded `packages/setup-agentic-workflow/` with single-file `tsup` bundler configuration (`dist/index.js`, 4.01 KB).
 - Integrated `@clack/prompts` and `picocolors` for interactive scope selection (`--workspace`, `--global`, `--all`).
 - Embedded static templates for all 70+ skills, rules, and memory template files (`context.md.tpl`, `tracker.md.tpl`, `features_implemented.md.tpl`).
-- Created [`.agents/skills/agent-ecosystem-installer/SKILL.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/agent-ecosystem-installer/SKILL.md) and deployed globally to `C:\Users\LENOVO\.gemini\config\skills/`.
+- Created [`.agents/skills/agent-ecosystem-installer/SKILL.md`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/agent-ecosystem-installer/SKILL.md) and deployed globally to `C:\Users\LENOVO\.gemini\config\skills/`.
 - Conducted `/adversarial-review` and `/council-review` confirming the offline embedded `tsup` + `@clack/prompts` + native `node:fs` stack.
 - Verified end-to-end scaffolding in `scratch/test-bootstrapper-sandbox/` (77 skills scaffolded in < 800ms).
 
@@ -199284,15 +199284,15 @@ Create a standalone, zero-network-dependency Node.js CLI package (`packages/setu
 Install and operationalize Batch C skills (`ui-ux-pro-max`, `addyosmani-perf`, `awesome-mcp-servers`, `context7`, `serena`, `graphify`, `agentmemory`) with official GitHub repository citations, and install the `agentmemory` Python vector memory package.
 
 ### Changes Made
-- Installed [`ui-ux-pro-max`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/ui-ux-pro-max/SKILL.md): High-craft UI/UX design director (GitHub: `shadcn/ui`, `radix-ui/primitives`).
-- Installed [`addyosmani-perf`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/addyosmani-perf/SKILL.md): Web performance & Core Web Vitals optimizer (GitHub: `addyosmani/critical`).
-- Installed [`awesome-mcp-servers`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/awesome-mcp-servers/SKILL.md): Master catalog of production MCP servers (GitHub: `punkpeye/awesome-mcp-servers`, `modelcontextprotocol/servers`).
-- Installed [`context7`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/context7/SKILL.md): High-density AST context window slicer and token compressor (GitHub: `chroma-core/chroma`).
-- Installed [`serena`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/serena/SKILL.md): Semantic codebase search & code navigation engine (GitHub: `sourcegraph/cody`).
-- Installed [`graphify`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/graphify/SKILL.md): Architecture & knowledge graph visualizer (GitHub: `mermaid-js/mermaid`).
-- Installed [`agentmemory`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/agentmemory/SKILL.md): Multi-agent episodic & semantic vector memory (GitHub: `agentops-ai/agentmemory`).
+- Installed [`ui-ux-pro-max`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/ui-ux-pro-max/SKILL.md): High-craft UI/UX design director (GitHub: `shadcn/ui`, `radix-ui/primitives`).
+- Installed [`addyosmani-perf`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/addyosmani-perf/SKILL.md): Web performance & Core Web Vitals optimizer (GitHub: `addyosmani/critical`).
+- Installed [`awesome-mcp-servers`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/awesome-mcp-servers/SKILL.md): Master catalog of production MCP servers (GitHub: `punkpeye/awesome-mcp-servers`, `modelcontextprotocol/servers`).
+- Installed [`context7`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/context7/SKILL.md): High-density AST context window slicer and token compressor (GitHub: `chroma-core/chroma`).
+- Installed [`serena`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/serena/SKILL.md): Semantic codebase search & code navigation engine (GitHub: `sourcegraph/cody`).
+- Installed [`graphify`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/graphify/SKILL.md): Architecture & knowledge graph visualizer (GitHub: `mermaid-js/mermaid`).
+- Installed [`agentmemory`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/agentmemory/SKILL.md): Multi-agent episodic & semantic vector memory (GitHub: `agentops-ai/agentmemory`).
 - Installed `agentmemory` Python client (`pip install agentmemory` with ChromaDB backend).
-- Updated [`docs/skills_architecture_guide.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/skills_architecture_guide.md) and [`docs/handoff.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/handoff.md).
+- Updated [`docs/skills_architecture_guide.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/skills_architecture_guide.md) and [`docs/handoff.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/handoff.md).
 - **Global Deployment:** Propagated all 35 skills into global directory `C:\Users\LENOVO\.gemini\config\skills/` (total 103 global skills now active) and installed the universal 5-mode intent router rule to `C:\Users\LENOVO\.gemini\config\rules\session-init.md` so every new project or chat session automatically inherits the full workflow.
 - **On-Demand (Lazy) MCP Policy:** Enforced on-demand ephemeral execution (`npx -y`) for individual MCP servers (e.g. Playwright MCP, Postgres MCP) rather than pre-downloading and running all servers simultaneously.
 
@@ -199331,15 +199331,15 @@ Install and operationalize Batch C skills (`ui-ux-pro-max`, `addyosmani-perf`, `
 Install and operationalize Batch B skills (`beads`, `multica`, `wshobson-agents`, `claude-code-route`, `system-prompts-ai`, `awesome-claude-skills`) into `.agents/skills/`, and update ecosystem blueprints and handoff tracking.
 
 ### Changes Made
-- Installed [`beads`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/beads/SKILL.md): Behavior-Driven Agent Design System for modular agent blocks.
-- Installed [`multica`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/multica/SKILL.md): Multi-agent chat, room consensus & multimodal collaboration engine.
-- Installed [`wshobson-agents`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/wshobson-agents/SKILL.md): Multi-agent role separation suite (Architect, QA, Sec, Optimizer, Reviewer).
-- Installed [`claude-code-route`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/claude-code-route/SKILL.md): Dynamic intent classification and model/skill routing.
-- Installed [`system-prompts-ai`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/system-prompts-ai/SKILL.md): Frontier system prompts, personas, and metaprompts.
-- Installed [`awesome-claude-skills`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/skills/awesome-claude-skills/SKILL.md): Reusable global Claude Code skill catalog.
-- Synchronized [`docs/skills_architecture_guide.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/skills_architecture_guide.md) and [`docs/handoff.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/handoff.md) with `[INSTALLED]` status badges.
+- Installed [`beads`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/beads/SKILL.md): Behavior-Driven Agent Design System for modular agent blocks.
+- Installed [`multica`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/multica/SKILL.md): Multi-agent chat, room consensus & multimodal collaboration engine.
+- Installed [`wshobson-agents`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/wshobson-agents/SKILL.md): Multi-agent role separation suite (Architect, QA, Sec, Optimizer, Reviewer).
+- Installed [`claude-code-route`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/claude-code-route/SKILL.md): Dynamic intent classification and model/skill routing.
+- Installed [`system-prompts-ai`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/system-prompts-ai/SKILL.md): Frontier system prompts, personas, and metaprompts.
+- Installed [`awesome-claude-skills`](file:///d:/Games/Hckthons/IRIS_ai/.agents/skills/awesome-claude-skills/SKILL.md): Reusable global Claude Code skill catalog.
+- Synchronized [`docs/skills_architecture_guide.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/skills_architecture_guide.md) and [`docs/handoff.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/handoff.md) with `[INSTALLED]` status badges.
 - Installed CLI packages: `repomix` (v1.18.0), `playwright` (v1.63.0), and `@playwright/test` into `devDependencies`.
-- Fully integrated all 28 skills across [`.agents/rules/session-init.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/.agents/rules/session-init.md), [`context.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/context.md), and [`docs/session_bootstrap_workflow_design.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/session_bootstrap_workflow_design.md) into 5 master operational execution workflows.
+- Fully integrated all 28 skills across [`.agents/rules/session-init.md`](file:///d:/Games/Hckthons/IRIS_ai/.agents/rules/session-init.md), [`context.md`](file:///d:/Games/Hckthons/IRIS_ai/context.md), and [`docs/session_bootstrap_workflow_design.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/session_bootstrap_workflow_design.md) into 5 master operational execution workflows.
 
 ### Files Changed
 - `.agents/skills/beads/SKILL.md` (Created)
@@ -199476,13 +199476,13 @@ All documentation across the repository is 100% synchronized and aligned with **
 Generate a presentation-ready architecture and workflow diagram modeled after the user's reference diagram (5-stage left pipeline $\to$ central AI engine $\to$ 3 multi-horizon visual execution cards) and establish a deep-module codebase refactoring plan.
 
 ### Changes Made
-- Created [`docs/architecture_diagram.html`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/architecture_diagram.html) featuring:
+- Created [`docs/architecture_diagram.html`](file:///d:/Games/Hckthons/IRIS_ai/docs/architecture_diagram.html) featuring:
   - 16:9 widescreen presentation canvas with dark navy styling (`#0B132B` & `#0F172A`), glowing gradient badges, and SIH 2025 finalist headers.
   - **Left Pipeline (Steps I to V)**: Multi-Source Data Ingestion (TMS/SMMS/TDMS/COA) $\to$ Geospatial & Headway Preprocessing $\to$ ML Urgency Triage (P1/P2/P3) $\to$ Joint Shadow-Block Optimizer Engine (MILP Solver) $\to$ Sanction & Kavach TSR Safety Broadcast.
   - **Center Hub**: Pulsing `OPTIMIZED CORRIDOR BLOCK PLAN` AI decision node with animated routing paths.
   - **Right Visual Cards**: 3 interactive SVG graph cards displaying the 24h Tactical Horizon (Night Lulls & TSRs), 7-Day Weekly Matrix (Joint Shadow Blocking & Downtime Savings), and 30-Day Cyclical Master Plan (Track Geometry Index & Machine Routing).
   - Bottom Impact KPI bar (35-40% downtime reduction, 0 passenger cancellations, <30s computation, 100% Kavach TSR).
-- Structured the deep-module refactoring blueprint ([`docs/research_sources.md`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/docs/research_sources.md), [`src/types/apiContracts.ts`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/src/types/apiContracts.ts), and [`src/lib/agents/`](file:///c:/Users/LENOVO/Downloads/railwaysurakshai/src/lib/agents)).
+- Structured the deep-module refactoring blueprint ([`docs/research_sources.md`](file:///d:/Games/Hckthons/IRIS_ai/docs/research_sources.md), [`src/types/apiContracts.ts`](file:///d:/Games/Hckthons/IRIS_ai/src/types/apiContracts.ts), and [`src/lib/agents/`](file:///d:/Games/Hckthons/IRIS_ai/src/lib/agents)).
 
 ### Files Changed
 - `docs/architecture_diagram.html` (Created)

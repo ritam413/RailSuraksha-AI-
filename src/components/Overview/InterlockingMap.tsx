@@ -1,75 +1,183 @@
 // src/components/Overview/InterlockingMap.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../Common/Card';
-import { SignalAspectState, TrackBlockCircuit } from '@/types/apiContracts';
+import { SignalHead } from '../Common/SignalHead';
+import { TrackCircuitState, SignalAspect, CircuitOperationalStatus } from '@/types/apiContracts';
+import { MOCK_TRACK_CIRCUITS } from '@/lib/mockData';
+import { ShieldAlert, Zap, ZapOff, Activity, Lock, GitBranch } from 'lucide-react';
 
-export type SignalAspect = SignalAspectState['aspect'];
-
-interface InterlockingMapProps {
-  onSignalClick?: (signalId: string, currentAspect: SignalAspect) => void;
-  onTrackSelect?: (circuitId: string) => void;
+export interface InterlockingMapProps {
+  circuits?: TrackCircuitState[];
+  selectedCircuitId?: string;
   selectedTrackId?: string;
+  onTrackSelect?: (circuitId: string) => void;
+  onSignalClick?: (signalId: string, currentAspect: SignalAspect) => void;
+  onToggleClamp?: (circuitId: string) => void;
 }
 
+// Bi-directional normalizer between legacy BLK IDs and standard TC-01..06 IDs
+const normalizeCircuitId = (id?: string): string => {
+  if (!id) return 'TC-03';
+  const mapping: Record<string, string> = {
+    'BLK-101': 'TC-01',
+    'BLK-102': 'TC-02',
+    'BLK-103': 'TC-03',
+    'BLK-104': 'TC-04',
+    'BLK-105': 'TC-05'
+  };
+  return mapping[id] || id;
+};
+
+const DEFAULT_FALLBACK_CIRCUIT: TrackCircuitState = {
+  circuitId: 'TC-03',
+  trackLine: 'UP_SLOW',
+  stationName: 'Dadar - Kurla',
+  kmStart: 9.2,
+  kmEnd: 15.5,
+  status: 'BLOCK_SANCTIONED',
+  signalId: 'S-12',
+  signalAspect: 'RED',
+  isSignalClamped: true,
+  speedLimitKmh: 30,
+  oheEnergized: false
+};
+
 export const InterlockingMap: React.FC<InterlockingMapProps> = ({
-  onSignalClick,
+  circuits = MOCK_TRACK_CIRCUITS,
+  selectedCircuitId,
+  selectedTrackId,
   onTrackSelect,
-  selectedTrackId
+  onSignalClick,
+  onToggleClamp
 }) => {
-  // State for dynamic signal overrides
-  const [signalStates, setSignalStates] = useState<Record<string, SignalAspect>>({
-    'S-12': 'STOP',
-    'S-14': 'CLEAR',
-    'S-16': 'HOLD_ACTIVE',
-    'S-18': 'CAUTION'
-  });
-
   const [activeSwitch, setActiveSwitch] = useState<'NORMAL' | 'REVERSE'>('NORMAL');
-  const [selectedCircuit, setSelectedCircuit] = useState<string>(selectedTrackId || 'BLK-101');
+  const [internalSelectedId, setInternalSelectedId] = useState<string>(
+    normalizeCircuitId(selectedCircuitId || selectedTrackId)
+  );
+  const [localCircuits, setLocalCircuits] = useState<TrackCircuitState[]>(
+    circuits && circuits.length > 0 ? circuits : MOCK_TRACK_CIRCUITS
+  );
 
-  // Cycle signal aspects on click: STOP -> CAUTION -> CLEAR -> STOP
-  const handleToggleSignal = (signalId: string) => {
-    setSignalStates((prev) => {
-      const current = prev[signalId] || 'STOP';
-      let next: SignalAspect = 'CLEAR';
-      if (current === 'STOP') next = 'CAUTION';
-      else if (current === 'CAUTION') next = 'CLEAR';
-      else next = 'STOP';
+  // Sync state when upstream props change (Avoids State Stall)
+  useEffect(() => {
+    if (circuits && circuits.length > 0) {
+      setLocalCircuits(circuits);
+    }
+  }, [circuits]);
 
-      if (onSignalClick) onSignalClick(signalId, next);
-      return { ...prev, [signalId]: next };
-    });
+  useEffect(() => {
+    const nextNormalized = normalizeCircuitId(selectedCircuitId || selectedTrackId);
+    if (nextNormalized) {
+      setInternalSelectedId(nextNormalized);
+    }
+  }, [selectedCircuitId, selectedTrackId]);
+
+  const activeId = normalizeCircuitId(selectedCircuitId || selectedTrackId || internalSelectedId);
+  const currentCircuit =
+    localCircuits.find((c) => c.circuitId === activeId) ||
+    localCircuits[0] ||
+    DEFAULT_FALLBACK_CIRCUIT;
+
+  const handleSelectTrack = (circuitId: string) => {
+    setInternalSelectedId(circuitId);
+    if (onTrackSelect) onTrackSelect(circuitId);
   };
 
-  const getAspectColor = (aspect: SignalAspect) => {
-    switch (aspect) {
-      case 'STOP':
-        return 'bg-red-500 text-white border-red-300 shadow-red-200';
-      case 'HOLD_ACTIVE':
-      case 'CAUTION':
-        return 'bg-amber-400 text-slate-900 border-amber-300 shadow-amber-200';
+  const handleToggleLocalClamp = (circuitId: string) => {
+    setLocalCircuits((prev) =>
+      prev.map((c) => {
+        if (c.circuitId === circuitId) {
+          const nextClamped = !c.isSignalClamped;
+          return {
+            ...c,
+            isSignalClamped: nextClamped,
+            // Fail-safe transition: Clamped = RED; Release = YELLOW (Caution approach under GR 3.08)
+            signalAspect: nextClamped ? 'RED' : 'YELLOW',
+            status: nextClamped ? 'BLOCK_SANCTIONED' : 'MAINTENANCE_SLOTTED',
+            oheEnergized: !nextClamped,
+            speedLimitKmh: nextClamped ? 30 : Math.min(c.speedLimitKmh, 50)
+          };
+        }
+        return c;
+      })
+    );
+    if (onToggleClamp) onToggleClamp(circuitId);
+  };
+
+  const handleLocalSignalClick = (signalId: string, currentAspect: SignalAspect) => {
+    setLocalCircuits((prev) =>
+      prev.map((c) => {
+        if (c.signalId === signalId && !c.isSignalClamped) {
+          let nextAspect: SignalAspect = 'GREEN';
+          if (currentAspect === 'GREEN') nextAspect = 'YELLOW';
+          else if (currentAspect === 'YELLOW') nextAspect = 'DOUBLE_YELLOW';
+          else if (currentAspect === 'DOUBLE_YELLOW') nextAspect = 'RED';
+          else nextAspect = 'GREEN';
+
+          return { ...c, signalAspect: nextAspect };
+        }
+        return c;
+      })
+    );
+    if (onSignalClick) onSignalClick(signalId, currentAspect);
+  };
+
+  const getStatusBadge = (status: CircuitOperationalStatus) => {
+    switch (status) {
+      case 'BLOCK_SANCTIONED':
+        return {
+          bg: 'bg-red-50 text-red-700 border-red-200',
+          label: 'BLOCK SANCTIONED'
+        };
+      case 'MAINTENANCE_SLOTTED':
+        return {
+          bg: 'bg-blue-50 text-blue-700 border-blue-200',
+          label: 'SLOTTED'
+        };
+      case 'OCCUPIED':
+        return {
+          bg: 'bg-amber-50 text-amber-700 border-amber-200',
+          label: 'OCCUPIED'
+        };
+      case 'POWER_ISOLATED':
+        return {
+          bg: 'bg-slate-100 text-slate-700 border-slate-300',
+          label: 'POWER ISOLATED'
+        };
       case 'CLEAR':
-        return 'bg-emerald-500 text-white border-emerald-300 shadow-emerald-200';
       default:
-        return 'bg-slate-400 text-white border-slate-300';
+        return {
+          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          label: 'LINE CLEAR'
+        };
     }
   };
 
+  const hasAnyClampedCircuit = localCircuits.some(
+    (c) => c.isSignalClamped || c.status === 'BLOCK_SANCTIONED'
+  );
+
   return (
     <Card
-      title="Railway Track Interlocking & Section Dispatch Map (Section 14B — CSMT Division)"
-      className="mb-6"
+      title="Section Interlocking & Track Circuit Schematic (CSMT - Kalyan 54 KM Quadrupled Corridor)"
+      className="mb-6 shadow-xs border-[#D0DFEE]"
     >
       <div className="space-y-4">
-        {/* Top Control & Legend Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#F0F6FC] border border-[#D0DFEE] rounded-xl text-xs font-mono" style={{ borderRadius: '12px' }}>
-          <div className="flex items-center space-x-4">
-            <span className="font-bold text-[#0F172A]">ROUTE STATUS:</span>
+        {/* Top Control Bar */}
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#F0F6FC] border border-[#D0DFEE] text-xs font-mono"
+          style={{ borderRadius: '12px' }}
+        >
+          <div className="flex items-center space-x-3">
+            <span className="font-bold text-[#0F172A] flex items-center space-x-1.5">
+              <GitBranch className="w-3.5 h-3.5 text-[#2B7FFF]" />
+              <span>INTERLOCKING ROUTE:</span>
+            </span>
             <button
               onClick={() => setActiveSwitch((prev) => (prev === 'NORMAL' ? 'REVERSE' : 'NORMAL'))}
-              className={`px-3 py-1 font-bold text-xs rounded transition-all flex items-center space-x-1.5 shadow-xs ${
+              className={`px-3 py-1 font-bold text-xs rounded transition-all flex items-center space-x-1.5 shadow-xs cursor-pointer ${
                 activeSwitch === 'NORMAL'
                   ? 'bg-[#2B7FFF] text-white hover:bg-blue-600'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -81,192 +189,200 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
             </button>
           </div>
 
-          {/* Aspect Legend */}
-          <div className="flex items-center space-x-3 text-[11px] text-slate-600">
+          {/* Axle Counter & Lockout Telemetry */}
+          <div className="flex items-center space-x-4 text-[11px] text-slate-600">
             <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <span>STOP (S-12)</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <span>CAUTION/HOLD (S-16)</span>
+              <Activity className="w-3.5 h-3.5 text-emerald-600" />
+              <span>
+                AXLE COUNTER DUAL-DETECTION:{' '}
+                <strong className="text-emerald-700">HEALTHY (0 MISMATCH)</strong>
+              </span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span>CLEAR (S-14)</span>
+              <span>CLEAR</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <span>OCCUPIED</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <span>BLOCK SANCTIONED</span>
             </div>
           </div>
         </div>
 
-        {/* Track Line Visual Canvas */}
-        <div className="theme-static bg-slate-950 border border-slate-800 rounded-xl p-6 text-white space-y-6 shadow-inner relative overflow-hidden" style={{ borderRadius: '16px' }}>
-          {/* Subtle Grid Background */}
-          <div className="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-25 pointer-events-none" />
-
-          {/* Line 1: Up Main Line 1A */}
+        {/* Form S&T/T-351 Statutory Lockout Banner */}
+        {hasAnyClampedCircuit && (
           <div
-            onClick={() => {
-              setSelectedCircuit('BLK-101');
-              if (onTrackSelect) onTrackSelect('BLK-101');
-            }}
-            className={`p-3 rounded-lg border transition-all cursor-pointer ${
-              selectedCircuit === 'BLK-101'
-                ? 'bg-slate-900/90 border-[#2B7FFF] shadow-md'
-                : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
-            }`}
+            className="p-3 bg-red-50 border-2 border-red-300 text-red-900 flex items-center justify-between gap-3 shadow-xs animate-pulse"
             style={{ borderRadius: '8px' }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold text-blue-400">UP MAIN 1A (BLK-101)</span>
-                <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-mono font-bold rounded border border-red-500/30">
-                  OCCUPIED • 130 KM/H
+            <div className="flex items-center space-x-2.5">
+              <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
+              <div>
+                <span className="font-bold text-xs uppercase font-mono tracking-wide">
+                  FORM S&amp;T/T-351 STATUTORY LOCKOUT: Automatic Train Stop Engaged — Signal Clamped Danger at S-12
                 </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400">Length: 1,200m | Gradient: +0.2%</span>
-            </div>
-
-            {/* Track Rail Simulation */}
-            <div className="h-6 bg-slate-800 rounded relative flex items-center px-2 border border-slate-700">
-              {/* Train Block */}
-              <div className="w-2/5 h-4 bg-[#2B7FFF] rounded flex items-center justify-between px-2 text-[10px] font-mono font-bold text-white shadow-md">
-                <span className="truncate">🚆 #12345 (Vande Bharat)</span>
-                <span className="text-[9px] bg-black/40 px-1 rounded">110 km/h</span>
-              </div>
-
-              {/* Hazard Marker */}
-              <div className="ml-16 px-2 py-0.5 bg-red-600 text-white text-[9px] font-mono font-bold rounded animate-pulse shadow-xs flex items-center space-x-1">
-                <span>⚠️ BOULDER @ 340m</span>
-              </div>
-
-              {/* Signal S-12 */}
-              <div className="ml-auto flex items-center space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleSignal('S-12');
-                  }}
-                  title="Click to cycle signal aspect"
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] border-2 shadow-xs cursor-pointer active:scale-95 transition-all ${getAspectColor(
-                    signalStates['S-12']
-                  )}`}
-                >
-                  {signalStates['S-12'] === 'STOP' ? 'S' : signalStates['S-12'] === 'CAUTION' || signalStates['S-12'] === 'HOLD_ACTIVE' ? 'C' : 'G'}
-                </button>
-                <span className="text-xs font-mono text-slate-300 font-bold">S-12</span>
+                <p className="text-[11px] text-red-700">
+                  Section locked for Joint Shadow Maintenance Block JB-2026-0926-01 (Dadar - Kurla UP Slow Line). Speed clamped to 30 km/h TSR.
+                </p>
               </div>
             </div>
+            <span
+              className="px-2.5 py-1 bg-red-600 text-white font-mono font-bold text-[10px] tracking-wider shrink-0"
+              style={{ borderRadius: '4px' }}
+            >
+              ACT 14B ENFORCED
+            </span>
           </div>
+        )}
 
-          {/* Line 2: Down Main Line 2A */}
-          <div
-            onClick={() => {
-              setSelectedCircuit('BLK-103');
-              if (onTrackSelect) onTrackSelect('BLK-103');
-            }}
-            className={`p-3 rounded-lg border transition-all cursor-pointer ${
-              selectedCircuit === 'BLK-103'
-                ? 'bg-slate-900/90 border-[#2B7FFF] shadow-md'
-                : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
-            }`}
-            style={{ borderRadius: '8px' }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold text-indigo-400">DOWN MAIN 2A (BLK-103)</span>
-                <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold rounded border border-emerald-500/30">
-                  OCCUPIED • 110 KM/H
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-400">Length: 1,400m | Clear Aspect</span>
-            </div>
+        {/* Horizontal Linear Chainage Track Overview */}
+        <div className="overflow-x-auto pb-2">
+          <div className="min-w-[780px] grid grid-cols-6 gap-3 pt-2">
+            {localCircuits.map((circuit) => {
+              const isSelected = circuit.circuitId === activeId;
+              const badge = getStatusBadge(circuit.status);
 
-            {/* Track Rail Simulation */}
-            <div className="h-6 bg-slate-800 rounded relative flex items-center px-2 border border-slate-700">
-              <div className="w-1/3 ml-36 h-4 bg-indigo-600 rounded flex items-center justify-between px-2 text-[10px] font-mono font-bold text-white shadow-md">
-                <span className="truncate">🚆 #22691 (Rajdhani Exp)</span>
-                <span className="text-[9px] bg-black/40 px-1 rounded">110 km/h</span>
-              </div>
-
-              {/* Signal S-14 */}
-              <div className="ml-auto flex items-center space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleSignal('S-14');
+              return (
+                <div
+                  key={circuit.circuitId}
+                  onClick={() => handleSelectTrack(circuit.circuitId)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectTrack(circuit.circuitId);
+                    }
                   }}
-                  title="Click to cycle signal aspect"
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] border-2 shadow-xs cursor-pointer active:scale-95 transition-all ${getAspectColor(
-                    signalStates['S-14']
-                  )}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Track Circuit ${circuit.circuitId}, ${circuit.stationName}, Status ${badge.label}`}
+                  className={`p-3 bg-white border-2 rounded-xl transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
+                    isSelected
+                      ? 'border-[#2B7FFF] shadow-md ring-2 ring-blue-100'
+                      : 'border-[#D0DFEE] hover:border-blue-300 shadow-xs'
+                  }`}
+                  style={{ borderRadius: '12px' }}
                 >
-                  {signalStates['S-14'] === 'STOP' ? 'S' : signalStates['S-14'] === 'CAUTION' || signalStates['S-14'] === 'HOLD_ACTIVE' ? 'C' : 'G'}
-                </button>
-                <span className="text-xs font-mono text-slate-300 font-bold">S-14</span>
-              </div>
-            </div>
-          </div>
+                  {/* Circuit Header & Badge */}
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-[#0F172A]">
+                      {circuit.circuitId}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 text-[10px] font-bold font-mono border rounded ${badge.bg}`}
+                      style={{ borderRadius: '4px' }}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
 
-          {/* Line 3: Platform 18 Loop (Bottleneck Hold) */}
-          <div
-            onClick={() => {
-              setSelectedCircuit('BLK-105');
-              if (onTrackSelect) onTrackSelect('BLK-105');
-            }}
-            className={`p-3 rounded-lg border transition-all cursor-pointer ${
-              selectedCircuit === 'BLK-105'
-                ? 'bg-slate-900/90 border-[#2B7FFF] shadow-md'
-                : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
-            }`}
-            style={{ borderRadius: '8px' }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-mono font-bold text-amber-400">PLATFORM 18 LOOP (BLK-105)</span>
-                <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold rounded border border-amber-500/30">
-                  5-MIN DETERMINISTIC HOLD • 30 KM/H LIMIT
-                </span>
-              </div>
-              <span className="text-[10px] font-mono text-amber-400 font-bold">Platform 17 Crowd Bottleneck (ρ = 88%)</span>
-            </div>
+                  {/* Station Section & Track Line */}
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-800 tracking-tight line-clamp-1">
+                      {circuit.stationName}
+                    </h4>
+                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mt-1">
+                      <span>{circuit.trackLine}</span>
+                      <span>
+                        KM {circuit.kmStart.toFixed(1)} - {circuit.kmEnd.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
 
-            {/* Track Rail Simulation */}
-            <div className="h-6 bg-amber-950/40 rounded relative flex items-center px-2 border border-amber-800/60">
-              <div className="flex items-center space-x-2 text-[10px] font-mono text-amber-300 font-bold">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                <span>INTERLOCK HOLD: Train #12137 Held at Outer Signal S-16</span>
-              </div>
+                  {/* Central Signal Head Visualizer */}
+                  <div
+                    className="py-2 flex items-center justify-center bg-[#F0F6FC] border border-[#D0DFEE]"
+                    style={{ borderRadius: '8px' }}
+                  >
+                    <SignalHead
+                      signalId={circuit.signalId}
+                      aspect={circuit.signalAspect}
+                      isClamped={circuit.isSignalClamped}
+                      onClick={handleLocalSignalClick}
+                    />
+                  </div>
 
-              {/* Signal S-16 */}
-              <div className="ml-auto flex items-center space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleSignal('S-16');
-                  }}
-                  title="Click to cycle signal aspect"
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[9px] border-2 shadow-xs cursor-pointer active:scale-95 transition-all ${getAspectColor(
-                    signalStates['S-16']
-                  )}`}
-                >
-                  {signalStates['S-16'] === 'STOP' ? 'S' : signalStates['S-16'] === 'CAUTION' || signalStates['S-16'] === 'HOLD_ACTIVE' ? 'C' : 'G'}
-                </button>
-                <span className="text-xs font-mono text-slate-300 font-bold">S-16</span>
-              </div>
-            </div>
+                  {/* Speed Limit & 25kV OHE Indicators */}
+                  <div className="pt-1 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+                    <div className="flex items-center space-x-1">
+                      {circuit.oheEnergized ? (
+                        <span
+                          className="flex items-center text-emerald-600 font-bold"
+                          title="25kV AC Energized"
+                        >
+                          <Zap className="w-3 h-3 mr-0.5" /> 25kV
+                        </span>
+                      ) : (
+                        <span
+                          className="flex items-center text-red-600 font-bold"
+                          title="25kV AC Power Isolated"
+                        >
+                          <ZapOff className="w-3 h-3 mr-0.5" /> 25kV ISOLATED
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`px-1.5 py-0.5 font-bold rounded ${
+                        circuit.speedLimitKmh <= 30
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                      style={{ borderRadius: '4px' }}
+                    >
+                      {circuit.speedLimitKmh} km/h{circuit.speedLimitKmh <= 30 ? ' TSR' : ''}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Circuit Inspector Bottom Strip */}
-        <div className="p-3 bg-white border border-[#D0DFEE] rounded-xl flex items-center justify-between text-xs font-mono" style={{ borderRadius: '12px' }}>
-          <div className="flex items-center space-x-2 text-slate-600">
-            <span className="font-bold text-[#0F172A]">SELECTED BLOCK:</span>
-            <span className="font-bold text-[#2B7FFF]">{selectedCircuit}</span>
+        {/* Selected Circuit Deep-Dive Drawer */}
+        <div
+          className="p-4 bg-[#F0F6FC] border border-[#D0DFEE] flex flex-wrap items-center justify-between gap-4"
+          style={{ borderRadius: '12px' }}
+        >
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <span
+                className="px-2 py-0.5 bg-[#2B7FFF] text-white font-mono font-bold text-xs"
+                style={{ borderRadius: '4px' }}
+              >
+                {currentCircuit.circuitId}
+              </span>
+              <h3 className="font-bold text-sm text-[#0F172A]">
+                {currentCircuit.stationName} ({currentCircuit.trackLine})
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600">
+              Chainage: KM {currentCircuit.kmStart.toFixed(1)} to KM {currentCircuit.kmEnd.toFixed(1)} •
+              Controlling Signal: <strong>{currentCircuit.signalId}</strong> • Aspect:{' '}
+              <strong>{currentCircuit.signalAspect}</strong>
+            </p>
           </div>
-          <div className="flex items-center space-x-3 text-slate-500 text-[11px]">
-            <span>Fail-Safe Relays: <strong className="text-emerald-600">ENERGIZED</strong></span>
-            <span>Axle Counters: <strong className="text-emerald-600">HEALTHY (4/4)</strong></span>
-            <span>Radio Link: <strong className="text-emerald-600">KAVACH 2.4GHz UHF</strong></span>
+
+          {/* Emergency Clamping Toggle */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => handleToggleLocalClamp(currentCircuit.circuitId)}
+              className={`px-4 py-2 font-bold font-mono text-xs rounded transition-all flex items-center space-x-2 shadow-xs cursor-pointer ${
+                currentCircuit.isSignalClamped
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+              style={{ borderRadius: '4px' }}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>
+                {currentCircuit.isSignalClamped
+                  ? 'RELEASE S&T LOCKOUT'
+                  : 'EMERGENCY CLAMP DANGER'}
+              </span>
+            </button>
           </div>
         </div>
       </div>

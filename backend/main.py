@@ -13,7 +13,7 @@ Interactive docs: http://localhost:8000/docs
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import streams, triage, braking, dispatch, system, audit
+from routers import streams, triage, braking, dispatch, system, audit, optimizer
 
 app = FastAPI(
     title="RailSuraksha AI — Backend API",
@@ -36,12 +36,13 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-app.include_router(streams.router,  prefix="/api/v1/streams",  tags=["Video Streams (SSE)"])
-app.include_router(triage.router,   prefix="/api/v1/triage",   tags=["AI Triage Agent"])
-app.include_router(braking.router,  prefix="/api/v1/braking",  tags=["Kavach Braking Agent"])
-app.include_router(dispatch.router, prefix="/api/v1/dispatch", tags=["Section Dispatch Agent"])
-app.include_router(system.router,   prefix="/api/v1/system",   tags=["System Mode"])
-app.include_router(audit.router,    prefix="/api/v1/audit",    tags=["Audit & Compliance"])
+app.include_router(streams.router,   prefix="/api/v1/streams",   tags=["Video Streams (SSE)"])
+app.include_router(triage.router,    prefix="/api/v1/triage",    tags=["AI Triage Agent"])
+app.include_router(braking.router,   prefix="/api/v1/braking",   tags=["Kavach Braking Agent"])
+app.include_router(dispatch.router,  prefix="/api/v1/dispatch",  tags=["Section Dispatch Agent"])
+app.include_router(system.router,    prefix="/api/v1/system",    tags=["System Mode"])
+app.include_router(audit.router,     prefix="/api/v1/audit",     tags=["Audit & Compliance"])
+app.include_router(optimizer.router, prefix="/api/v1/optimizer", tags=["Corridor Optimizer (CP-SAT)"])
 
 
 @app.api_route("/", methods=["GET", "HEAD"], tags=["System"])
