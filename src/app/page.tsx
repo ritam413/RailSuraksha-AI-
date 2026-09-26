@@ -103,6 +103,12 @@ export default function CommandCenterPage() {
 
   // Filter Active Joint Blocks by Planning Horizon
   const filteredBlocks = useMemo(() => {
+    if (horizon === 'TACTICAL_24H') {
+      return jointBlocks.filter((b) => b.status === 'SANCTIONED' || b.blockId.endsWith('-01'));
+    }
+    if (horizon === 'OPERATIONAL_7D') {
+      return jointBlocks;
+    }
     return jointBlocks;
   }, [jointBlocks, horizon]);
 
@@ -527,6 +533,7 @@ export default function CommandCenterPage() {
                       handleSanctionBlock(block);
                     }
                   }}
+                  horizon={horizon}
                 />
 
                 <div

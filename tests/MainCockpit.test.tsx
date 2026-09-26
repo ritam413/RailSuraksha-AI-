@@ -78,6 +78,7 @@ describe('TICKET-DEV1-07: Master Cockpit Assembly & Horizon Switcher', () => {
 
       // Marey String Chart elements
       expect(html).toContain('Corridor Time-Distance String Chart');
+      expect(html).toContain('Marey Stringline Diagram with Joint Shadow-Block Possessions (TACTICAL_24H)');
       expect(html).toContain('CSMT');
       expect(html).toContain('Kalyan');
       expect(html).toContain('White-Corridor: 01:30 - 04:45 IST');

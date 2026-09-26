@@ -156,7 +156,7 @@ Assemble all Developer 1 and Developer 2 core and UI components into the Master 
   - Added live IST clock, API status indicator badge, Web Audio toggle, and Advisory vs Autonomous deployment mode switcher.
   - Standardized all button geometry with Light-Blue Mintlify tokens (4px border radii, zero pill buttons).
 - **Updated `src/app/page.tsx`**:
-  - Implemented React 19 `useTransition` and `startTransition` for non-blocking rolling horizon shifts.
+  - Implemented React 19 `useTransition` and `startTransition` for non-blocking rolling horizon shifts, dynamic `filteredBlocks` horizon window filtering, and `horizon` prop propagation to `CorridorStringChart`.
   - Assembled View 1 (`CORRIDOR_PLANNER`): 6-metric `KpiStrip` summary strip, 70% `CorridorStringChart` + collapsible Recharts analytics drawer (`TriageDonut` and `DecelerationCurve`), and 30% `IncidentQueue` triage stream.
   - Assembled View 2 (`INTERLOCKING`): 6-circuit schematic (`InterlockingMap`), 4-aspect signal heads ($S\text{-}12$, $S\text{-}14$, $S\text{-}16$), switch $SW\text{-}04$ controls, Form S&T/T-351 lockout banner, and full-width `IncidentQueue`.
   - Assembled View 3 (`LOCO_CAB`): forward loco vision feed with multi-angle switcher, weather friction simulator, HUD gauges, and 4-stage `AgentPipelineCanvas`.
