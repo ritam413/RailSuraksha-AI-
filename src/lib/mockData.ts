@@ -151,6 +151,8 @@ export const MOCK_DEMANDS: MaintenanceDemand[] = [
   }
 ];
 
+export const MOCK_MAINTENANCE_DEMANDS: MaintenanceDemand[] = MOCK_DEMANDS;
+
 // 3. Optimized Joint Shadow Block Schedule
 export const MOCK_JOINT_BLOCKS: JointBlockSchedule[] = [
   {
