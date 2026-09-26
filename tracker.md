@@ -1,5 +1,23 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-26 — Fix: Export MOCK_MAINTENANCE_DEMANDS in mockData.ts (/diagnosing-bugs)
+
+### Objective
+Resolve Next.js Turbopack build error `Export MOCK_MAINTENANCE_DEMANDS doesn't exist in target module` in `src/lib/agents/explainableLogger.ts`.
+
+### Changes Made
+- Added `export const MOCK_MAINTENANCE_DEMANDS: MaintenanceDemand[] = MOCK_DEMANDS;` in [`src/lib/mockData.ts`](src/lib/mockData.ts).
+- Verified Turbopack / Next.js client component compilation and full Vitest suite (64/64 tests passing).
+
+### Files Changed
+- `src/lib/mockData.ts` (Modified)
+- `tracker.md` (Updated)
+
+### Verification
+- `node ./node_modules/vitest/vitest.mjs run` — 64/64 tests passing.
+
+---
+
 ## 2026-09-26 — TICKET-DEV1-05 Explainable Decision Dossier Modal & RDSO Form 14B Export Implementation (/wshobson-agents DEVELOPER + /ponytail)
 
 ### Objective
