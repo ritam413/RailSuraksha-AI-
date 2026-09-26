@@ -6,7 +6,7 @@
 Resolve Next.js Turbopack build error `Export MOCK_MAINTENANCE_DEMANDS doesn't exist in target module` in `src/lib/agents/explainableLogger.ts`.
 
 ### Changes Made
-- Added `export const MOCK_MAINTENANCE_DEMANDS: MaintenanceDemand[] = MOCK_DEMANDS;` in [`src/lib/mockData.ts`](file:///d:/Games/Hckthons/IRIS_ai/src/lib/mockData.ts).
+- Added `export const MOCK_MAINTENANCE_DEMANDS: MaintenanceDemand[] = MOCK_DEMANDS;` in [`src/lib/mockData.ts`](src/lib/mockData.ts).
 - Verified Turbopack / Next.js client component compilation and full Vitest suite (64/64 tests passing).
 
 ### Files Changed
