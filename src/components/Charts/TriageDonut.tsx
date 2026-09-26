@@ -152,7 +152,7 @@ export const TriageDonut: React.FC<TriageDonutProps> = ({
   const bundledCount = demands.filter(
     (d) => d.trackCircuitId === 'TC-03' || d.trackCircuitId === 'TC-04' || d.requiresPowerBlock
   ).length;
-  const bundlingRatePercent = totalDemands > 0 ? Math.round((bundledCount / totalDemands) * 100) : 75;
+  const bundlingRatePercent = totalDemands > 0 ? Math.round((bundledCount / totalDemands) * 100) : 0;
 
   /**
    * Toggle the highlighted department and notify the optional listener.

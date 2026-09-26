@@ -17,14 +17,17 @@ Provide a direct, high-craft online form and portal on the website where **TDMS 
   - Form submission dynamically injects the new demand into state, updates joint shadow block bundling schedules, plays acoustic confirmation chime, and displays an IST timestamped success banner.
 
 ### Changes Made
-- Created and hardened `src/components/Requisition/BlockRequisitionModal.tsx` with raw string chainage state and circuit range bounds validation in `handleSubmit`.
+- Created and hardened `src/components/Requisition/BlockRequisitionModal.tsx` with raw string chainage state, circuit range bounds validation in `handleSubmit`, and timer cleanup on modal close/unmount.
 - Updated `src/components/Navbar.tsx` with `onRequestBlock` prop and button.
-- Updated `src/app/page.tsx` with `handleDemandSubmit`, demand state, quick requisition banner, and modal rendering.
+- Updated `src/app/page.tsx` with `handleDemandSubmit` (gated bundling on PROPOSED status), `handleSanctionBlock` (updating block status to SANCTIONED), explicit string chart block sanction strip, and live `currentDossier` passing to `AuditorWorkspace`.
+- Updated `src/components/Auditor/AuditorWorkspace.tsx` to integrate live dossiers into ledger search/verification and display `{forgedOfficer}`.
+- Updated `src/components/Charts/TriageDonut.tsx` to fallback to 0% on empty demand arrays.
+- Updated `src/components/Vision/DefectVisionTelemetry.tsx` to reuse shared `AudioContext` and move deceleration stop side effects into a pure `useEffect`.
 - Created `tests/BlockRequisitionModal.test.tsx` (4/4 passing tests).
 
 ### Verification
-- `npx vitest run tests/BlockRequisitionModal.test.tsx` — 3/3 passed (100%).
-- `npm test` — 106/106 tests passed across 14 test suites (100%).
+- `npm test` — 107/107 tests passed across 14 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
 
 ---
 

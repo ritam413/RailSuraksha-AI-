@@ -135,7 +135,9 @@ export default function CommandCenterPage() {
     setDemands((prev) => [newDemand, ...prev]);
 
     setJointBlocks((prev) => {
-      const existingBlock = prev.find((b) => b.affectedTrackCircuits.includes(newDemand.trackCircuitId));
+      const existingBlock = prev.find(
+        (b) => b.affectedTrackCircuits.includes(newDemand.trackCircuitId) && b.status === 'PROPOSED'
+      );
       if (existingBlock) {
         return prev.map((b) =>
           b.blockId === existingBlock.blockId
@@ -200,6 +202,14 @@ export default function CommandCenterPage() {
         }
         return c;
       })
+    );
+
+    setJointBlocks((prev) =>
+      prev.map((b) =>
+        b.blockId === block.blockId
+          ? { ...b, status: 'SANCTIONED' }
+          : b
+      )
     );
 
     try {
@@ -571,13 +581,69 @@ export default function CommandCenterPage() {
                   trainPaths={MOCK_TRAIN_SCHEDULES}
                   selectedBlockId={selectedBlockId}
                   onSelectBlock={(blockId) => {
-                    const block = filteredBlocks.find((b) => b.blockId === blockId) || filteredBlocks[0];
-                    if (block) {
-                      handleSanctionBlock(block);
-                    }
+                    setSelectedBlockId(blockId);
                   }}
                   horizon={horizon}
                 />
+
+                {/* Selected Block Action & Telemetry Strip */}
+                {(() => {
+                  const selectedBlock = filteredBlocks.find((b) => b.blockId === selectedBlockId);
+                  if (!selectedBlock) return null;
+                  return (
+                    <div
+                      className="bg-white border border-[#D0DFEE] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                      style={{ borderRadius: '8px' }}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-base">⚡</span>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-mono font-bold text-[#0F172A]">{selectedBlock.blockId}</span>
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.5 ${
+                                selectedBlock.status === 'SANCTIONED'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}
+                              style={{ borderRadius: '4px' }}
+                            >
+                              {selectedBlock.status}
+                            </span>
+                            <span className="text-xs text-slate-500 font-mono">
+                              ({selectedBlock.affectedTrackCircuits.join(', ')})
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            {selectedBlock.corridorName} • Saved {selectedBlock.downtimeSavedMinutes}m ({selectedBlock.corridorDowntimeSavedPct}%) • {selectedBlock.bundledDemandIds.length} Demands
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {selectedBlock.status === 'PROPOSED' ? (
+                          <button
+                            onClick={() => handleSanctionBlock(selectedBlock)}
+                            className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all flex items-center space-x-1 shadow-sm cursor-pointer"
+                            style={{ borderRadius: '4px' }}
+                          >
+                            <span>⚡</span>
+                            <span>Sanction Joint Block</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setIsDecisionLogOpen(true)}
+                            className="px-3 py-1.5 text-xs font-bold text-[#2B7FFF] bg-[#E6F0FA] hover:bg-blue-100 transition-all flex items-center space-x-1 cursor-pointer border border-[#D0DFEE]"
+                            style={{ borderRadius: '4px' }}
+                          >
+                            <span>📋</span>
+                            <span>View Decision Dossier</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 <div
                   className="bg-white border border-[#D0DFEE] p-5 shadow-xs"
@@ -686,7 +752,7 @@ export default function CommandCenterPage() {
         {/* SCREEN 4: AUDITOR WORKSPACE & REGULATORY TERMINAL (screen4_auditor_workspace.html) */}
         {isAuditorWorkspace && (
           <div>
-            <AuditorWorkspace />
+            <AuditorWorkspace currentDossier={currentDossier} />
           </div>
         )}
 

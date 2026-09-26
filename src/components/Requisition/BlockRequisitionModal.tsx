@@ -111,6 +111,23 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  const submitTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const closeTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      setIsSubmitting(false);
+      setSubmitSuccess(false);
+      setValidationError(null);
+    }
+    return () => {
+      if (submitTimerRef.current) clearTimeout(submitTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, [isOpen]);
+
   // Sync defaults when department changes
   /**
    * Apply department presets, including urgency and chainage, and clear validation
@@ -219,12 +236,12 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
       defectDescription
     };
 
-    setTimeout(() => {
+    submitTimerRef.current = setTimeout(() => {
       playActionConfirmedChime();
       onSubmitDemand(newDemand);
       setIsSubmitting(false);
       setSubmitSuccess(true);
-      setTimeout(() => {
+      closeTimerRef.current = setTimeout(() => {
         setSubmitSuccess(false);
         onClose();
       }, 1400);

@@ -121,6 +121,21 @@ export const MAINTENANCE_SCENARIOS: MaintenanceDefectScenario[] = [
   }
 ];
 
+let sharedAudioCtx: AudioContext | null = null;
+function getSharedAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const AudioContextClass =
+    window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+    sharedAudioCtx = new AudioContextClass();
+  }
+  if (sharedAudioCtx.state === 'suspended') {
+    sharedAudioCtx.resume().catch(() => {});
+  }
+  return sharedAudioCtx;
+}
+
 /**
  * Render preset maintenance imagery, weather-dependent braking telemetry,
  * and a local speed simulation with audible alerts. Scenario changes reset
@@ -158,6 +173,21 @@ export const DefectVisionTelemetry: React.FC = () => {
     };
   }, []);
 
+  // Handle deceleration stop side effects cleanly outside React state updater
+  useEffect(() => {
+    if (isDecelerating && currentSpeed <= selectedScenario.tsrSpeedKmh) {
+      if (decelTimerRef.current) {
+        clearInterval(decelTimerRef.current);
+        decelTimerRef.current = null;
+      }
+      setIsDecelerating(false);
+      setBrakePressure(2.1);
+      setNotification(`✓ Train stabilized at Kavach TSR ceiling: ${selectedScenario.tsrSpeedKmh} km/h.`);
+      const timer = setTimeout(() => setNotification(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSpeed, isDecelerating, selectedScenario.tsrSpeedKmh]);
+
   // Live RDSO Physics Calculation
   const ebdResult = useMemo(() => {
     return calculateKavachEbd({
@@ -169,7 +199,7 @@ export const DefectVisionTelemetry: React.FC = () => {
     });
   }, [currentSpeed, selectedScenario.targetDistanceMeters, weatherCondition]);
 
-  // Audio synthesizer functions
+  // Audio synthesizer functions reusing shared AudioContext
   /**
    * Play a 1,200 Hz tone for 300 ms and show a temporary notice. Synchronous
    * synthesis failures invoke the shared confirmation chime; resume promise
@@ -179,8 +209,8 @@ export const DefectVisionTelemetry: React.FC = () => {
    */
   const playCautionChime = () => {
     try {
-      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const audioCtx = getSharedAudioContext();
+      if (!audioCtx) throw new Error('No AudioContext');
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
@@ -207,8 +237,8 @@ export const DefectVisionTelemetry: React.FC = () => {
    */
   const playEmergencyChime = () => {
     try {
-      const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const audioCtx = getSharedAudioContext();
+      if (!audioCtx) throw new Error('No AudioContext');
       const osc1 = audioCtx.createOscillator();
       const osc2 = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -250,18 +280,7 @@ export const DefectVisionTelemetry: React.FC = () => {
     if (decelTimerRef.current) clearInterval(decelTimerRef.current);
 
     decelTimerRef.current = setInterval(() => {
-      setCurrentSpeed((prev) => {
-        const next = Math.max(selectedScenario.tsrSpeedKmh, prev - 6);
-        if (next <= selectedScenario.tsrSpeedKmh) {
-          if (decelTimerRef.current) clearInterval(decelTimerRef.current);
-          setIsDecelerating(false);
-          setBrakePressure(2.1);
-          setNotification(`✓ Train stabilized at Kavach TSR ceiling: ${selectedScenario.tsrSpeedKmh} km/h.`);
-          setTimeout(() => setNotification(null), 4000);
-          return selectedScenario.tsrSpeedKmh;
-        }
-        return next;
-      });
+      setCurrentSpeed((prev) => Math.max(selectedScenario.tsrSpeedKmh, prev - 6));
     }, 200);
   };
 

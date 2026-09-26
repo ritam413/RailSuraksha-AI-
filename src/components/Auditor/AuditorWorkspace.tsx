@@ -1,7 +1,7 @@
 // src/components/Auditor/AuditorWorkspace.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card } from '../Common/Card';
 import { ExplainableDecisionDossier, MaintenanceDemand } from '@/types/apiContracts';
 import {
@@ -114,14 +114,20 @@ const EXTENDED_LEDGER_RECORDS: LedgerItem[] = [
   }
 ];
 
+export interface AuditorWorkspaceProps {
+  currentDossier?: ExplainableDecisionDossier;
+}
+
 /**
  * Render a searchable demo ledger with dossier inspection, payload tamper
  * simulation, and JSON certificate export. Attestation is local component state
  * and is shared across record selections until the workspace unmounts.
  */
-export const AuditorWorkspace: React.FC = () => {
+export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossier }) => {
   // Navigation & Filter States
-  const [selectedRecordId, setSelectedRecordId] = useState<string>('1');
+  const [selectedRecordId, setSelectedRecordId] = useState<string>(
+    currentDossier ? `live-${currentDossier.blockId}` : '1'
+  );
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [deptFilter, setDeptFilter] = useState<'ALL' | 'TMS' | 'TDMS' | 'SMMS' | 'JOINT'>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'SANCTIONED & LOCKED' | 'COMPLETED & VERIFIED' | 'ARCHIVED'>('ALL');
@@ -149,16 +155,47 @@ export const AuditorWorkspace: React.FC = () => {
     notes: string;
   } | null>(null);
 
+  // Merge live dossier into ledger records
+  const allLedgerRecords = useMemo(() => {
+    if (!currentDossier) return EXTENDED_LEDGER_RECORDS;
+
+    const liveRecord: LedgerItem = {
+      id: `live-${currentDossier.blockId}`,
+      blockId: currentDossier.blockId,
+      title: `Live Sanctioned Joint Block (${currentDossier.blockId})`,
+      section: currentDossier.bundledDemands?.[0]?.stationSection || 'CSMT-Kalyan Quad Section',
+      department: 'JOINT',
+      timestamp: currentDossier.timestamp ? new Date(currentDossier.timestamp).toLocaleString() : 'Live IST',
+      status: 'SANCTIONED & LOCKED',
+      downtimeSaved: 'Saved 85 mins (38.4%)',
+      demands: currentDossier.bundledDemands?.map((d) => d.demandId) || ['DEM-TMS-01'],
+      tsrSpeed: 30,
+      officer: currentDossier.sanctionedBy || 'Section Controller CTRL-MUM-402',
+      ruleClause: 'IRPWM 2020 / ACTM Vol II / SEM Part II'
+    };
+
+    const existingIndex = EXTENDED_LEDGER_RECORDS.findIndex((r) => r.blockId === currentDossier.blockId);
+    if (existingIndex >= 0) {
+      return [liveRecord, ...EXTENDED_LEDGER_RECORDS.filter((_, idx) => idx !== existingIndex)];
+    }
+    return [liveRecord, ...EXTENDED_LEDGER_RECORDS];
+  }, [currentDossier]);
+
   const selectedRecord =
-    EXTENDED_LEDGER_RECORDS.find((r) => r.id === selectedRecordId) || EXTENDED_LEDGER_RECORDS[0];
+    allLedgerRecords.find((r) => r.id === selectedRecordId) || allLedgerRecords[0];
 
   // Build authentic baseline dossier
-  const authenticDossier: ExplainableDecisionDossier = buildExplainableDossier({
-    blockId: selectedRecord.blockId,
-    sanctionedBy: selectedRecord.officer,
-    bundledDemandIds: selectedRecord.demands,
-    kavachTsrSpeedKmh: selectedRecord.tsrSpeed
-  });
+  const authenticDossier: ExplainableDecisionDossier = useMemo(() => {
+    if (currentDossier && selectedRecord.id === `live-${currentDossier.blockId}`) {
+      return currentDossier;
+    }
+    return buildExplainableDossier({
+      blockId: selectedRecord.blockId,
+      sanctionedBy: selectedRecord.officer,
+      bundledDemandIds: selectedRecord.demands,
+      kavachTsrSpeedKmh: selectedRecord.tsrSpeed
+    });
+  }, [currentDossier, selectedRecord]);
 
   // Current active dossier with tamper simulation evaluation
   const effectivePayloadString = isTampered
@@ -183,7 +220,7 @@ export const AuditorWorkspace: React.FC = () => {
   };
 
   // Filter Ledger Records
-  const filteredRecords = EXTENDED_LEDGER_RECORDS.filter((rec) => {
+  const filteredRecords = allLedgerRecords.filter((rec) => {
     const matchesSearch =
       rec.blockId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -625,7 +662,7 @@ export const AuditorWorkspace: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Forged Operator:</span>
-                  <span className="font-bold text-red-300">USER_ANONYMOUS_FORGER</span>
+                  <span className="font-bold text-red-300">{forgedOfficer}</span>
                 </div>
               </div>
             )}
