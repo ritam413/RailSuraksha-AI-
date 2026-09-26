@@ -170,3 +170,30 @@ journey
 3. **Cryptographic Validation & Export:**
    * System verifies the SHA-256 digital seal matches the original timestamped record.
    * Auditor clicks `[EXPORT RDSO FORM 14B]`, generating an official signed compliance certificate.
+
+---
+
+### Journey 5: Direct Online Block Requisition by TDMS, SMMS, and TMS Officers
+
+* **Primary Persona:** Departmental Field Engineers (SSE/TRD Electrical, SSE/Signal S&T, SSE/P-Way Civil).
+* **Interface Surface:** Global Navbar `[+ Request Block]` & Corridor Planner `[+ Submit Block Requisition]` Modal (`src/components/Requisition/BlockRequisitionModal.tsx`).
+
+#### Step-by-Step Flow:
+1. **Officer Access & Role Selection:**
+   * An engineer accesses the platform and clicks `[+ Request Block]`.
+   - **TDMS Officer:** Selects `TDMS — Electrical Traction (TRD)`. The form auto-populates 25kV AC contact wire wear presets, Tower Wagon `#60515`, `requiresPowerBlock = true`, and automated $10\text{ min}$ earthing buffers.
+   - **SMMS Officer:** Selects `SMMS — Signal & Telecom (S&T)`. The form auto-populates **Form S&T/T-351** Disconnection Notice parameters, Point Machine `SW-04` stroke overhauls ($>4.8\text{s}$ delay), and AFTC impedance calibration presets.
+   - **TMS Officer:** Selects `TMS — Civil Engineering (P-Way)`. The form auto-populates *IRPWM 2020* track tamping, USFD IMR rail weld fractures, and CSM Continuous Tamping Machines (`#5109`).
+2. **Spatial Chainage & Line Definition:**
+   * Officer selects the Station Section / Track Circuit (e.g. `TC-03 Dadar - Kurla`), Track Line (`UP_SLOW`), and linear chainage (`KM 14.800`).
+3. **Live AI Optimization & Bundling Feasibility Preview:**
+   * The modal's live AI engine calculates in real-time:
+     - Optimal nocturnal white corridor window (e.g., `01:30 - 04:45 AM`).
+     - Multi-department shadow bundling synergy (nests Civil tamping & S&T overhaul under de-energized OHE).
+     - Projected corridor track downtime reduction (**$38.4\%$ saved** with 0 secondary passenger train delay).
+4. **Requisition Submission & State Synchronization:**
+   * Officer clicks `[Submit Block Requisition]`.
+   * Web Audio API plays an action confirmation chime (`playActionConfirmedChime`).
+   * The demand is assigned a unique tracking ID (e.g., `DEM-TDMS-4309`) and slotted into the CP-SAT Corridor Optimizer.
+   * The proposed block dynamically appears on the **Corridor Time-Distance Marey String Chart** ready for Section Controller one-click sanctioning.
+
