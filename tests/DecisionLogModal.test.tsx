@@ -33,8 +33,7 @@ describe('TICKET-DEV1-05: Explainable Decision Dossier Modal & RDSO Form 14B Exp
       expect(dossier.blockId).toBe('JB-2026-0926-01');
       expect(dossier.sanctionedBy).toBe('CTRL-MUM-402 (Sr. DOM)');
       expect(dossier.canonicalPayloadString).toBe(
-        'JB-2026-0926-01|CTRL-MUM-402 (Sr. DOM)|2026-09-26T01:28:14Z|DEM-TDMS-02,DEM-SMMS-03,DEM-TMS-01|30|RDSO-v4.0'.toLowerCase() ||
-        dossier.canonicalPayloadString
+        'JB-2026-0926-01|CTRL-MUM-402 (Sr. DOM)|2026-09-26T01:28:14Z|DEM-SMMS-03,DEM-TDMS-02,DEM-TMS-01|30|RDSO-v4.0'
       );
       expect(dossier.sha256Signature).toHaveLength(64);
       expect(dossier.verificationStatus).toBe('VERIFIED_TAMPER_FREE');
