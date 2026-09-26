@@ -1,171 +1,160 @@
 // src/components/Overview/KpiStrip.tsx
 import React from 'react';
-import { Card } from '../Common/Card';
-import {
-  TrackInterlockingState,
-  IncidentRecord,
-  PlatformHoldState
-} from '@/types/apiContracts';
-import {
-  MOCK_INTERLOCKING_STATE,
-  MOCK_INCIDENTS,
-  MOCK_PLATFORM_HOLD_STATE
-} from '@/lib/mockData';
+import { CorridorKpiMetrics, TrackInterlockingState, IncidentRecord, PlatformHoldState } from '@/types/apiContracts';
+import { MOCK_CORRIDOR_KPIS } from '@/lib/mockData';
+import { KpiCard, KpiBadgeVariant, KpiTrendDirection } from './KpiCard';
 
 export interface KpiStripProps {
+  metrics?: CorridorKpiMetrics;
+  selectedMetricId?: string;
+  onSelectMetric?: (id: string) => void;
+  className?: string;
+  // Backward compatibility legacy props
   interlockingState?: TrackInterlockingState;
   incidents?: IncidentRecord[];
   platformHold?: PlatformHoldState;
 }
 
+// Pure, safe headway formatter (e.g. 195 -> "3h 15m")
+export function formatHeadwaySafe(minutes?: number): string {
+  if (minutes === undefined || isNaN(minutes) || minutes <= 0) {
+    return '0h 00m';
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours}h ${mins.toString().padStart(2, '0')}m`;
+}
+export const formatHeadway = formatHeadwaySafe;
+
+// Pure, zero-padded count formatter (e.g. 3 -> "03" or "03 Active")
+export function formatCountSafe(count?: number, suffix?: string): string {
+  const safeCount = Math.max(0, count || 0);
+  const padded = safeCount < 10 ? `0${safeCount}` : `${safeCount}`;
+  return suffix ? `${padded} ${suffix}` : padded;
+}
+export const formatCount = formatCountSafe;
+
+// Format percentages with 1 decimal precision (e.g. 38.4 -> "38.4%")
+export function formatPercentageSafe(val?: number): string {
+  if (val === undefined || isNaN(val)) return '0.0%';
+  return `${val.toFixed(1)}%`;
+}
+
 export const KpiStrip: React.FC<KpiStripProps> = ({
-  interlockingState = MOCK_INTERLOCKING_STATE,
-  incidents = MOCK_INCIDENTS,
-  platformHold = MOCK_PLATFORM_HOLD_STATE
+  metrics = MOCK_CORRIDOR_KPIS,
+  selectedMetricId,
+  onSelectMetric,
+  className = ''
 }) => {
-  // Compute metric values from live state or fallbacks
-  const activeTrainsCount = interlockingState.circuits
-    ? interlockingState.circuits.filter((c) => c.isOccupied).length
-    : 3;
-  const activeTrainsDisplay = activeTrainsCount > 0 ? `1,28${activeTrainsCount}` : '1,284';
+  const data = metrics || MOCK_CORRIDOR_KPIS;
 
-  const totalCircuits = interlockingState.circuits?.length ?? 5;
-  const trackCircuitsDisplay = totalCircuits > 0 ? `4,820` : '4,820';
+  // Dynamic Threshold Logic for Badges & Trends
+  const isAvailabilityHealthy = data.assetAvailabilityIndexPct >= 95.0;
+  const isDowntimeHigh = data.corridorDowntimeSavedPct >= 30.0;
 
-  const signalsClearCount = interlockingState.signals
-    ? interlockingState.signals.filter((s) => s.aspect === 'CLEAR' || s.aspect === 'CAUTION').length
-    : 2;
-  const signalsDisplay = `1,240`;
-
-  const pendingIncidentsCount = incidents.filter(
-    (i) => i.status === 'PENDING_APPROVAL' || i.status === 'EXECUTING'
-  ).length;
-  const incidentsDisplay = pendingIncidentsCount < 10 ? `0${pendingIncidentsCount}` : `${pendingIncidentsCount}`;
-
-  const isHoldActive = platformHold.status === 'HOLD_ACTIVE';
-  const holdsDisplay = isHoldActive ? '01' : '00';
-
-  const metrics = [
+  const cards = [
     {
-      id: 'active-trains',
-      label: 'Active Trains',
-      value: activeTrainsDisplay,
-      status: 'ON TIME',
-      color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-      dotColor: 'bg-emerald-500',
+      id: 'corridor-downtime',
+      title: 'Corridor Downtime Saved',
+      value: formatPercentageSafe(data.corridorDowntimeSavedPct),
+      badgeText: isDowntimeHigh ? '⚡ ROI ACTIVE' : 'MODERATE ROI',
+      badgeVariant: (isDowntimeHigh ? 'success' : 'primary') as KpiBadgeVariant,
+      pulse: data.corridorDowntimeSavedPct > 0,
+      trend: 'UP' as KpiTrendDirection,
+      trendValue: '↑ +4.2h',
+      subtext: 'Shadow Bundling',
+      subtextTooltip: 'Shadow Blocking Multi-Dept Bundling'
+    },
+    {
+      id: 'track-availability',
+      title: 'Track Availability Index',
+      value: formatPercentageSafe(data.assetAvailabilityIndexPct),
+      badgeText: isAvailabilityHealthy ? 'TARGET > 95%' : 'CRITICAL DEFICIT',
+      badgeVariant: (isAvailabilityHealthy ? 'primary' : 'danger') as KpiBadgeVariant,
+      pulse: !isAvailabilityHealthy,
+      trend: 'UP' as KpiTrendDirection,
+      trendValue: '↑ +1.2%',
+      subtext: 'IRPWM Standard',
+      subtextTooltip: 'Section Availability (IRPWM 2020)'
+    },
+    {
+      id: 'active-blocks',
+      title: 'Active Corridor Blocks',
+      value: formatCountSafe(data.activeBlocksCount),
+      unit: 'Active',
+      badgeText: 'NOCTURNAL',
+      badgeVariant: 'indigo' as KpiBadgeVariant,
+      pulse: data.activeBlocksCount > 0,
+      trend: 'NEUTRAL' as KpiTrendDirection,
+      trendValue: '01:30–04:45',
+      subtext: 'Possessory Windows',
+      subtextTooltip: 'Possessory Windows (01:30–04:45)'
+    },
+    {
+      id: 'pending-demands',
+      title: 'Pending Demands',
+      value: formatCountSafe(data.pendingDemandsCount),
+      unit: 'In Queue',
+      badgeText:
+        data.pendingDemandsCount > 0
+          ? `${formatCountSafe(Math.min(2, data.pendingDemandsCount))} P1 CRITICAL`
+          : 'ALL CLEAR',
+      badgeVariant: (data.pendingDemandsCount > 0 ? 'warning' : 'neutral') as KpiBadgeVariant,
+      pulse: data.pendingDemandsCount > 0,
+      trend: 'DOWN' as KpiTrendDirection,
+      trendValue: '↑ +2 New',
+      subtext: 'Civil/OHE/S&T',
+      subtextTooltip: 'Civil + Electrical + S&T Demands'
+    },
+    {
+      id: 'white-corridor',
+      title: 'White Corridor Gap',
+      value: formatHeadwaySafe(data.whiteCorridorHeadwayMinutes),
+      badgeText: 'OPTIMAL LULL',
+      badgeVariant: 'primary' as KpiBadgeVariant,
       pulse: false,
-      icon: (
-        <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m-8 4h8m-4 4h.01M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
-        </svg>
-      )
+      trend: 'NEUTRAL' as KpiTrendDirection,
+      trendValue: '01:30–04:45',
+      subtext: `${data.whiteCorridorHeadwayMinutes || 195}m Window`,
+      subtextTooltip: 'Next possessory window: 01:30–04:45'
     },
     {
-      id: 'track-circuits',
-      label: 'Track Circuits',
-      value: trackCircuitsDisplay,
-      status: `${totalCircuits} ACTIVE`,
-      color: 'text-blue-700 bg-blue-50 border-blue-200',
-      dotColor: 'bg-blue-500',
-      pulse: false,
-      icon: (
-        <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-        </svg>
-      )
-    },
-    {
-      id: 'signals-active',
-      label: 'Signals Active',
-      value: signalsDisplay,
-      status: `${signalsClearCount} ASPECTS OK`,
-      color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-      dotColor: 'bg-emerald-500',
-      pulse: false,
-      icon: (
-        <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      )
-    },
-    {
-      id: 'incidents-logged',
-      label: 'Incidents Logged',
-      value: incidentsDisplay,
-      status: pendingIncidentsCount > 0 ? 'ACTION REQD' : 'ALL CLEAR',
-      color: pendingIncidentsCount > 0 ? 'text-amber-800 bg-amber-50 border-amber-300' : 'text-slate-700 bg-slate-50 border-slate-200',
-      dotColor: pendingIncidentsCount > 0 ? 'bg-amber-500' : 'bg-slate-400',
-      pulse: pendingIncidentsCount > 0,
-      icon: (
-        <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      )
-    },
-    {
-      id: 'platform-holds',
-      label: 'Platform Holds',
-      value: holdsDisplay,
-      status: isHoldActive ? `${platformHold.heldPlatformId.replace('_', ' ')}` : 'NO HOLDS',
-      color: isHoldActive ? 'text-indigo-800 bg-indigo-50 border-indigo-200' : 'text-slate-700 bg-slate-50 border-slate-200',
-      dotColor: isHoldActive ? 'bg-indigo-500' : 'bg-slate-400',
-      pulse: isHoldActive,
-      icon: (
-        <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-        </svg>
-      )
-    },
-    {
-      id: 'telemetry-latency',
-      label: 'Telemetry Latency',
-      value: '<85ms',
-      status: 'SUB-100MS',
-      color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-      dotColor: 'bg-emerald-500',
-      pulse: false,
-      icon: (
-        <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      )
+      id: 'kavach-tsrs',
+      title: 'Active Kavach TSRs',
+      value: formatCountSafe(data.activeKavachTsrsCount),
+      unit: 'Enforced',
+      badgeText: '30 KM/H SPEED',
+      badgeVariant: 'danger' as KpiBadgeVariant,
+      pulse: data.activeKavachTsrsCount > 0,
+      trend: 'DOWN' as KpiTrendDirection,
+      trendValue: '↓ -1 Cleared',
+      subtext: 'Speed Supervision',
+      subtextTooltip: 'RDSO Kavach Speed Supervision'
     }
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-      {metrics.map((item) => (
-        <Card
-          key={item.id}
-          className="p-4 flex flex-col justify-between hover:border-[#2B7FFF] transition-all duration-200"
-        >
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight">{item.label}</span>
-              <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100">{item.icon}</div>
-            </div>
-            <div className="text-2xl font-black text-[#0F172A] tracking-tight mb-2 font-mono">
-              {item.value}
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <span
-              className={`inline-flex items-center space-x-1.5 px-2 py-0.5 text-[10px] font-mono font-bold rounded border ${item.color}`}
-            >
-              <span className="relative flex h-1.5 w-1.5">
-                {item.pulse && (
-                  <span
-                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${item.dotColor} opacity-75`}
-                  />
-                )}
-                <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${item.dotColor}`} />
-              </span>
-              <span>{item.status}</span>
-            </span>
-          </div>
-        </Card>
+    <div
+      data-testid="kpi-strip"
+      className={`grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6 ${className}`}
+    >
+      {cards.map((card) => (
+        <KpiCard
+          key={card.id}
+          id={card.id}
+          title={card.title}
+          value={card.value}
+          unit={card.unit}
+          badgeText={card.badgeText}
+          badgeVariant={card.badgeVariant}
+          pulse={card.pulse}
+          trend={card.trend}
+          trendValue={card.trendValue}
+          subtext={card.subtext}
+          subtextTooltip={card.subtextTooltip}
+          isSelected={selectedMetricId === card.id}
+          onClick={() => onSelectMetric?.(card.id)}
+        />
       ))}
     </div>
   );
