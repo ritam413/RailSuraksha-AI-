@@ -79,4 +79,25 @@ src/
 - All AI automated interventions must produce an immutable 4-step explainable decision log.
 - Domain rules and parameters must be configurable via policy profiles rather than hardcoded in business logic.
 
+## 7. Dual-Mode API Client & Network Invariants (TICKET-DEV1-06)
+- **File Location:** `src/lib/apiClient.ts` | **Tests:** `tests/apiClient.test.ts` (13/13 passing)
+- **Base URL Resolution:** `process.env.NEXT_PUBLIC_API_URL` || `process.env.NEXT_PUBLIC_BACKEND_URL` || `https://railsuraksha-ai.onrender.com/api/v1`
+- **Timeout Policy:** 1500ms default for GET queries; 2500ms for POST mutations via native `AbortController`.
+- **Memory Safety:** All offline fallbacks return immutable deep clones via `structuredClone()` to prevent in-memory SPA state contamination.
+- **Exported API Methods & Fallback Matrix:**
+  1. `fetchCorridorSchedule(divisionId)` $\to$ `MOCK_JOINT_BLOCKS`
+  2. `fetchMaintenanceDemands(department)` $\to$ `MOCK_DEMANDS`
+  3. `fetchCorridorKpis()` $\to$ `MOCK_CORRIDOR_KPIS`
+  4. `fetchInterlockingCircuits()` $\to$ `MOCK_CIRCUITS` (alias of `MOCK_TRACK_CIRCUITS`)
+  5. `sanctionBlockRequest(blockId, controllerId)` $\to$ `MOCK_DECISION_DOSSIER`
+  6. `checkBackendHealth()` $\to$ `{ online: boolean, message: string, latencyMs?: number }`
+  7. `fetchInterlockingState()` $\to$ `MOCK_INTERLOCKING_STATE` (GIS Topology)
+  8. `fetchIncidentQueue(status, severity)` $\to$ `MOCK_INCIDENTS`
+  9. `reviewIncidentAction(incidentId, action, operatorId)` $\to$ `{ success: true, newStatus }`
+  10. `calculateEbd(params)` $\to$ `calculateKavachEbd` local physics agent
+  11. `fetchPlatformHoldState(platformId)` $\to$ `MOCK_PLATFORM_HOLD_STATE`
+  12. `overridePlatformHold(platformId, action)` $\to$ `RELEASE` (0s) / `EXTEND_3M` (+180s)
+  13. `fetchAuditLog(incidentId, mode)` $\to$ `buildExplainableDecisionLog`
+
+
 

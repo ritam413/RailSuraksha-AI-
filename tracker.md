@@ -1,4 +1,64 @@
-# Agent Handoff Log (tracker.md)
+﻿# Agent Handoff Log (tracker.md)
+
+## 2026-09-26 — TICKET-DEV1-06 Dual-Mode API Client & Offline Fallback Architecture
+
+### Objective
+Implement dual-mode API client in src/lib/apiClient.ts with 1500ms abort controller, deep immutable clone fallbacks (structuredClone), and full Auto-BDMS SIH 26027 + tactical endpoint support.
+
+### Changes Made
+- **Implemented src/lib/apiClient.ts**:
+  - Added etchWithTimeout<T>(url, fallbackData, timeoutMs) using AbortController, clearTimeout in inally, and structuredClone isolation.
+  - Added etchCorridorSchedule(divisionId) falling back to MOCK_JOINT_BLOCKS.
+  - Added etchMaintenanceDemands(department) falling back to MOCK_DEMANDS.
+  - Added etchCorridorKpis() falling back to MOCK_CORRIDOR_KPIS.
+  - Added etchInterlockingCircuits() falling back to MOCK_CIRCUITS.
+  - Added sanctionBlockRequest(blockId, controllerId) with 2500ms timeout falling back to MOCK_DECISION_DOSSIER.
+  - Retained all legacy tactical endpoints (checkBackendHealth, etchInterlockingState, etchIncidentQueue, eviewIncidentAction, calculateEbd, etchPlatformHoldState, overridePlatformHold, etchAuditLog).
+- **Added 	ests/apiClient.test.ts**:
+  - 13 automated Vitest tests validating timeout, network error, deep-cloning immutability, and endpoint fallbacks.
+- **Updated src/lib/mockData.ts**:
+  - Exported MOCK_CIRCUITS alias for MOCK_TRACK_CIRCUITS.
+
+### Verification
+- 
+px vitest run tests/apiClient.test.ts — 13/13 tests passed.
+- 
+pm test — 80/80 tests passed across 9 test suites.
+- 
+px tsc --noEmit — 0 errors (clean exit code 0).
+
+### Current State
+- TICKET-DEV1-06 is complete.
+- Ready for TICKET-DEV1-07 (Master Cockpit Assembly).
+
+### Next Agent Instructions
+1. Inspect docs/ticket/TICKET-DEV1-07-master-cockpit-assembly.md.
+2. Assemble multi-view cockpit in src/app/page.tsx integrating CorridorStringChart, InterlockingMap, DecisionLogModal, and KpiStrip.
+
+---
+
+## 2026-09-26 — Audit & AgentMemory O(1) Indexing of Tickets 01–05 (/serena + /context7 + /codegraph)
+
+### Objective
+Audit implementation status for Tickets DEV1-01 through DEV1-05 (`TICKET-DEV1-04-interlocking-track-map.md`, `TICKET-DEV1-04-dual-mode-api-client.md`, `TICKET-DEV1-05-decision-dossier-modal.md`, `TICKET-DEV1-05-master-cockpit-assembly.md`), execute full test suites, and populate `agentmemory` and `repomix` for instant $O(1)$ recall.
+
+### Changes & Findings
+- **`TICKET-DEV1-04-interlocking-track-map.md`**: Fully **IMPLEMENTED** (`src/components/Overview/InterlockingMap.tsx`, `src/components/Common/SignalHead.tsx`, 9/9 passing tests in `tests/InterlockingMap.test.tsx`).
+- **`TICKET-DEV1-05-decision-dossier-modal.md`**: Fully **IMPLEMENTED** (`src/components/Auditor/DecisionLogModal.tsx`, `src/lib/agents/explainableLogger.ts`, 9/9 passing tests in `tests/DecisionLogModal.test.tsx`).
+- **`TICKET-DEV1-04-dual-mode-api-client.md` / `TICKET-DEV1-06`**: **PARTIALLY IMPLEMENTED** (`src/lib/apiClient.ts` has live tactical endpoints; optimizer scheduling endpoints queued for Stage 3).
+- **`TICKET-DEV1-05-master-cockpit-assembly.md` / `TICKET-DEV1-07`**: **PARTIALLY IMPLEMENTED** (`src/app/page.tsx` renders 3 tactical views; rolling horizon tab integration queued for Stage 4).
+- Fixed assertion vector in `tests/DecisionLogModal.test.tsx`.
+- Ran full test suite: **67/67 Vitest tests passing (100%)** + **4/4 Pytest solver tests passing (100%)**.
+- Indexed all Tickets DEV1-01 through DEV1-07 into `agentmemory` vector/document store.
+- Refreshed Repomix snapshots (`repomix-output.md` & `repomix-output.xml`).
+
+### Verification
+- `npx vitest run` — 67/67 tests passing across 8 test suites.
+- `pytest backend/test_optimizer.py` — 4/4 tests passing.
+- `agentmemory` semantic recall verified.
+- `npm run repomix` and `npm run repomix:xml` completed successfully.
+
+---
 
 ## 2026-09-26 — Fix: Export MOCK_MAINTENANCE_DEMANDS in mockData.ts (/diagnosing-bugs)
 
@@ -1828,3 +1888,19 @@ Build and enhance `KpiStrip.tsx` in `src/components/Overview/KpiStrip.tsx` with 
 
 ### Objective
 Implement the animated 4-stage sequential Kavach safety pipeline visualizer, multi-hazard tactical scenario switcher with dynamic HUD and kinematic deceleration, and automated unit test suite.
+
+## 2026-09-26 � Renumber Tickets to Eliminate Duplicates
+
+### Objective
+Renumber the tickets in `docs/ticket/` to fix duplicate IDs while preserving their distinct descriptions.
+
+### Changes Made
+- Renamed `TICKET-DEV1-04-dual-mode-api-client.md` to `TICKET-DEV1-06-dual-mode-api-client.md` and updated internal headers.
+- Renamed `TICKET-DEV1-05-master-cockpit-assembly.md` to `TICKET-DEV1-07-master-cockpit-assembly.md` and updated internal headers.
+- Deleted obsolete `TICKET-DEV2-03-interlocking-track-map.md` (as this ticket is now DEV1-04).
+
+### Files Changed
+- `docs/ticket/TICKET-DEV1-06-dual-mode-api-client.md`
+- `docs/ticket/TICKET-DEV1-07-master-cockpit-assembly.md`
+- `tracker.md`
+
