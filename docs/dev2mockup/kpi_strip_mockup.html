@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RailSuraksha IRIS AI - 6-Metric Operational KPI Strip Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-app: #F8FAFC;
+      --surface-card: #FFFFFF;
+      --border-subtle: #D0DFEE;
+      --border-card: #E2E8F0;
+      --border-focus: #2B7FFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --text-dim: #94A3B8;
+      
+      --accent-blue: #2563EB;
+      --accent-blue-bg: #EFF6FF;
+      --accent-blue-border: #BFDBFE;
+
+      --accent-emerald: #059669;
+      --accent-emerald-bg: #ECFDF5;
+      --accent-emerald-border: #A7F3D0;
+
+      --accent-amber: #D97706;
+      --accent-amber-bg: #FFFBEB;
+      --accent-amber-border: #FDE68A;
+
+      --accent-rose: #E11D48;
+      --accent-rose-bg: #FFF1F2;
+      --accent-rose-border: #FECDD3;
+
+      --accent-indigo: #4F46E5;
+      --accent-indigo-bg: #EEF2FF;
+      --accent-indigo-border: #C7D2FE;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      padding: 32px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .dashboard-container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar inspired by Ovalent Design System */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .top-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      background: #0F172A;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    .top-title-area h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .top-title-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      width: 280px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      padding: 0 40px 0 12px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(43, 127, 255, 0.12);
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      padding: 2px 5px;
+    }
+
+    .btn-export {
+      background: #0F172A;
+      color: #FFFFFF;
+      border: none;
+      height: 38px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-export:hover {
+      background: #1E293B;
+    }
+
+    /* KPI Strip Grid: 3 columns x 2 rows format */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .kpi-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .kpi-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* KPI Card Component (Mintlify 16px Outer / 4px Inner Rule) */
+    .kpi-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 154px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      user-select: none;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(43, 127, 255, 0.08);
+    }
+
+    .kpi-card.selected {
+      border-color: var(--border-focus);
+      background: #FAFCFF;
+      box-shadow: 0 0 0 2px rgba(43, 127, 255, 0.25), 0 8px 16px -4px rgba(43, 127, 255, 0.1);
+    }
+
+    .kpi-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .kpi-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* Tiny in-card selected indicator */
+    .selected-tag {
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      color: #2563EB;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 4px;
+      padding: 1px 5px;
+      letter-spacing: 0.02em;
+    }
+
+    .kpi-card.selected .selected-tag {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Strictly 4px inner radius badges */
+    .kpi-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 4px;
+      border: 1px solid;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-emerald {
+      background: var(--accent-emerald-bg);
+      border-color: var(--accent-emerald-border);
+      color: var(--accent-emerald);
+    }
+
+    .badge-blue {
+      background: var(--accent-blue-bg);
+      border-color: var(--accent-blue-border);
+      color: var(--accent-blue);
+    }
+
+    .badge-indigo {
+      background: var(--accent-indigo-bg);
+      border-color: var(--accent-indigo-border);
+      color: var(--accent-indigo);
+    }
+
+    .badge-amber {
+      background: var(--accent-amber-bg);
+      border-color: var(--accent-amber-border);
+      color: var(--accent-amber);
+    }
+
+    .badge-rose {
+      background: var(--accent-rose-bg);
+      border-color: var(--accent-rose-border);
+      color: var(--accent-rose);
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 6px 0 10px 0;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+
+    .kpi-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #F1F5F9;
+      padding-top: 10px;
+      margin-top: auto;
+    }
+
+    .kpi-trend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .trend-up {
+      color: var(--accent-emerald);
+    }
+
+    .trend-down {
+      color: var(--accent-rose);
+    }
+
+    .trend-neutral {
+      color: var(--text-muted);
+    }
+
+    .kpi-subtext {
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Live Pulsing Indicator */
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+
+    .pulse-dot.emerald { background: var(--accent-emerald); }
+    .pulse-dot.rose { background: var(--accent-rose); }
+    .pulse-dot.amber { background: var(--accent-amber); }
+    .pulse-dot.indigo { background: var(--accent-indigo); }
+
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.4;
+      animation: pulse-ring 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.6); opacity: 0.8; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    /* Middle Layout Section (Chart + Allocation Breakdown) */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .tab-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Enhanced Graph with Explicit X & Y Axes and Comparative Variables */
+    .chart-container {
+      position: relative;
+      padding: 10px 10px 0 0;
+    }
+
+    /* Chart Legend */
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 18px;
+      margin-bottom: 16px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color-box {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-optimized {
+      background: linear-gradient(180deg, #2563EB 0%, #60A5FA 100%);
+      border: 1px solid #1D4ED8;
+    }
+
+    .legend-baseline {
+      background: repeating-linear-gradient(
+        45deg,
+        #E2E8F0,
+        #E2E8F0 3px,
+        #CBD5E1 3px,
+        #CBD5E1 6px
+      );
+      border: 1px solid #94A3B8;
+    }
+
+    /* Main Chart Area with Axes */
+    .chart-layout {
+      display: flex;
+      height: 220px;
+      gap: 12px;
+    }
+
+    /* Y-Axis Column */
+    .y-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 48px;
+      padding-bottom: 24px; /* offset for x-axis */
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 600;
+      user-select: none;
+    }
+
+    .y-axis-title {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-right: 4px;
+      align-self: center;
+    }
+
+    .y-axis-wrapper {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Chart Canvas / Grid Area */
+    .chart-canvas {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grid-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .grid-line {
+      width: 100%;
+      height: 1px;
+      background: #F1F5F9;
+      border-top: 1px dashed #E2E8F0;
+    }
+
+    /* Bars Container */
+    .chart-bars-area {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      padding: 0 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .chart-group-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .chart-group-col:hover .bar-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    .bars-pair {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+    }
+
+    /* Individual Comparative Bars */
+    .bar-baseline {
+      width: 42%;
+      background: repeating-linear-gradient(
+        45deg,
+        #E2E8F0,
+        #E2E8F0 3px,
+        #CBD5E1 3px,
+        #CBD5E1 6px
+      );
+      border: 1px solid #94A3B8;
+      border-bottom: none;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s ease;
+    }
+
+    .bar-optimized {
+      width: 52%;
+      background: linear-gradient(180deg, #3B82F6 0%, #93C5FD 100%);
+      border: 1px solid #2563EB;
+      border-bottom: none;
+      border-radius: 3px 3px 0 0;
+      transition: all 0.3s ease;
+    }
+
+    .chart-group-col:hover .bar-optimized {
+      background: linear-gradient(180deg, #1D4ED8 0%, #60A5FA 100%);
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+    }
+
+    /* X-Axis Row */
+    .x-axis-row {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      border-top: 1px solid #CBD5E1;
+      padding: 6px 8px 0 8px;
+    }
+
+    .x-axis-label {
+      flex: 1;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .x-axis-title {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    /* Interactive Hover Tooltip */
+    .bar-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.15s ease;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .bar-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #0F172A;
+    }
+
+    .tooltip-header {
+      font-weight: 700;
+      color: #94A3B8;
+      margin-bottom: 4px;
+      font-size: 10px;
+    }
+
+    .tooltip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 2px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    
+    <!-- Top Nav / Controls -->
+    <div class="top-bar">
+      <div class="top-title-area">
+        <div class="logo-badge">IRIS</div>
+        <div>
+          <h1>Corridor Operations — Central Railway Division (BB-CR)</h1>
+          <p>Automatic Block Planning & Headway Super-Corridor Cockpit</p>
+        </div>
+      </div>
+      <div class="top-controls">
+        <div class="search-input-wrapper">
+          <input type="text" class="search-input" placeholder="Search corridors, trains, TSRs..." />
+          <span class="search-kbd">⌘K</span>
+        </div>
+        <button class="btn-export">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export Dossier
+        </button>
+      </div>
+    </div>
+
+    <!-- 6-Metric IRIS AI KPI Strip (3x2 Grid Layout with Multi-Select) -->
+    <div class="kpi-strip" id="kpiStrip">
+      
+      <!-- Card 1: Corridor Downtime Saved -->
+      <div class="kpi-card" data-metric="downtime" onclick="toggleCardSelection(this, 'downtime')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">Corridor Downtime Saved</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-emerald">
+            <span class="pulse-dot emerald"></span>
+            ⚡ ROI ACTIVE
+          </span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">38.4%</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-up">↑ +4.2h</span>
+          <span class="kpi-subtext" title="Shadow Multi-Dept Bundling">Shadow Bundling</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Track Availability Index -->
+      <div class="kpi-card" data-metric="availability" onclick="toggleCardSelection(this, 'availability')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">Track Availability Index</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-blue">TARGET > 95%</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">96.2%</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-up">↑ +1.2%</span>
+          <span class="kpi-subtext" title="IRPWM 2020 Compliance">IRPWM Standard</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Active Corridor Blocks -->
+      <div class="kpi-card" data-metric="blocks" onclick="toggleCardSelection(this, 'blocks')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">Active Corridor Blocks</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-indigo">
+            <span class="pulse-dot indigo"></span>
+            NOCTURNAL
+          </span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">03</span>
+          <span class="kpi-unit">Active</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-neutral">01:30–04:45</span>
+          <span class="kpi-subtext" title="Dadar - Kurla Up Slow">Dadar-Kurla Sec</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Pending Demands -->
+      <div class="kpi-card" data-metric="demands" onclick="toggleCardSelection(this, 'demands')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">Pending Demands</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-amber">
+            <span class="pulse-dot amber"></span>
+            02 P1 CRITICAL
+          </span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">08</span>
+          <span class="kpi-unit">In Queue</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-down">↑ +2 New</span>
+          <span class="kpi-subtext" title="Civil + Electrical + S&T">Civil/OHE/S&T</span>
+        </div>
+      </div>
+
+      <!-- Card 5: White Corridor Headway Gap -->
+      <div class="kpi-card" data-metric="headway" onclick="toggleCardSelection(this, 'headway')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">White Corridor Gap</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-blue">OPTIMAL LULL</span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">3h 15m</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-neutral">01:30–04:45</span>
+          <span class="kpi-subtext" title="Next possessory window">195m Window</span>
+        </div>
+      </div>
+
+      <!-- Card 6: Active Kavach TSRs (Selected by default) -->
+      <div class="kpi-card selected" data-metric="kavach" onclick="toggleCardSelection(this, 'kavach')">
+        <div class="kpi-card-header">
+          <div class="kpi-title-wrap">
+            <span class="kpi-title">Active Kavach TSRs</span>
+            <span class="selected-tag">SELECTED</span>
+          </div>
+          <span class="kpi-badge badge-rose">
+            <span class="pulse-dot rose"></span>
+            30 KM/H SPEED
+          </span>
+        </div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">02</span>
+          <span class="kpi-unit">Enforced</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-trend trend-down">↓ -1 Cleared</span>
+          <span class="kpi-subtext" title="RDSO Kavach Ver 4.0">Speed Supervision</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Secondary Operational Analytics (Graph with Clear Axes & Variable Legend) -->
+    <div class="content-grid">
+      
+      <!-- Left Panel: Optimization Headway Utilization Graph with X & Y Axes -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h3>CP–SAT Optimization Headway Utilization</h3>
+          <span class="tab-pill">24h Tactical View</span>
+        </div>
+
+        <div class="chart-container">
+          <!-- Clear Chart Legend displaying both comparison variables -->
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-color-box legend-optimized"></div>
+              <span>Simulated Shadow Bundling Throughput (IRIS AI)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color-box legend-baseline"></div>
+              <span>Uncoordinated Departmental Slots (Baseline)</span>
+            </div>
+          </div>
+
+          <!-- Chart Area with Y-Axis and X-Axis -->
+          <div class="chart-layout">
+            <!-- Y-Axis Section -->
+            <div class="y-axis-wrapper">
+              <span class="y-axis-title">Throughput Capacity</span>
+              <div class="y-axis">
+                <span>100%</span>
+                <span>75%</span>
+                <span>50%</span>
+                <span>25%</span>
+                <span>0%</span>
+              </div>
+            </div>
+
+            <!-- Canvas Grid & Bars -->
+            <div class="chart-canvas">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+
+              <div class="chart-bars-area">
+                <!-- Col 1: 00:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">00:00 – 02:00 IST</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong>35%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>15%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 15%;"></div>
+                    <div class="bar-optimized" style="height: 35%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 2: 02:00 (Major Nocturnal Window) -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">02:00 – 04:00 IST (Possessory Peak)</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong style="color: #60A5FA;">88%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>32%</strong></div>
+                    <div class="tooltip-row" style="color: #34D399;"><span>Saved Efficiency:</span> <strong>+56%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 32%;"></div>
+                    <div class="bar-optimized" style="height: 88%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 3: 04:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">04:00 – 06:00 IST</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong style="color: #60A5FA;">92%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>40%</strong></div>
+                    <div class="tooltip-row" style="color: #34D399;"><span>Saved Efficiency:</span> <strong>+52%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 40%;"></div>
+                    <div class="bar-optimized" style="height: 92%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 4: 06:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">06:00 – 08:00 IST (Morning Peak)</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong>28%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>12%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 12%;"></div>
+                    <div class="bar-optimized" style="height: 28%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 5: 08:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">08:00 – 10:00 IST</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong>18%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>10%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 10%;"></div>
+                    <div class="bar-optimized" style="height: 18%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 6: 10:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">10:00 – 12:00 IST (Afternoon Lull)</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong>42%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>20%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 20%;"></div>
+                    <div class="bar-optimized" style="height: 42%;"></div>
+                  </div>
+                </div>
+
+                <!-- Col 7: 12:00 -->
+                <div class="chart-group-col">
+                  <div class="bar-tooltip">
+                    <div class="tooltip-header">12:00 – 14:00 IST</div>
+                    <div class="tooltip-row"><span>IRIS Bundled:</span> <strong>32%</strong></div>
+                    <div class="tooltip-row"><span>Uncoordinated:</span> <strong>15%</strong></div>
+                  </div>
+                  <div class="bars-pair">
+                    <div class="bar-baseline" style="height: 15%;"></div>
+                    <div class="bar-optimized" style="height: 32%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- X-Axis Labels -->
+              <div class="x-axis-row">
+                <span class="x-axis-label">00:00</span>
+                <span class="x-axis-label">02:00</span>
+                <span class="x-axis-label">04:00</span>
+                <span class="x-axis-label">06:00</span>
+                <span class="x-axis-label">08:00</span>
+                <span class="x-axis-label">10:00</span>
+                <span class="x-axis-label">12:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- X-Axis Global Title -->
+          <div class="x-axis-title">24-Hour Operational Corridor Timeline (IST)</div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Department Demand Allocation -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h3>Department Demand Allocation</h3>
+          <span class="tab-pill">Total: 8</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 8px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+              <span style="font-weight: 600; color: #1E293B;">TMS Civil (Track)</span>
+              <span style="font-family: 'JetBrains Mono'; font-weight: 700; color: #2563EB;">4 Demands (50%)</span>
+            </div>
+            <div style="height: 8px; background: #EFF6FF; border-radius: 4px; overflow: hidden;">
+              <div style="width: 50%; height: 100%; background: #2563EB;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+              <span style="font-weight: 600; color: #1E293B;">TDMS Electrical (OHE)</span>
+              <span style="font-family: 'JetBrains Mono'; font-weight: 700; color: #059669;">2 Demands (25%)</span>
+            </div>
+            <div style="height: 8px; background: #ECFDF5; border-radius: 4px; overflow: hidden;">
+              <div style="width: 25%; height: 100%; background: #059669;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+              <span style="font-weight: 600; color: #1E293B;">SMMS Signal & Telecom</span>
+              <span style="font-family: 'JetBrains Mono'; font-weight: 700; color: #D97706;">2 Demands (25%)</span>
+            </div>
+            <div style="height: 8px; background: #FFFBEB; border-radius: 4px; overflow: hidden;">
+              <div style="width: 25%; height: 100%; background: #D97706;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    function toggleCardSelection(element, metricId) {
+      // Toggle selection on clicked card (supports multi-selection)
+      element.classList.toggle('selected');
+      
+      const selectedCards = Array.from(document.querySelectorAll('.kpi-card.selected')).map(
+        card => card.getAttribute('data-metric')
+      );
+      console.log('Active selected KPI metrics:', selectedCards);
+    }
+  </script>
+</body>
+</html>
