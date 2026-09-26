@@ -17,10 +17,10 @@ Provide a direct, high-craft online form and portal on the website where **TDMS 
   - Form submission dynamically injects the new demand into state, updates joint shadow block bundling schedules, plays acoustic confirmation chime, and displays an IST timestamped success banner.
 
 ### Changes Made
-- Created `src/components/Requisition/BlockRequisitionModal.tsx`.
+- Created and hardened `src/components/Requisition/BlockRequisitionModal.tsx` with raw string chainage state and circuit range bounds validation in `handleSubmit`.
 - Updated `src/components/Navbar.tsx` with `onRequestBlock` prop and button.
 - Updated `src/app/page.tsx` with `handleDemandSubmit`, demand state, quick requisition banner, and modal rendering.
-- Created `tests/BlockRequisitionModal.test.tsx` (3/3 passing tests).
+- Created `tests/BlockRequisitionModal.test.tsx` (4/4 passing tests).
 
 ### Verification
 - `npx vitest run tests/BlockRequisitionModal.test.tsx` — 3/3 passed (100%).

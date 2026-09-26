@@ -93,7 +93,7 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
   const [department, setDepartment] = useState<DepartmentCode>(initialDepartment);
   const [trackCircuitId, setTrackCircuitId] = useState<TrackCircuitId>('TC-03');
   const [trackLine, setTrackLine] = useState<TrackLineCode>('UP_SLOW');
-  const [chainageKm, setChainageKm] = useState<number>(14.8);
+  const [chainageKm, setChainageKm] = useState<string>('14.8');
   const [urgencyTier, setUrgencyTier] = useState<UrgencyTier>('P2_SCHEDULED');
   const [durationMinutes, setDurationMinutes] = useState<number>(90);
   const [requiresPowerBlock, setRequiresPowerBlock] = useState<boolean>(true);
@@ -103,10 +103,12 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Sync defaults when department changes
   const handleDepartmentChange = (dept: DepartmentCode) => {
     setDepartment(dept);
+    setValidationError(null);
     const preset = DEPARTMENT_PRESETS[dept];
     setAssignedMachine(preset.defaultMachine);
     setDurationMinutes(preset.defaultDuration);
@@ -114,13 +116,13 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
     setDefectDescription(preset.sampleDefects[0]);
     if (dept === 'TMS_CIVIL') {
       setUrgencyTier('P1_CRITICAL');
-      setChainageKm(14.2);
+      setChainageKm('14.2');
     } else if (dept === 'SMMS_SIGNAL') {
       setUrgencyTier('P2_SCHEDULED');
-      setChainageKm(15.1);
+      setChainageKm('15.1');
     } else {
       setUrgencyTier('P2_SCHEDULED');
-      setChainageKm(14.8);
+      setChainageKm('14.8');
     }
   };
 
@@ -155,6 +157,28 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
+
+    const selectedCircuit = TRACK_CIRCUITS.find((c) => c.id === trackCircuitId);
+    if (!selectedCircuit) {
+      setValidationError('Please select a valid track circuit.');
+      return;
+    }
+
+    const trimmedKm = chainageKm.trim();
+    const parsedKm = parseFloat(trimmedKm);
+    if (!trimmedKm || Number.isNaN(parsedKm) || !Number.isFinite(parsedKm)) {
+      setValidationError('Please enter a valid numeric chainage KM.');
+      return;
+    }
+
+    if (parsedKm < selectedCircuit.kmStart || parsedKm > selectedCircuit.kmEnd) {
+      setValidationError(
+        `Chainage KM (${parsedKm.toFixed(2)}) must be within circuit ${selectedCircuit.id} range (${selectedCircuit.kmStart.toFixed(1)} - ${selectedCircuit.kmEnd.toFixed(1)} KM).`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     const generatedId = `DEM-${department.split('_')[0]}-${Date.now().toString().slice(-4)}`;
@@ -166,7 +190,7 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
       trackCircuitId,
       trackLine,
       stationSection: `${aiFeasibility.sectionName} ${trackLine.replace('_', ' ')}`,
-      chainageKm: Number(chainageKm),
+      chainageKm: parsedKm,
       urgencyTier,
       urgencyScore: urgencyTier === 'P1_CRITICAL' ? 0.94 : urgencyTier === 'P2_SCHEDULED' ? 0.72 : 0.45,
       durationMinutes: Number(durationMinutes),
@@ -313,12 +337,28 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
                   type="number"
                   step="0.05"
                   value={chainageKm}
-                  onChange={(e) => setChainageKm(parseFloat(e.target.value))}
-                  className="w-full text-xs bg-white border border-[#D0DFEE] p-2 text-slate-900 focus:border-[#2B7FFF] focus:outline-hidden"
+                  onChange={(e) => {
+                    setChainageKm(e.target.value);
+                    if (validationError) setValidationError(null);
+                  }}
+                  className={`w-full text-xs bg-white border p-2 text-slate-900 focus:outline-hidden ${
+                    validationError ? 'border-rose-500 focus:border-rose-600' : 'border-[#D0DFEE] focus:border-[#2B7FFF]'
+                  }`}
                   style={{ borderRadius: '4px' }}
                 />
               </div>
             </div>
+
+            {/* Validation Error Banner */}
+            {validationError && (
+              <div
+                className="bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 text-xs flex items-center space-x-2 animate-in fade-in duration-150"
+                style={{ borderRadius: '4px' }}
+              >
+                <span className="font-bold">⚠️ Error:</span>
+                <span>{validationError}</span>
+              </div>
+            )}
 
             {/* 3. Operational Requirements & Machine Roster */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

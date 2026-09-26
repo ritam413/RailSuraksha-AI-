@@ -56,5 +56,21 @@ describe('Direct Block Requisition Portal (TDMS, SMMS, TMS)', () => {
 
     expect(html).toContain('IRPWM 2020');
     expect(html).toContain('Track Tamping');
+    expect(html).toContain('value="14.8"');
+  });
+
+  it('renders chainage input with step and number attributes for raw input handling', () => {
+    const html = renderToStaticMarkup(
+      <BlockRequisitionModal
+        isOpen={true}
+        onClose={vi.fn()}
+        onSubmitDemand={vi.fn()}
+        initialDepartment="TDMS_ELECTRICAL"
+      />
+    );
+
+    expect(html).toContain('KM Linear Chainage');
+    expect(html).toContain('step="0.05"');
+    expect(html).toContain('value="14.8"');
   });
 });
