@@ -114,6 +114,11 @@ const EXTENDED_LEDGER_RECORDS: LedgerItem[] = [
   }
 ];
 
+/**
+ * Render a searchable demo ledger with dossier inspection, payload tamper
+ * simulation, and JSON certificate export. Attestation is local component state
+ * and is shared across record selections until the workspace unmounts.
+ */
 export const AuditorWorkspace: React.FC = () => {
   // Navigation & Filter States
   const [selectedRecordId, setSelectedRecordId] = useState<string>('1');
@@ -190,6 +195,12 @@ export const AuditorWorkspace: React.FC = () => {
   });
 
   // Cryptographic Seal Verification
+  /**
+   * Compare the effective payload hash with its stored signature and show the
+   * result with an audible confirmation or alarm. A mismatch becomes error feedback.
+   *
+   * @throws Audio context initialization errors before feedback is updated.
+   */
   const handleVerifySeal = () => {
     const result = verifyDossierIntegrity(effectiveDossier);
     if (result.isValid) {
@@ -211,6 +222,12 @@ export const AuditorWorkspace: React.FC = () => {
     }
   };
 
+  /**
+   * Request a clipboard write of the stored signature and show copied feedback
+   * without awaiting completion. Clipboard promise rejections are unhandled.
+   *
+   * @throws Synchronous clipboard access or audio context initialization errors.
+   */
   const handleCopyToken = () => {
     navigator.clipboard.writeText(effectiveDossier.sha256Signature);
     setCopiedToken(true);
@@ -218,6 +235,12 @@ export const AuditorWorkspace: React.FC = () => {
     setTimeout(() => setCopiedToken(false), 2000);
   };
 
+  /**
+   * Store the chosen attestation status with the preset auditor identity and an
+   * IST timestamp locally. Seal verification is not required by this handler.
+   *
+   * @throws Audio context initialization errors before attestation is stored.
+   */
   const handleAttestDossier = (status: 'ATTESTED_COMPLIANT' | 'FLAGGED_FOR_INQUIRY') => {
     playActionConfirmedChime();
     const timestampNow = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
@@ -233,6 +256,12 @@ export const AuditorWorkspace: React.FC = () => {
     });
   };
 
+  /**
+   * Trigger a JSON download of the effective dossier, including simulated tampering
+   * and the current attestation or pending-signoff placeholder.
+   *
+   * @throws Audio initialization or browser download API errors are not caught.
+   */
   const handleExportForm14B = () => {
     playActionConfirmedChime();
     const certificatePayload = {

@@ -43,6 +43,10 @@ import {
 } from '@/lib/mockData';
 import { playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
 
+/**
+ * Render the command cockpit with local block and circuit state, incident actions,
+ * and decision dossiers. Persist the selected theme in browser local storage.
+ */
 export default function CommandCenterPage() {
   const [activeTab, setActiveTab] = useState<NavbarTab>('CORRIDOR_PLANNER');
   const [horizon, setHorizon] = useState<HorizonTier>('TACTICAL_24H');
@@ -112,6 +116,9 @@ export default function CommandCenterPage() {
     return jointBlocks;
   }, [jointBlocks, horizon]);
 
+  /**
+   * Update the selected planning horizon in a transition; all joint blocks remain visible.
+   */
   const handleHorizonChange = (newHorizon: HorizonTier) => {
     startTransition(() => {
       setHorizon(newHorizon);
@@ -119,6 +126,11 @@ export default function CommandCenterPage() {
   };
 
   // Direct Departmental Block Requisition Submission Handler
+  /**
+   * Add a demand locally and bundle it into the first block sharing its circuit.
+   * If none matches, propose a block at 01:30 IST with 20 extra minutes for a power
+   * block. Update estimated savings and display a registration notice.
+   */
   const handleDemandSubmit = (newDemand: MaintenanceDemand) => {
     setDemands((prev) => [newDemand, ...prev]);
 
@@ -163,6 +175,13 @@ export default function CommandCenterPage() {
   };
 
   // Master Sanction Event Bus (Atomic Block Possession & Interlocking Clamp)
+  /**
+   * Mark affected circuits sanctioned, power isolated, and signals red locally,
+   * then request backend sanction and schedule the local dossier display.
+   * Request failures are ignored; local circuit changes are retained.
+   *
+   * @throws Audio context initialization errors reject the returned promise.
+   */
   const handleSanctionBlock = async (block: JointBlockSchedule) => {
     playActionConfirmedChime();
     setSelectedBlockId(block.blockId);
@@ -257,6 +276,14 @@ export default function CommandCenterPage() {
     }, 150);
   };
 
+  /**
+   * Start the timed scenario pipeline and return before it finishes. Calculate
+   * braking distance through the API client, using local physics if it rejects,
+   * and prepare decision records. Autonomous mode starts simulated braking;
+   * advisory mode pauses at the approval stage.
+   *
+   * @throws Audio context initialization errors before the timed stages begin.
+   */
   const handleRunPipeline = () => {
     if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
     setIsPipelineExecuting(true);
@@ -352,6 +379,11 @@ export default function CommandCenterPage() {
     }, 800);
   };
 
+  /**
+   * Select an incident, switch to its camera view, and build its local decision log.
+   * For cab incidents, choose a scenario from the first detected hazard, defaulting
+   * to the rail-fracture scenario for hazards other than boulders or cattle.
+   */
   const handleSelectIncident = (incident: IncidentRecord) => {
     setSelectedIncidentId(incident.incidentId);
 
@@ -384,6 +416,13 @@ export default function CommandCenterPage() {
     setCurrentDecisionLog(log);
   };
 
+  /**
+   * Request incident approval and schedule display of locally generated decision
+   * records. Review request failures are ignored, so the approval notice and
+   * dossier display do not confirm backend acceptance.
+   *
+   * @throws Audio context initialization errors reject the returned promise.
+   */
   const handleApproveIncidentAction = async (incidentId: string) => {
     playActionConfirmedChime();
     setSelectedIncidentId(incidentId);
@@ -427,6 +466,10 @@ export default function CommandCenterPage() {
     }, 5000);
   };
 
+  /**
+   * Select a circuit and open the mapped platform or vision view, accepting both
+   * TC circuit IDs and legacy BLK IDs. Unmapped IDs leave the current view unchanged.
+   */
   const handleTrackSelect = (circuitId: string) => {
     setSelectedTrackId(circuitId);
     if (circuitId === 'TC-04' || circuitId === 'TC-05' || circuitId === 'BLK-104' || circuitId === 'BLK-105') {

@@ -64,6 +64,14 @@ export const DEPARTMENT_THEMES: Record<
   }
 };
 
+/**
+ * Summarize supplied demands by department, using mock demands when omitted.
+ * Unknown departments count as Civil; falsy durations count as 60 minutes.
+ * The bundling estimate counts TC-03, TC-04, or power-block demands and defaults
+ * to 75% for an empty list; the window and savings footer use fixed demo values.
+ * selectedDepartment initializes local highlighting only. Selection callbacks
+ * receive the department key, or null when the active department is clicked again.
+ */
 export const TriageDonut: React.FC<TriageDonutProps> = ({
   demands = MOCK_DEMANDS,
   selectedDepartment,
@@ -146,6 +154,10 @@ export const TriageDonut: React.FC<TriageDonutProps> = ({
   ).length;
   const bundlingRatePercent = totalDemands > 0 ? Math.round((bundledCount / totalDemands) * 100) : 75;
 
+  /**
+   * Toggle the highlighted department and notify the optional listener.
+   * Listener errors propagate after the state update is queued.
+   */
   const handleSliceClick = (deptKey: string) => {
     const next = activeDept === deptKey ? null : deptKey;
     setActiveDept(next);

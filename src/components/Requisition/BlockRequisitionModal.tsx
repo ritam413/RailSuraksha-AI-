@@ -84,6 +84,12 @@ const TRACK_CIRCUITS: { id: TrackCircuitId; section: string; kmStart: number; km
   { id: 'TC-06', section: 'Thane - Kalyan', kmStart: 34.0, kmEnd: 54.0 }
 ];
 
+/**
+ * Render a local requisition form with a preset feasibility preview, or null when
+ * closed. Form state survives closing while mounted. initialDepartment seeds
+ * only the department; other fields initially use the electrical defaults.
+ * Submission delivers a demand through onSubmitDemand and later calls onClose.
+ */
 export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
   isOpen,
   onClose,
@@ -106,6 +112,10 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Sync defaults when department changes
+  /**
+   * Apply department presets, including urgency and chainage, and clear validation
+   * feedback. The selected track circuit and line remain unchanged.
+   */
   const handleDepartmentChange = (dept: DepartmentCode) => {
     setDepartment(dept);
     setValidationError(null);
@@ -155,6 +165,13 @@ export const BlockRequisitionModal: React.FC<BlockRequisitionModalProps> = ({
 
   if (!isOpen) return null;
 
+  /**
+   * Prevent form navigation and validate parsed chainage in kilometers against the
+   * selected circuit, including both endpoints. Invalid input sets form feedback.
+   * After 450 ms, play confirmation and deliver a SLOTTED demand to onSubmitDemand;
+   * then show success and request closure after another 1,400 ms. Audio or callback
+   * errors in the timers are uncaught and stop the remaining steps in that timer.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);

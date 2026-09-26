@@ -121,6 +121,11 @@ export const MAINTENANCE_SCENARIOS: MaintenanceDefectScenario[] = [
   }
 ];
 
+/**
+ * Render preset maintenance imagery, weather-dependent braking telemetry,
+ * and a local speed simulation with audible alerts. Scenario changes reset
+ * speed, brake pressure, and camera selection; dissemination shows a local notice.
+ */
 export const DefectVisionTelemetry: React.FC = () => {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('SCENARIO_TMS_804');
   const [weatherCondition, setWeatherCondition] = useState<WeatherCondition>('DRY');
@@ -165,6 +170,13 @@ export const DefectVisionTelemetry: React.FC = () => {
   }, [currentSpeed, selectedScenario.targetDistanceMeters, weatherCondition]);
 
   // Audio synthesizer functions
+  /**
+   * Play a 1,200 Hz tone for 300 ms and show a temporary notice. Synchronous
+   * synthesis failures invoke the shared confirmation chime; resume promise
+   * rejections are unhandled. Direct synthesis bypasses the shared mute setting.
+   *
+   * @throws Audio context initialization errors from the fallback chime.
+   */
   const playCautionChime = () => {
     try {
       const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -186,6 +198,13 @@ export const DefectVisionTelemetry: React.FC = () => {
     }
   };
 
+  /**
+   * Play 800 Hz and 880 Hz tones for 500 ms and show a temporary notice. Synchronous
+   * synthesis failures invoke the shared emergency alarm; resume promise
+   * rejections are unhandled. Direct synthesis bypasses the shared mute setting.
+   *
+   * @throws Audio context initialization errors from the fallback alarm.
+   */
   const playEmergencyChime = () => {
     try {
       const audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
@@ -214,6 +233,13 @@ export const DefectVisionTelemetry: React.FC = () => {
   };
 
   // Continuous Kinematic Deceleration Loop
+  /**
+   * Reduce simulated speed by 6 km/h every 200 ms down to the scenario TSR limit.
+   * Do nothing at or below that limit; otherwise sound caution and update brake
+   * pressure and completion feedback.
+   *
+   * @throws Audio initialization errors propagated by the caution chime.
+   */
   const handleSimulateBraking = () => {
     if (currentSpeed <= selectedScenario.tsrSpeedKmh) return;
 
@@ -239,6 +265,10 @@ export const DefectVisionTelemetry: React.FC = () => {
     }, 200);
   };
 
+  /**
+   * Stop the braking interval, restore scenario cruising speed, clear brake
+   * pressure, and show a temporary reset notice.
+   */
   const handleResetSpeed = () => {
     if (decelTimerRef.current) clearInterval(decelTimerRef.current);
     setCurrentSpeed(selectedScenario.initialSpeedKmh);
@@ -248,6 +278,12 @@ export const DefectVisionTelemetry: React.FC = () => {
     setTimeout(() => setNotification(null), 2500);
   };
 
+  /**
+   * Play confirmation and show a temporary dispatch notice for the scenario.
+   * This action only updates local notification state.
+   *
+   * @throws Audio context initialization errors before the notice is set.
+   */
   const handleDisseminatePWay = () => {
     playActionConfirmedChime();
     setNotification(

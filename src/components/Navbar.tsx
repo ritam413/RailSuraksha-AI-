@@ -33,6 +33,11 @@ const HORIZONS: { tier: HorizonTier; label: string }[] = [
   { tier: 'STRATEGIC_30D', label: '30D' }
 ];
 
+/**
+ * Render controlled view, horizon, theme, and deployment controls with an IST
+ * clock and backend health indicator. Poll health every eight seconds and share
+ * the global audio mute state; show block requisition access when a callback exists.
+ */
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onTabChange,

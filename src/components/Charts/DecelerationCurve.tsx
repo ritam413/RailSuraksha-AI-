@@ -37,6 +37,12 @@ interface DataPoint {
   tsrClamp: number;
 }
 
+/**
+ * Render simulated emergency and service braking curves with stopping-distance
+ * telemetry and a 30 km/h reference line. Speed (km/h), obstacle distance (meters),
+ * and weather props initialize local controls only. User weather selections
+ * invoke onWeatherChange; collision risk includes stopping exactly at the obstacle.
+ */
 export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
   initialSpeedKmh = 110,
   obstacleDistanceMeters = 450,
@@ -112,6 +118,10 @@ export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
     return data;
   }, [speedKmh, weatherParams, ebdResult.calculatedStoppingDistanceMeters]);
 
+  /**
+   * Select local weather and notify the optional listener, even on reselection.
+   * Listener errors propagate after the state update is queued.
+   */
   const handleWeatherSelect = (newWeather: WeatherCondition) => {
     setWeather(newWeather);
     if (onWeatherChange) {
@@ -119,6 +129,9 @@ export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
     }
   };
 
+  /**
+   * Set the simulation speed in km/h and highlight the matching preset.
+   */
   const handleSpeedPreset = (speed: number) => {
     setSpeedKmh(speed);
     setActivePreset(speed);
