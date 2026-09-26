@@ -1,4 +1,4 @@
-# Features Implemented: IRIS AI
+﻿# Features Implemented: IRIS AI
 
 ## Status Overview
 
@@ -63,4 +63,5 @@
 - **Navbar & Page Routing:** `src/components/Navbar.tsx`, `src/app/page.tsx`
 - **Vision Feed & Safety Canvas:** `src/components/LocoCameraFeed.tsx`, `src/components/AgentPipelineCanvas.tsx`, `src/components/PlatformGatewayFeed.tsx`
 - **Track Interlocking & Dispatch:** `src/components/Overview/InterlockingMap.tsx`
+
 
