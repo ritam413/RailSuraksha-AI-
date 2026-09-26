@@ -1,26 +1,36 @@
 // src/lib/apiClient.ts
-// Centralized API Client with Graceful Fallback to Local TypeScript Simulation
+// Dual-Mode HTTP Client & Resilient Offline Simulation Engine for RailSuraksha AI
 
 import {
+  JointBlockSchedule,
+  MaintenanceDemand,
+  CorridorKpiMetrics,
+  TrackCircuitState,
+  ExplainableDecisionDossier,
   TrackInterlockingState,
   IncidentRecord,
   EbdCalculationResult,
   PlatformHoldState,
   ExplainableDecisionLog,
-  DeploymentMode,
+  DeploymentMode
 } from '@/types/apiContracts';
 import {
+  MOCK_JOINT_BLOCKS,
+  MOCK_DEMANDS,
+  MOCK_CORRIDOR_KPIS,
+  MOCK_CIRCUITS,
+  MOCK_DECISION_DOSSIER,
   MOCK_INTERLOCKING_STATE,
   MOCK_INCIDENTS,
-  MOCK_EBD_CALCULATION,
-  MOCK_PLATFORM_HOLD_STATE,
-  MOCK_DECISION_LOG,
+  MOCK_PLATFORM_HOLD_STATE
 } from '@/lib/mockData';
 import { calculateKavachEbd } from '@/lib/agents/kavachBrakingAgent';
 import { buildExplainableDecisionLog } from '@/lib/agents/explainableLogger';
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://railsuraksha-ai.onrender.com/api/v1';
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://railsuraksha-ai.onrender.com/api/v1';
 
 export interface BackendStatus {
   online: boolean;
@@ -29,15 +39,135 @@ export interface BackendStatus {
 }
 
 /**
- * 1. Health & Status Check
+ * Core Timeout-Guarded Fetch Helper with Immutable Fallback
+ */
+export async function fetchWithTimeout<T>(
+  url: string,
+  fallbackData: T,
+  timeoutMs = 1500
+): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP status: ${res.status}`);
+    }
+
+    return (await res.json()) as T;
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'test') {
+      console.warn(`[IRIS AI API] Offline / Timeout on ${url}. Using local fallback.`, err);
+    }
+    return structuredClone(fallbackData);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/* =========================================================================
+   1. AUTO-BDMS SIH 26027 OPTIMIZER ENDPOINTS
+   ========================================================================= */
+
+/**
+ * Fetch active joint block schedules for corridor
+ */
+export async function fetchCorridorSchedule(
+  divisionId = 'CR-BB-01'
+): Promise<JointBlockSchedule[]> {
+  return fetchWithTimeout<JointBlockSchedule[]>(
+    `${API_BASE_URL}/optimizer/schedules/active?divisionId=${divisionId}`,
+    MOCK_JOINT_BLOCKS
+  );
+}
+
+/**
+ * Fetch prioritized multi-department maintenance demands
+ */
+export async function fetchMaintenanceDemands(
+  department = 'ALL'
+): Promise<MaintenanceDemand[]> {
+  return fetchWithTimeout<MaintenanceDemand[]>(
+    `${API_BASE_URL}/demands?department=${department}`,
+    MOCK_DEMANDS
+  );
+}
+
+/**
+ * Fetch corridor KPIs and capacity metrics
+ */
+export async function fetchCorridorKpis(): Promise<CorridorKpiMetrics> {
+  return fetchWithTimeout<CorridorKpiMetrics>(
+    `${API_BASE_URL}/kpis`,
+    MOCK_CORRIDOR_KPIS
+  );
+}
+
+/**
+ * Fetch live track circuit states (Auto-BDMS SIH 26027)
+ */
+export async function fetchInterlockingCircuits(): Promise<TrackCircuitState[]> {
+  return fetchWithTimeout<TrackCircuitState[]>(
+    `${API_BASE_URL}/interlocking/circuits`,
+    MOCK_CIRCUITS
+  );
+}
+
+/**
+ * Submit block sanction request with explainable dossier generation
+ */
+export async function sanctionBlockRequest(
+  blockId: string,
+  controllerId = 'CTRL-402'
+): Promise<ExplainableDecisionDossier> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/optimizer/sanction`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        blockId,
+        controllerId,
+        timestamp: new Date().toISOString(),
+      }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Sanction failed: ${res.status}`);
+    }
+
+    return (await res.json()) as ExplainableDecisionDossier;
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'test') {
+      console.warn('[IRIS AI API] Fallback sanction generated locally.', err);
+    }
+    return structuredClone(MOCK_DECISION_DOSSIER);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/* =========================================================================
+   2. BACKWARD-COMPATIBLE TACTICAL ENDPOINTS
+   ========================================================================= */
+
+/**
+ * Health & Status Check
  */
 export async function checkBackendHealth(): Promise<BackendStatus> {
   const startTime = Date.now();
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-    // Try /api/v1/system/status first (adblocker-safe), fallback to /health
+  try {
     let res: Response | null = await fetch(`${API_BASE_URL}/system/status`, {
       signal: controller.signal,
     }).catch(() => null);
@@ -48,7 +178,6 @@ export async function checkBackendHealth(): Promise<BackendStatus> {
         signal: controller.signal,
       }).catch(() => null);
     }
-    clearTimeout(timeoutId);
 
     if (res && res.ok) {
       return {
@@ -57,72 +186,50 @@ export async function checkBackendHealth(): Promise<BackendStatus> {
         latencyMs: Date.now() - startTime,
       };
     }
-    return { online: false, message: `Offline / Connecting` };
+    return { online: false, message: 'Offline / Connecting' };
   } catch {
     return { online: false, message: 'Offline (Using Local TS Simulation)' };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
 /**
- * 2. Track Interlocking GIS Map
+ * Track Interlocking GIS Map (Tactical visualizer)
  */
 export async function fetchInterlockingState(): Promise<TrackInterlockingState> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-    const res = await fetch(`${API_BASE_URL}/dispatch/interlocking-map`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      return data as TrackInterlockingState;
-    }
-  } catch {
-    // Graceful fallback to mock data
-  }
-  return MOCK_INTERLOCKING_STATE;
+  return fetchWithTimeout<TrackInterlockingState>(
+    `${API_BASE_URL}/dispatch/interlocking-map`,
+    MOCK_INTERLOCKING_STATE,
+    2000
+  );
 }
 
 /**
- * 3. AI Triage Incident Queue
+ * AI Triage Incident Queue
  */
 export async function fetchIncidentQueue(
   status = 'all',
   severity = 'all'
 ): Promise<IncidentRecord[]> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-    const res = await fetch(
-      `${API_BASE_URL}/triage/queue?status=${status}&severity=${severity}`,
-      { signal: controller.signal }
-    );
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data as IncidentRecord[];
-      }
-    }
-  } catch {
-    // Graceful fallback
-  }
-  return MOCK_INCIDENTS;
+  return fetchWithTimeout<IncidentRecord[]>(
+    `${API_BASE_URL}/triage/queue?status=${status}&severity=${severity}`,
+    MOCK_INCIDENTS,
+    2000
+  );
 }
 
 /**
- * 4. Approve / Review Incident
+ * Approve / Review Incident
  */
 export async function reviewIncidentAction(
   incidentId: string,
   action: 'APPROVE' | 'REJECT',
   operatorId = 'OP-402'
 ): Promise<{ success: boolean; newStatus: string }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+
   try {
     const res = await fetch(
       `${API_BASE_URL}/triage/incidents/${incidentId}/review`,
@@ -130,6 +237,7 @@ export async function reviewIncidentAction(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, operatorId }),
+        signal: controller.signal,
       }
     );
     if (res.ok) {
@@ -137,13 +245,15 @@ export async function reviewIncidentAction(
       return { success: true, newStatus: data.newStatus || 'RESOLVED' };
     }
   } catch {
-    // Fallback to local mutation
+    // Fallback
+  } finally {
+    clearTimeout(timeoutId);
   }
   return { success: true, newStatus: action === 'APPROVE' ? 'RESOLVED' : 'REJECTED' };
 }
 
 /**
- * 5. Kavach EBD Calculation
+ * Kavach EBD Calculation
  */
 export async function calculateEbd(params: {
   trainId: string;
@@ -154,6 +264,9 @@ export async function calculateEbd(params: {
   trackGradientPercent?: number;
   reactionTimeSeconds?: number;
 }): Promise<EbdCalculationResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+
   try {
     const payload = {
       trainId: params.trainId,
@@ -170,6 +283,7 @@ export async function calculateEbd(params: {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
 
     if (res.ok) {
@@ -186,7 +300,9 @@ export async function calculateEbd(params: {
       };
     }
   } catch {
-    // Fallback to local pure TS agent
+    // Fallback
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   return calculateKavachEbd({
@@ -200,39 +316,28 @@ export async function calculateEbd(params: {
 }
 
 /**
- * 6. Platform Hold State
+ * Platform Hold State
  */
 export async function fetchPlatformHoldState(
   platformId = 'PLATFORM_18'
 ): Promise<PlatformHoldState> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/dispatch/hold-timer/${platformId}`);
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        stationCode: data.stationCode || 'CSMT',
-        heldPlatformId: data.heldPlatformId || platformId,
-        adjacentPlatformId: data.adjacentPlatformId || 'PLATFORM_17',
-        gatewayOccupancyIndex: data.gatewayOccupancyIndex ?? 0.88,
-        gatewayCrowdCount: data.gatewayCrowdCount ?? 482,
-        remainingHoldSeconds: data.remainingHoldSeconds ?? 252,
-        isMlExtensionActive: data.isMlExtensionActive ?? true,
-        status: (data.status as 'HOLD_ACTIVE' | 'CLEARING' | 'RELEASED') || 'HOLD_ACTIVE',
-      };
-    }
-  } catch {
-    // Fallback
-  }
-  return MOCK_PLATFORM_HOLD_STATE;
+  return fetchWithTimeout<PlatformHoldState>(
+    `${API_BASE_URL}/dispatch/hold-timer/${platformId}`,
+    MOCK_PLATFORM_HOLD_STATE,
+    2000
+  );
 }
 
 /**
- * 7. Platform Hold Override
+ * Platform Hold Override
  */
 export async function overridePlatformHold(
   platformId: string,
   action: 'RELEASE' | 'EXTEND_3M'
 ): Promise<PlatformHoldState> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+
   try {
     const res = await fetch(`${API_BASE_URL}/dispatch/override-hold`, {
       method: 'POST',
@@ -242,6 +347,7 @@ export async function overridePlatformHold(
         action,
         operatorId: 'OP-402',
       }),
+      signal: controller.signal,
     });
     if (res.ok) {
       const data = await res.json();
@@ -258,38 +364,35 @@ export async function overridePlatformHold(
     }
   } catch {
     // Fallback
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   return {
-    ...MOCK_PLATFORM_HOLD_STATE,
+    ...structuredClone(MOCK_PLATFORM_HOLD_STATE),
     remainingHoldSeconds: action === 'RELEASE' ? 0 : MOCK_PLATFORM_HOLD_STATE.remainingHoldSeconds + 180,
     status: action === 'RELEASE' ? 'RELEASED' : 'HOLD_ACTIVE',
   };
 }
 
 /**
- * 8. Audit Log Retrieval
+ * Audit Log Retrieval
  */
 export async function fetchAuditLog(
   incidentId: string,
   deploymentMode: DeploymentMode = 'ADVISORY'
 ): Promise<ExplainableDecisionLog> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/audit/logs/${incidentId}`);
-    if (res.ok) {
-      const data = await res.json();
-      return data as ExplainableDecisionLog;
-    }
-  } catch {
-    // Fallback
-  }
-  return buildExplainableDecisionLog(
-    incidentId,
-    '12345 (Vande Bharat)',
-    'Section 14B Up Main Line',
-    deploymentMode,
-    'BOULDER',
-    340,
-    410
+  return fetchWithTimeout<ExplainableDecisionLog>(
+    `${API_BASE_URL}/audit/logs/${incidentId}`,
+    buildExplainableDecisionLog(
+      incidentId,
+      '12345 (Vande Bharat)',
+      'Section 14B Up Main Line',
+      deploymentMode,
+      'BOULDER',
+      340,
+      410
+    ),
+    2000
   );
 }

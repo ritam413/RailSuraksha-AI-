@@ -284,6 +284,8 @@ export const MOCK_TRACK_CIRCUITS: TrackCircuitState[] = [
   }
 ];
 
+export const MOCK_CIRCUITS: TrackCircuitState[] = MOCK_TRACK_CIRCUITS;
+
 // 6. Time-Distance Train Schedule Slots
 export const MOCK_TRAIN_SCHEDULES: TrainScheduleSlot[] = [
   {

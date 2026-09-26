@@ -1,53 +1,68 @@
-# 🎫 `TICKET-DEV1-07`: Master Cockpit Assembly & Horizon Switcher
+# 🎫 `TICKET-DEV1-07`: Master 3-View Cockpit & Horizon Switcher Assembly
 
-- **Assignee:** Developer 1 (Lead / Core Architect)
-- **Role:** Master Cockpit Layout, Routing, Event Bus & State Orchestration
-- **Status:** `BLOCKED` by `TICKET-DEV1-01` through `TICKET-DEV1-06`, and `TICKET-DEV2-01` through `TICKET-DEV2-03`
+- **Assignee:** Developer 1 (Lead Integrator)
+- **Role:** Page Orchestration & App Integration
+- **Status:** `BLOCKED` by all Developer 1 and Developer 2 tickets
 - **Priority:** `P0 (Terminal Integration)`
-- **Reference Spec:** [`docs/12_screens.md`](../12_screens.md) & [`refactoring_plan.md#section-4-system-architecture`](../refactoring_plan.md#section-4-system-architecture)
+- **Unblocks:** Release & Live Pitch Presentation
+- **Reference Spec:** [`docs/12_screens.md#screen-1-master-corridor-block-command-cockpit`](../12_screens.md#screen-1-master-corridor-block-command-cockpit)
 
 ---
 
 ## 🎯 Objective
-Assemble `src/app/page.tsx`, `src/components/Navbar.tsx`, and `src/components/LocoCameraFeed.tsx` to unify the 3 tactical views:
-1. **View 1: Corridor Planner (Marey String Chart + Demand Triage Queue)**
-2. **View 2: Section Interlocking & Signal Schematic**
-3. **View 3: Loco-Cab Forward Vision HUD (Kavach EBD overlay)**
+Assemble all Developer 1 and Developer 2 components into the Master IRIS AI Command Cockpit (`src/app/page.tsx`) with 3 tactical view switchers, a top navigation bar with rolling horizon tabs (`[24h Tactical]`, `[7D Operational]`, `[30D Strategic]`), and global sanction event handling.
 
 ---
 
 ## 📁 File Manifest
 - **Modify:** `src/app/page.tsx`
 - **Modify:** `src/components/Navbar.tsx`
-- **Modify:** `src/components/LocoCameraFeed.tsx`
-- **Test:** `tests/AppCockpit.test.tsx`
+- **Test:** `tests/MainCockpit.test.tsx`
 
 ---
 
-## 📐 Layout & State Specifications
+## 📐 Layout & Architecture
 
-### Tactical View Switching
-- Primary navigation tab in `Navbar.tsx`:
-  - `[📊 Corridor Planner (Marey)]`
-  - `[🚦 Interlocking Map]`
-  - `[🚆 Loco-Cab HUD (Kavach)]`
-
-### Global Event Bus
-- Sanctioning a block in `IncidentQueue.tsx` or `CorridorStringChart.tsx` triggers:
-  1. Circuit state change in `InterlockingMap.tsx` (`TC-03` turns `BLOCK_SANCTIONED`, Signal `S-12` clamped to `RED`).
-  2. TSR warning overlay in `LocoCameraFeed.tsx` (Speed Limit target clamped to $30\text{ km/h}$).
-  3. Metric update in `KpiStrip.tsx` (Active Blocks incremented, Downtime Saved refreshed).
-  4. Decision Dossier audit logged in `DecisionLogModal.tsx`.
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ NAVBAR: [IRIS AI Auto-BDMS] | [24h Tactical | 7D | 30D] | [Mode: Advisory]     │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ TACTICAL VIEW SWITCHER:                                                                │
+│   [1. Master Corridor Planner]  [2. Interlocking Map]  [3. Cab Vision & Kavach HUD]    │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ KPI STRIP (Dev 2): [38.4% Downtime Saved] [96.2% Availability] [03 Blocks] [08 Demands]│
+├──────────────────────────────────────────────────────────┬─────────────────────────────┤
+│ VIEW 1: CORRIDOR MAREY STRING CHART (Dev 1)              │ DEPARTMENT DEMAND QUEUE     │
+│         Time vs. Distance with Shaded Shadow Blocks      │ (Dev 2): Filter by TMS/SMMS │
+├──────────────────────────────────────────────────────────┴─────────────────────────────┤
+│ MODAL: EXPLAINABLE DECISION DOSSIER (Dev 2)                                            │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🛠️ Implementation Steps (TDD)
 
-- [ ] **Step 1: Write integration tests in `tests/AppCockpit.test.tsx`**
-- [ ] **Step 2: Refactor `src/components/Navbar.tsx`**
-- [ ] **Step 3: Refactor `src/components/LocoCameraFeed.tsx`**
-- [ ] **Step 4: Refactor `src/app/page.tsx`**
-- [ ] **Step 5: Run tests and verify PASS**
+- [ ] **Step 1: Update `src/components/Navbar.tsx`**
+  Add Horizon Switcher buttons and Mode Toggle (`ADVISORY` / `AUTONOMOUS`).
+- [ ] **Step 2: Implement `src/app/page.tsx`**
+  Import and wire:
+  - `KpiStrip` (from `src/components/Overview/KpiStrip`)
+  - `CorridorStringChart` (from `src/components/Planner/CorridorStringChart`)
+  - `IncidentQueue` (from `src/components/Overview/IncidentQueue`)
+  - `InterlockingMap` (from `src/components/Overview/InterlockingMap`)
+  - `LocoCameraFeed` (from `src/components/LocoCameraFeed`)
+  - `DecisionLogModal` (from `src/components/Auditor/DecisionLogModal`)
+- [ ] **Step 3: Wire `handleSanctionBlock(blockId)`**
+  Atomically update interlocking state to `BLOCK_SANCTIONED` and open the Decision Log Modal.
+- [ ] **Step 4: Run full test suite**
   Run `npm test`.
-- [ ] **Step 6: Commit**
-  `git commit -m "feat(cockpit): assemble master IRIS AI 3-view command center and sanction event bus"`
+- [ ] **Step 5: Commit**
+  `git commit -m "feat(cockpit): assemble master 3-view command center and horizon switcher"`
+
+---
+
+## ✅ Acceptance Criteria
+1. Seamless tab switching between the 3 views with zero layout shifts.
+2. Horizon tabs update time scales dynamically.
+3. Sanctioning a block updates interlocking status and displays the SHA-256 decision dossier.
