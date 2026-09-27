@@ -1,5 +1,31 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-27 — Code Review Verification & Physics / Audio / Deceleration Lifecycle Hardening
+
+### Objective
+Systematically verify all CodeRabbit review comments against current active codebase, apply fixes for still-valid issues, skip already-resolved ones with reasons, and validate:
+- **Still-Valid Fixes Applied**:
+  - `src/components/Charts/DecelerationCurve.tsx`: Aligned `tReact` reaction-time multiplier from `1.20` to `1.96` matching `calculateKavachEbd` in `src/lib/agents/kavachBrakingAgent.ts`.
+  - `src/lib/audioAlerts.ts`: Exported `getAudioContext()` so components share the singleton `AudioContext` rather than duplicating local instances.
+  - `src/components/Vision/DefectVisionTelemetry.tsx`: Reused shared `getAudioContext()`, added `activeBrakingScenarioRef` to invalidate stale deceleration actions on scenario change / reset, and decoupled the stabilization notice timeout from `isDecelerating` cleanup.
+- **Skipped / Verified Already-Resolved**:
+  - `src/app/page.tsx`: Gated bundling (`handleDemandSubmit`), block sanction status (`handleSanctionBlock`), `filteredBlocks` horizon filtering, explicit block sanction strip, and live `currentDossier` passing were already implemented.
+  - `src/components/Auditor/AuditorWorkspace.tsx`: Live `currentDossier` prop integration and `{forgedOfficer}` display were already implemented.
+  - `src/components/Charts/TriageDonut.tsx`: `bundlingRatePercent` empty dataset fallback to 0% was already implemented.
+  - `src/components/Requisition/BlockRequisitionModal.tsx`: Raw string `chainageKm`, range bounds validation, and modal timer cleanup were already implemented.
+
+### Files Changed
+- `src/components/Charts/DecelerationCurve.tsx` (Modified)
+- `src/lib/audioAlerts.ts` (Modified)
+- `src/components/Vision/DefectVisionTelemetry.tsx` (Modified)
+- `tracker.md` (Updated)
+
+### Verification
+- `npm test` — 107/107 tests passed across 14 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
 ## 2026-09-27 — Direct Departmental Block Requisition Portal (TDMS / SMMS / TMS)
 
 ### Objective

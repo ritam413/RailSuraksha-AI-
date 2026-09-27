@@ -75,7 +75,7 @@ export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
     const g = 9.81;
     const mu = weatherParams.frictionCoefficient;
     const G = 0.002;
-    const tReact = 1.20 * weatherParams.reactionTimeMultiplier;
+    const tReact = 1.96 * weatherParams.reactionTimeMultiplier;
     const dReact = v0Ms * tReact;
 
     const maxDist = Math.max(1000, Math.ceil((ebdResult.calculatedStoppingDistanceMeters + 150) / 100) * 100);
