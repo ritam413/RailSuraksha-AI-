@@ -60,9 +60,14 @@ export async function fetchWithTimeout<T>(
     }
 
     return (await res.json()) as T;
-  } catch (err) {
+  } catch (err: unknown) {
     if (process.env.NODE_ENV !== 'test') {
-      console.warn(`[IRIS AI API] Offline / Timeout on ${url}. Using local fallback.`, err);
+      const isAbort = (err as Error)?.name === 'AbortError';
+      if (isAbort) {
+        console.warn(`[IRIS AI API] Request timed out on ${url}. Using local fallback.`);
+      } else {
+        console.warn(`[IRIS AI API] Backend offline on ${url}. Using local fallback:`, (err as Error)?.message || err);
+      }
     }
     return structuredClone(fallbackData);
   } finally {

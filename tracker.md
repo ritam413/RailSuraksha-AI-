@@ -5,6 +5,9 @@
 ### Objective
 Systematically verify all CodeRabbit review comments against current active codebase, apply fixes for still-valid issues, skip already-resolved ones with reasons, and validate:
 - **Still-Valid Fixes Applied**:
+  - `backend/main.py`: Added dynamic `sys.path.insert(0, ...)` so `uvicorn backend.main:app` can be run cleanly directly from the repository root.
+  - `.env.local`: Configured `NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1` for instant local backend development.
+  - `src/lib/apiClient.ts`: Cleaned up fallback error logging so timeout aborts log cleanly without stack traces.
   - `src/components/Charts/DecelerationCurve.tsx`: Aligned `tReact` reaction-time multiplier from `1.20` to `1.96` matching `calculateKavachEbd` in `src/lib/agents/kavachBrakingAgent.ts`.
   - `src/lib/audioAlerts.ts`: Exported `getAudioContext()` so components share the singleton `AudioContext` rather than duplicating local instances.
   - `src/components/Vision/DefectVisionTelemetry.tsx`: Reused shared `getAudioContext()`, added `activeBrakingScenarioRef` to invalidate stale deceleration actions on scenario change / reset, and decoupled the stabilization notice timeout from `isDecelerating` cleanup.
