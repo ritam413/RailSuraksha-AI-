@@ -477,20 +477,10 @@ export default function CommandCenterPage() {
   };
 
   /**
-   * Select a circuit and open the mapped platform or vision view, accepting both
-   * TC circuit IDs and legacy BLK IDs. Unmapped IDs leave the current view unchanged.
+   * Select a circuit and update state within the current view.
    */
   const handleTrackSelect = (circuitId: string) => {
     setSelectedTrackId(circuitId);
-    if (circuitId === 'TC-04' || circuitId === 'TC-05' || circuitId === 'BLK-104' || circuitId === 'BLK-105') {
-      setActiveTab('PLATFORM_GATEWAY');
-    } else if (circuitId === 'TC-01' || circuitId === 'BLK-101') {
-      handleSelectScenario(SCENARIOS.BOULDER_CRITICAL);
-      setActiveTab('VISION_TELEMETRY');
-    } else if (circuitId === 'TC-03' || circuitId === 'BLK-103') {
-      handleSelectScenario(SCENARIOS.CATTLE_WARNING);
-      setActiveTab('VISION_TELEMETRY');
-    }
   };
 
   const isCorridorPlanner = activeTab === 'CORRIDOR_PLANNER' || activeTab === 'OVERVIEW';

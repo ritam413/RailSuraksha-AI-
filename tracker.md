@@ -1,5 +1,39 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-27 — 3-Aspect Traffic Signal Head (Orange/Yellow, Green, Red) & Track Section Navigation Fix
+
+### Objective
+1. Convert the traffic signal heads on the Interlocking Track Circuit Schematic (Screen 2) from a 4-lamp vertical housing to standard 3-aspect signalling (Yellow/Orange Caution on top, Green Proceed in middle, Red Danger on bottom).
+2. Fix track circuit section selection behavior where clicking on track circuit cards (`TC-01`, `TC-03`, `TC-04`, `TC-05`) unexpectedly switched tabs and opened other screens (such as Platform Gateway CCTV or Defect Vision & Telemetry) instead of remaining in the current view.
+
+### Changes Made
+- **`src/components/Common/SignalHead.tsx`**:
+  - Replaced 4 vertical LED apertures with 3 LED apertures:
+    1. Top: Yellow/Orange Caution (`aspect-yellow-active`, `#F59E0B`).
+    2. Middle: Green Proceed (`aspect-green-active`, `#10B981`).
+    3. Bottom: Red Danger (`aspect-red-active`, `#EF4444`).
+  - Added `e.stopPropagation()` on signal head `onClick` and `onKeyDown` to prevent click bubbling into parent circuit cards when toggling signal aspects.
+- **`src/app/page.tsx`**:
+  - Simplified `handleTrackSelect` to update `selectedTrackId` within the current view without auto-switching `activeTab`.
+- **`tests/InterlockingMap.test.tsx`**:
+  - Updated unit tests to assert the 3-aspect LED states (`RED`, `YELLOW`, `GREEN`).
+
+### Files Changed
+- `src/components/Common/SignalHead.tsx` (Modified)
+- `src/app/page.tsx` (Modified)
+- `tests/InterlockingMap.test.tsx` (Modified)
+- `tracker.md` (Updated)
+
+### Verification
+- `npm test` — 14/14 test files passed, 108/108 unit and integration tests passed (100%).
+- `npx tsc --noEmit` — 0 TypeScript compiler errors.
+
+### Current State
+- Signal heads render with 3 lights (Orange/Yellow, Green, Red).
+- Clicking any track circuit card selects and highlights that section and inspects it in the deep-dive drawer without switching tabs or navigating away.
+
+---
+
 ## 2026-09-27 — Code Review Verification & Physics / Audio / Deceleration Lifecycle Hardening
 
 ### Objective
