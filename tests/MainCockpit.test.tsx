@@ -72,9 +72,9 @@ describe('TICKET-DEV1-07: Master Cockpit Assembly & Horizon Switcher', () => {
       const html = renderToStaticMarkup(<CommandCenterPage />);
 
       // KPI Strip metrics
-      expect(html).toContain('Active Trains');
-      expect(html).toContain('Track Circuits');
-      expect(html).toContain('Signals Active');
+      expect(html).toContain('Corridor Downtime Saved');
+      expect(html).toContain('Track Availability Index');
+      expect(html).toContain('Active Corridor Blocks');
 
       // Marey String Chart elements
       expect(html).toContain('Corridor Time-Distance String Chart');
