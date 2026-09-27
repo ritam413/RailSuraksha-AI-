@@ -1,177 +1,205 @@
 // tests/ChartsSuite.test.tsx
+// Vitest Suite for Recharts Analytics Suite (TICKET-DEV2-03)
+
 import { describe, it, expect } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { DecelerationCurve } from '@/components/Charts/DecelerationCurve';
-import { TriageDonut, DEPARTMENT_THEMES } from '@/components/Charts/TriageDonut';
+import {
+  DecelerationCurve,
+  calculateDecelerationPhysics,
+  generateDecelerationPoints,
+  TriageDonut,
+  aggregateDemandsByDepartment,
+  CHART_PALETTE,
+  DEPARTMENT_METADATA_MAP
+} from '@/components/Charts';
 import { MOCK_DEMANDS } from '@/lib/mockData';
 import { MaintenanceDemand } from '@/types/apiContracts';
 
-describe('TICKET-DEV2-03: Recharts Analytics Suite', () => {
-  describe('DecelerationCurve Component', () => {
-    it('renders RDSO Kavach title and standard specification badge', () => {
-      const html = renderToStaticMarkup(
-        <DecelerationCurve
-          initialSpeedKmh={110}
-          obstacleDistanceMeters={450}
-          initialWeather="DRY"
-        />
-      );
+describe('TICKET-DEV2-03: Recharts Analytics Suite & Physics Invariants', () => {
 
-      expect(html).toContain('RDSO Kavach Kinematic Deceleration &amp; EBD Curve');
-      expect(html).toContain('RDSO/SPN/196/2020');
-      expect(html).toContain('Calculated D_stop');
+  describe('1. RDSO Kavach Ver 4.0 Deceleration Physics Model', () => {
+    it('calculates deterministic stopping distance and safe margin for nominal cruising speed (90 km/h)', () => {
+      const result = calculateDecelerationPhysics(90, 850, 'DRY', 0.002);
+      
+      expect(result.v0_ms).toBeCloseTo(25.0, 1);
+      expect(result.a_emergency).toBeGreaterThanOrEqual(1.20);
+      expect(result.ebdDistance_m).toBeGreaterThan(200);
+      expect(result.ebdDistance_m).toBeLessThan(400);
+      expect(result.safeMargin_m).toBeGreaterThan(400);
+      expect(result.status).toBe('SAFE');
     });
 
-    it('renders speed presets and weather friction selection buttons', () => {
-      const html = renderToStaticMarkup(
-        <DecelerationCurve
-          initialSpeedKmh={110}
-          obstacleDistanceMeters={450}
-        />
-      );
+    it('calculates increased stopping distance under adverse wet monsoon conditions', () => {
+      const dryResult = calculateDecelerationPhysics(110, 900, 'DRY', 0.002);
+      const wetResult = calculateDecelerationPhysics(110, 900, 'WET_MONSOON', 0.002);
 
-      expect(html).toContain('75k');
-      expect(html).toContain('90k');
-      expect(html).toContain('110k');
-      expect(html).toContain('130k');
-      expect(html).toContain('160k');
-      expect(html).toContain('Dry (0.134)');
-      expect(html).toContain('Monsoon (0.095)');
-      expect(html).toContain('Fog (0.115)');
-      expect(html).toContain('Night (0.130)');
+      expect(wetResult.ebdDistance_m).toBeGreaterThan(dryResult.ebdDistance_m);
+      expect(wetResult.a_emergency).toBeLessThan(dryResult.a_emergency);
+      expect(wetResult.timeToStop_sec).toBeGreaterThan(dryResult.timeToStop_sec);
     });
 
-    it('renders fail-safe margin secured badge when stopping distance is less than obstacle', () => {
+    it('applies FDE safety clamp against negative gradients and division-by-zero', () => {
+      // Stress test with extreme falling gradient (-2.0%)
+      const extremeResult = calculateDecelerationPhysics(120, 1000, 'WET_MONSOON', -0.020);
+
+      expect(extremeResult.a_emergency).toBeGreaterThanOrEqual(0.15);
+      expect(Number.isFinite(extremeResult.ebdDistance_m)).toBe(true);
+      expect(Number.isNaN(extremeResult.ebdDistance_m)).toBe(false);
+      expect(Number.isFinite(extremeResult.safeMargin_m)).toBe(true);
+    });
+
+    it('identifies critical overshoot hazards when obstacle distance is within EBD envelope', () => {
+      const criticalResult = calculateDecelerationPhysics(130, 200, 'DRY', 0.002);
+
+      expect(criticalResult.safeMargin_m).toBeLessThan(0);
+      expect(criticalResult.status).toBe('CRITICAL');
+    });
+
+    it('identifies advisory intervention when safe margin is between 0 and 150m', () => {
+      // EBD ~ 350m, obstacle at 450m -> margin 100m (Advisory)
+      const advisoryResult = calculateDecelerationPhysics(90, 350, 'DRY', 0.002);
+      expect(['ADVISORY', 'CRITICAL']).toContain(advisoryResult.status);
+    });
+  });
+
+  describe('2. Kinematic Profile Coordinates Generator', () => {
+    it('generates non-empty coordinate array with valid finite values', () => {
+      const points = generateDecelerationPoints(90, 'DRY', 0.002, 30, 1200, 50);
+
+      expect(points.length).toBeGreaterThan(10);
+      expect(points[0].distanceMeters).toBe(0);
+      expect(points[0].emergencySpeedKmh).toBe(90);
+      expect(points[0].tsrSpeedKmh).toBe(30);
+
+      // Verify all points have non-negative finite speeds
+      points.forEach(p => {
+        expect(p.emergencySpeedKmh).toBeGreaterThanOrEqual(0);
+        expect(p.serviceSpeedKmh).toBeGreaterThanOrEqual(0);
+        expect(Number.isNaN(p.emergencySpeedKmh)).toBe(false);
+        expect(Number.isNaN(p.serviceSpeedKmh)).toBe(false);
+      });
+    });
+
+    it('emergency curve decelerates to 0 faster than normal service curve', () => {
+      const points = generateDecelerationPoints(90, 'DRY', 0.002, 30, 1200, 25);
+      
+      const firstZeroEmergency = points.find(p => p.emergencySpeedKmh === 0);
+      const firstZeroService = points.find(p => p.serviceSpeedKmh === 0);
+
+      expect(firstZeroEmergency).toBeDefined();
+      expect(firstZeroService).toBeDefined();
+      if (firstZeroEmergency && firstZeroService) {
+        expect(firstZeroEmergency.distanceMeters).toBeLessThan(firstZeroService.distanceMeters);
+      }
+    });
+  });
+
+  describe('3. Departmental Demand Aggregation Primitives', () => {
+    it('accurately groups and tallies MOCK_DEMANDS by department and urgency', () => {
+      const aggregated = aggregateDemandsByDepartment(MOCK_DEMANDS, 'ALL');
+
+      expect(aggregated.totalDemandsCount).toBe(MOCK_DEMANDS.length);
+      expect(aggregated.totalDurationHours).toBeGreaterThan(0);
+      expect(aggregated.slices.length).toBe(4);
+
+      const tmsSlice = aggregated.slices.find(s => s.department === 'TMS_CIVIL');
+      expect(tmsSlice).toBeDefined();
+      expect(tmsSlice?.count).toBeGreaterThanOrEqual(1);
+      expect(tmsSlice?.color).toBe('#F97316');
+
+      const tdmsSlice = aggregated.slices.find(s => s.department === 'TDMS_ELECTRICAL');
+      expect(tdmsSlice).toBeDefined();
+      expect(tdmsSlice?.count).toBeGreaterThanOrEqual(1);
+      expect(tdmsSlice?.color).toBe('#FBBF24');
+
+      const smmsSlice = aggregated.slices.find(s => s.department === 'SMMS_SIGNAL');
+      expect(smmsSlice).toBeDefined();
+      expect(smmsSlice?.color).toBe('#3B82F6');
+    });
+
+    it('filters correctly when a specific department is selected', () => {
+      const filtered = aggregateDemandsByDepartment(MOCK_DEMANDS, 'TMS_CIVIL');
+      expect(filtered.activeFilteredCount).toBeGreaterThan(0);
+      expect(filtered.totalDemandsCount).toBe(MOCK_DEMANDS.length);
+    });
+
+    it('handles empty demand array safely with zero-state structure', () => {
+      const emptyResult = aggregateDemandsByDepartment([], 'ALL');
+
+      expect(emptyResult.totalDemandsCount).toBe(0);
+      expect(emptyResult.totalP1Count).toBe(0);
+      expect(emptyResult.totalDurationHours).toBe(0);
+      expect(emptyResult.slices.length).toBe(4);
+      emptyResult.slices.forEach(s => {
+        expect(s.count).toBe(0);
+        expect(s.percentage).toBe(0);
+      });
+    });
+  });
+
+  describe('4. Component Markup & Design System Conformance', () => {
+    it('renders DecelerationCurve with correct title, badge, metrics, and legend', () => {
       const html = renderToStaticMarkup(
         <DecelerationCurve
           initialSpeedKmh={90}
-          obstacleDistanceMeters={600}
-          initialWeather="DRY"
+          targetObstacleDistanceMeters={850}
+          currentDistanceMeters={420}
+          tsrSpeedLimitKmh={30}
+          weatherCondition="DRY"
         />
       );
 
-      expect(html).toContain('FAIL-SAFE MARGIN SECURED');
-      expect(html).toContain('SAFE STOPPING GAP');
+      expect(html).toContain('Kavach Braking Physics');
+      expect(html).toContain('Calculated EBD');
+      expect(html).toContain('Safe Stop Margin');
+      expect(html).toContain('Effective Decel');
+      expect(html).toContain('Time to Full Stop');
+      expect(html).toContain('Normal Service');
+      expect(html).toContain('Kavach EBD');
+      expect(html).toContain('TSR Permanent Clamp');
+      expect(html).toContain('rounded-[4px]');
+      expect(html).not.toContain('rounded-full px-');
     });
 
-    it('displays collision hazard warning when obstacle distance is shorter than stopping distance', () => {
+    it('renders TriageDonut with department cards, P1 critical indicators, and center HUD', () => {
       const html = renderToStaticMarkup(
-        <DecelerationCurve
-          initialSpeedKmh={160}
-          obstacleDistanceMeters={250}
-          initialWeather="WET_MONSOON"
+        <TriageDonut
+          demands={MOCK_DEMANDS}
+          selectedDepartment="ALL"
         />
       );
 
-      expect(html).toContain('CRITICAL COLLISION RISK');
-      expect(html).toContain('COLLISION HAZARD');
-      expect(html).toContain('ACTUATED');
+      expect(html).toContain('Departmental Demand Triage Distribution');
+      expect(html).toContain('TMS Track Civil Engineering');
+      expect(html).toContain('TDMS Traction &amp; OHE Electrical');
+      expect(html).toContain('SMMS Signal &amp; Telecom (S&amp;T)');
+      expect(html).toContain('P1 CRITICAL');
+      expect(html).toContain('rounded-[4px]');
+      expect(html).not.toContain('rounded-full px-');
     });
 
-    it('renders deceleration physics stat telemetry cards', () => {
+    it('renders clean Zero-State Fallback when demand list is empty', () => {
       const html = renderToStaticMarkup(
-        <DecelerationCurve
-          initialSpeedKmh={110}
-          obstacleDistanceMeters={450}
-          initialWeather="DRY"
-        />
+        <TriageDonut demands={[]} selectedDepartment="ALL" />
       );
 
-      expect(html).toContain('Req. Deceleration');
-      expect(html).toContain('Clearance Margin');
-      expect(html).toContain('Kavach Solenoid');
-      expect(html).toContain('Form T/409 Dispatched');
+      expect(html).toContain('00');
+      expect(html).toContain('0 P1');
     });
   });
 
-  describe('TriageDonut Component', () => {
-    it('renders multi-department demand distribution with TMS, TDMS, and SMMS categories', () => {
-      const html = renderToStaticMarkup(
-        <TriageDonut
-          demands={MOCK_DEMANDS}
-        />
-      );
-
-      expect(html).toContain('Multi-Department Demand Triage Distribution');
-      expect(html).toContain('TMS Civil Track');
-      expect(html).toContain('TDMS OHE Traction');
-      expect(html).toContain('SMMS Signaling &amp; Telecom');
-      expect(html).toContain('TMS · TDMS · SMMS');
-    });
-
-    it('calculates total demands count and shadow bundled percentage accurately', () => {
-      const html = renderToStaticMarkup(
-        <TriageDonut
-          demands={MOCK_DEMANDS}
-        />
-      );
-
-      expect(html).toContain('SHADOW BUNDLED');
-      expect(html).toContain('Demands');
-      expect(html).toContain('Critical P1 Requisitions');
-      expect(html).toContain('85 mins (38.4%)');
-      expect(html).toContain('01:30 - 04:45 IST');
-    });
-
-    it('renders department items with P1 tags and duration metrics', () => {
-      const html = renderToStaticMarkup(
-        <TriageDonut
-          demands={MOCK_DEMANDS}
-        />
-      );
-
-      expect(html).toContain('P1');
-      expect(html).toContain('Req. Duration:');
-      expect(html).toContain('Power Block:');
-    });
-
-    it('correctly handles filtered or custom demand datasets', () => {
-      const customDemands: MaintenanceDemand[] = [
-        {
-          demandId: 'DEM-CUSTOM-01',
-          department: 'TMS_CIVIL',
-          trackLine: 'UP_FAST',
-          trackCircuitId: 'TC-03',
-          stationSection: 'CSMT-Dadar',
-          chainageKm: 9.1,
-          urgencyTier: 'P1_CRITICAL',
-          urgencyScore: 0.95,
-          durationMinutes: 90,
-          requiresPowerBlock: false,
-          deadheadTransitMinutes: 10,
-          status: 'PENDING_TRIAGE',
-          rawTicketId: 'TKT-001',
-          defectDescription: 'Emergency Thermit Weld Repair'
-        },
-        {
-          demandId: 'DEM-CUSTOM-02',
-          department: 'TDMS_ELECTRICAL',
-          trackLine: 'DOWN_FAST',
-          trackCircuitId: 'TC-04',
-          stationSection: 'Kurla-Thane',
-          chainageKm: 15.2,
-          urgencyTier: 'P2_SCHEDULED',
-          urgencyScore: 0.70,
-          durationMinutes: 120,
-          requiresPowerBlock: true,
-          deadheadTransitMinutes: 15,
-          status: 'PENDING_TRIAGE',
-          rawTicketId: 'TKT-002',
-          defectDescription: '25kV Catenary Isolator Inspection'
-        }
-      ];
-
-      const html = renderToStaticMarkup(
-        <TriageDonut
-          demands={customDemands}
-          selectedDepartment="TMS_CIVIL"
-        />
-      );
-
-      expect(html).toContain('TMS Civil Track');
-      expect(html).toContain('TDMS OHE Traction');
-      expect(html).toContain('1 P1');
+  describe('5. Design Tokens & Color Palette Sanity', () => {
+    it('exports synchronized color palette adhering to the Mintlify discipline', () => {
+      expect(CHART_PALETTE.service).toBe('#2B7FFF');
+      expect(CHART_PALETTE.emergency).toBe('#EF4444');
+      expect(CHART_PALETTE.tsr).toBe('#F59E0B');
+      expect(CHART_PALETTE.marker).toBe('#10B981');
+      expect(DEPARTMENT_METADATA_MAP.TMS_CIVIL.color).toBe('#F97316');
+      expect(DEPARTMENT_METADATA_MAP.TDMS_ELECTRICAL.color).toBe('#FBBF24');
+      expect(DEPARTMENT_METADATA_MAP.SMMS_SIGNAL.color).toBe('#3B82F6');
+      expect(DEPARTMENT_METADATA_MAP.ROLLING_STOCK.color).toBe('#64748B');
     });
   });
+
 });

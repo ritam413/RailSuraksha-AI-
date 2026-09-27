@@ -84,8 +84,8 @@ describe('TICKET-DEV1-07: Master Cockpit Assembly & Horizon Switcher', () => {
       expect(html).toContain('White-Corridor: 01:30 - 04:45 IST');
 
       // AI Incident / Demand Queue
-      expect(html).toContain('AI Triage Incident Queue');
-      expect(html).toContain('Pending Approval');
+      expect(html).toContain('Maintenance Demand Queue');
+      expect(html).toContain('Demands');
     });
 
     it('renders peripheral analytics tabs (Triage Donut & Deceleration Curve)', () => {

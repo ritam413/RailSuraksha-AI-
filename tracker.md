@@ -1,5 +1,29 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-28 — Merge origin/dev2 into main (Demand Triage Queue & Recharts Analytics Suite)
+
+### Objective
+Merge remote branch `origin/dev2` into `main`, resolve merge conflicts in the Recharts Analytics suite, and verify full test suite integrity across all 20 test suites.
+
+### Changes Made
+- Merged `origin/dev2` into `main`.
+- Resolved conflicts in:
+  - `src/components/Charts/DecelerationCurve.tsx` (Adopted complete physics and Recharts component from Dev2).
+  - `src/components/Charts/TriageDonut.tsx` (Adopted departmental demand aggregation and Recharts Donut from Dev2).
+  - `src/components/Charts/index.ts` (Barrel export of types, functions, and components).
+  - `tests/ChartsSuite.test.tsx` (Comprehensive 14-test verification of Kavach physics, coordinate generator, demand aggregation, and design tokens).
+- Integrated `UrgencyBadge.tsx`, `DemandRowItem.tsx`, `IncidentQueue.tsx` enhancements, and `tests/IncidentQueue.test.tsx`.
+- Updated `tests/MainCockpit.test.tsx` assertions to match the updated `Maintenance Demand Queue` component text.
+
+### Verification
+- `npm test` (`npx vitest run`) — 20/20 test files passed, 146/146 unit & integration tests passed (100%).
+
+### Current State
+- `origin/dev2` is completely merged into local `main`. All 20 test files pass cleanly.
+
+### Next Agent Instructions
+- Ready to push merged `main` branch to remote `origin/main` when requested.
+
 ## 2026-09-27 — TICKET-04 Complete: 3D Holographic Cryptographic Audit Seal & Tamper Engine (/tdd + /impeccable + /addyosmani-perf)
 
 ### Objective
