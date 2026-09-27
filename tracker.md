@@ -1,5 +1,24 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-27 — Safety Validation & Ground Execution Verification Report (Anti-Ghost Block Research)
+
+### Objective
+Document comprehensive safety validation and research in `safety_validate_report.md` covering:
+1. Standard 3-Aspect Colour Light Signalling (SEM Part II & GR 3.08) with Yellow (Caution), Green (Clear), and Red (Danger/Lockout).
+2. Non-disruptive track circuit section inspection on the Interlocking Map.
+3. Multi-Modal Ground Execution Verification Engine (Anti-Ghost Block Audit):
+   - GPS Geofencing radius validation ($\pm 100\text{m}$) preventing unauthorized/remote fake check-ins.
+   - YOLOv11 Computer Vision processing on-site field photos for worker headcount, PPE compliance, and heavy machinery detection.
+   - 25kV OHE physical discharge earthing rod sensor telemetry ($\Delta_{\text{earth}} \ge 10\text{m}$).
+   - Automated Section Controller warning & emergency lockout revocation workflow for unverified idle blocks.
+4. RFC 8785 SHA-256 cryptographic audit trail and RDSO Form 14B certificate integration.
+
+### Files Created / Changed
+- `safety_validate_report.md` (Created)
+- `tracker.md` (Updated)
+
+---
+
 ## 2026-09-27 — 3-Aspect Traffic Signal Head (Orange/Yellow, Green, Red) & Track Section Navigation Fix
 
 ### Objective
