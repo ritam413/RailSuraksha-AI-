@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IRIS AI — 3D WebGL Digital Twin & Immersion Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js & OrbitControls from reliable CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clayBg: '#F0F6FC',
+            signalBlue: '#2B7FFF',
+            inkSlate: '#0F172A',
+            mutedSlate: '#486581',
+            borderSlate: '#D0DFEE',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #F0F6FC;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .mint-card {
+      background: #FFFFFF;
+      border: 1px solid #D0DFEE;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px -2px rgba(43, 127, 255, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+    .mint-inset {
+      background: #F4F8FD;
+      border: 1px solid #D0DFEE;
+      border-radius: 12px;
+    }
+    .btn-action {
+      transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease, box-shadow 160ms ease;
+    }
+    .btn-action:active {
+      transform: scale(0.97);
+    }
+    .viewport-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: radial-gradient(circle at 50% 30%, #151e2e 0%, #080c14 100%);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #233348;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    /* Scanline & grid HUD overlay */
+    .hud-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(rgba(43, 127, 255, 0.03) 50%, rgba(0, 0, 0, 0.22) 50%);
+      background-size: 100% 4px;
+    }
+  </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8 min-h-screen">
+
+  <!-- HEADER -->
+  <header class="max-w-7xl mx-auto w-full mb-6 mint-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-signalBlue text-white flex items-center justify-center font-extrabold text-2xl shadow-md">
+        🔮
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">RailSuraksha AI — 3D WebGL Digital Twin Experience</h1>
+          <span class="px-2.5 py-0.5 text-xs font-black text-signalBlue bg-blue-50 border border-blue-200 rounded mono">THREE.JS / WEBGL</span>
+        </div>
+        <p class="text-xs text-mutedSlate font-medium">Interactive Spatial Digital Twins for SIH-26027: USFD Ultrasonics, Point Turnout Interlocking & Kavach TCAS</p>
+      </div>
+    </div>
+
+    <!-- MODULE SWITCHER TABS -->
+    <div class="flex flex-wrap items-center gap-2 mint-inset p-1.5 w-full md:w-auto">
+      <button onclick="switch3DModule('flaw', this)" class="mod-tab px-3.5 py-2 text-xs font-black bg-signalBlue text-white rounded btn-action">
+        🔬 1. USFD Volumetric Rail Hologram
+      </button>
+      <button onclick="switch3DModule('switch', this)" class="mod-tab px-3.5 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate rounded btn-action">
+        🔀 2. 3D Point Switch Turnout (SW-04)
+      </button>
+      <button onclick="switch3DModule('cab', this)" class="mod-tab px-3.5 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate rounded btn-action">
+        ⚡ 3. Kavach 3D Deceleration Run
+      </button>
+      <button onclick="switch3DModule('seal', this)" class="mod-tab px-3.5 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate rounded btn-action">
+        🛡️ 4. SHA-256 Tamper Seal
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT 7 COLS: 3D INTERACTIVE VIEWPORT -->
+    <div class="lg:col-span-7 mint-card p-5 flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="module-title" class="font-extrabold text-sm text-inkSlate">1. Ultrasonic USFD Volumetric Rail Fracture Hologram (UIC-60 Section)</span>
+        </div>
+        <span class="text-[11px] font-mono text-mutedSlate bg-slate-100 px-2.5 py-0.5 rounded border border-slate-200">
+          🖱️ Orbit (Drag) • Zoom (Scroll) • Pan (Right-Click)
+        </span>
+      </div>
+
+      <!-- 3D CANVAS VIEWPORT -->
+      <div class="viewport-container" id="canvas-container">
+        <div class="hud-overlay"></div>
+        <canvas id="webgl-canvas"></canvas>
+
+        <!-- FLOATING OVERLAY HUD GAUGES -->
+        <div id="hud-stats" class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur-md text-white p-3.5 rounded-xl border border-blue-500/30 text-xs font-mono max-w-[280px] shadow-2xl">
+          <div class="text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+            <span>USFD Telemetry Matrix</span>
+            <span class="text-[9px] bg-blue-900/60 text-blue-300 px-1.5 py-0.5 rounded">A-SCAN LIVE</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-700/50"><span>Flaw Type:</span> <span id="hud-flaw-type" class="text-amber-400 font-bold">Transverse (IMR-804)</span></div>
+          <div class="flex justify-between py-1 border-b border-slate-700/50"><span>Location:</span> <span class="text-white">Dadar UP Fast (KM 9/2)</span></div>
+          <div class="flex justify-between py-1 border-b border-slate-700/50"><span>Severity:</span> <span id="hud-severity-badge" class="text-rose-400 font-black">IMR DEFECT (EMERGENCY)</span></div>
+          <div class="flex justify-between pt-1"><span>Crack Depth:</span> <span id="hud-crack-depth" class="text-rose-400 font-bold">14.2 mm / 38% Head</span></div>
+        </div>
+
+        <!-- FLOATING STATUS BADGE -->
+        <div id="hud-badge" class="absolute bottom-3 right-3 bg-slate-900/85 backdrop-blur-md text-emerald-300 px-3.5 py-2 rounded-xl border border-emerald-500/40 text-xs font-mono font-bold flex items-center gap-2 shadow-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="hud-badge-text">IRPWM 2020 CLASSIFICATION: IMR CLAMP</span>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE CONTROLS BAR -->
+      <div id="interactive-controls" class="mt-4 p-4 mint-inset flex flex-wrap items-center justify-between gap-3">
+        <!-- Dynamically injected controls per module -->
+      </div>
+    </div>
+
+    <!-- RIGHT 5 COLS: EMIL KOWALSKI CRAFT AUDIT & WHY 3D WINS -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+
+      <!-- VALUE COMPARISON CARD -->
+      <div class="mint-card p-5">
+        <h2 class="text-sm font-extrabold text-inkSlate uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>⚖️</span> 2D Flat UI vs. 3D WebGL Digital Twin
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="border-b border-borderSlate bg-slate-50 font-bold text-mutedSlate">
+                <th class="p-2">Subsystem</th>
+                <th class="p-2 text-slate-500">2D Flat View</th>
+                <th class="p-2 text-signalBlue">3D WebGL Digital Twin</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-borderSlate/60 text-slate-700 font-medium">
+              <tr>
+                <td class="p-2 font-bold text-inkSlate">USFD Flaw Inspection</td>
+                <td class="p-2 text-slate-500">Static 2D photo with flat rectangle overlay</td>
+                <td class="p-2 text-emerald-700 font-semibold bg-emerald-50/50">360° Volumetric X-Ray cross-section with live acoustic wave pulses</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold text-inkSlate">Yard Point Interlocking</td>
+                <td class="p-2 text-slate-500">Static green/red circuit diagram lines</td>
+                <td class="p-2 text-emerald-700 font-semibold bg-emerald-50/50">Physical tongue rail slide throw + 5-lamp feather route indicator</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold text-inkSlate">Kavach TCAS Decel</td>
+                <td class="p-2 text-slate-500">Static 2D X/Y Cartesian line plot</td>
+                <td class="p-2 text-emerald-700 font-semibold bg-emerald-50/50">Continuous forward locomotive perspective run (110k $\to$ 30k clamp)</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold text-inkSlate">Auditor Tamper Proof</td>
+                <td class="p-2 text-slate-500">Plain text SHA-256 string</td>
+                <td class="p-2 text-emerald-700 font-semibold bg-emerald-50/50">Embossed rotating gold seal with real-time glitch tamper detection</td>
+              </tr>
+              <tr>
+                <td class="p-2 font-bold text-inkSlate">Mission Readiness</td>
+                <td class="p-2 text-slate-500">Conventional admin portal</td>
+                <td class="p-2 text-signalBlue font-extrabold bg-blue-50/50">Frontier Indian Railways Mission Control 🚀</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DESIGN ENGINEERING PRINCIPLES CARD -->
+      <div class="mint-card p-5 flex-1 flex flex-col justify-between">
+        <div>
+          <h3 class="text-sm font-extrabold text-inkSlate uppercase tracking-wider mb-2 flex items-center gap-2">
+            <span>✨</span> Emil Kowalski Craft & Motion Principles
+          </h3>
+          <p class="text-xs text-mutedSlate mb-3 leading-relaxed">
+            3D in RailSuraksha AI is built for <strong>situational awareness</strong>. Heavy mechanical systems (switches, rails, locomotives) feel alive through inertia, spring physics, and true volumetric geometry.
+          </p>
+
+          <div class="space-y-2.5">
+            <div class="p-2.5 rounded-lg bg-blue-50/80 border border-blue-200/60 text-xs">
+              <span class="font-bold text-signalBlue block mb-0.5">1. Physical Mechanical Kinematics</span>
+              <span class="text-slate-600">Switch tongue rails and motor rods smoothly travel with mechanical spring damping, reflecting actual 115mm stroke clearance.</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/60 text-xs">
+              <span class="font-bold text-emerald-800 block mb-0.5">2. Volumetric Depth Perception</span>
+              <span class="text-slate-600">Track engineers can inspect internal fissure propagation inside the rail web/head before catastrophic transverse rail fracture.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-borderSlate flex items-center justify-between text-xs font-mono">
+          <span class="text-mutedSlate">Shader: PBR Metalness + Emissive Bloom</span>
+          <span class="text-signalBlue font-bold">FPS: 60.0 (GPU Hardware Accelerated)</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT: THREE.JS 3D SCENE MANAGER -->
+  <script>
+    let currentModule = 'flaw';
+    let scene, camera, renderer, controls, animationId;
+    let animatedMeshes = [];
+    let state = {
+      // Module 1 (USFD)
+      flawType: 'TRANSVERSE', // 'TRANSVERSE', 'THERMITE_VOID', 'HEAD_WEB_SPLIT'
+      crackDepth: 14.2,
+      xrayMode: true,
+      scanActive: true,
+      probeX: 0,
+      probeDir: 1,
+
+      // Module 2 (Yard Switch SW-04)
+      switchPosition: 'NORMAL', // 'NORMAL' or 'REVERSE'
+      switchProgress: 0, // 0 (NORMAL) to 1 (REVERSE)
+      isSwitching: false,
+      lockoutActive: false,
+      trainPassing: false,
+      wheelsetZ: -12,
+
+      // Module 3 (Kavach Deceleration) - PRESERVED EXACTLY
+      trainSpeed: 110,
+      isBraking: false,
+
+      // Module 4 (SHA-256 Seal)
+      sealTampered: false
+    };
+
+    const canvas = document.getElementById('webgl-canvas');
+    const container = document.getElementById('canvas-container');
+
+    function initThree() {
+      // Scene
+      scene = new THREE.Scene();
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      camera.position.set(0, 3, 7);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+
+      // Controls
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      window.addEventListener('resize', onWindowResize);
+      loadModuleScene('flaw');
+      animate();
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function clearScene() {
+      animatedMeshes = [];
+      while(scene.children.length > 0){ 
+        const obj = scene.children[0];
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+          else obj.material.dispose();
+        }
+        scene.remove(obj); 
+      }
+      // Re-add standard lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
+      dirLight.position.set(6, 12, 8);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      scene.add(dirLight);
+
+      const fillLight = new THREE.DirectionalLight(0x90cdf4, 0.6);
+      fillLight.position.set(-6, 4, -4);
+      scene.add(fillLight);
+    }
+
+    /* =========================================================================
+       MODULE 1: UPGRADED USFD VOLUMETRIC RAIL FLAW HOLOGRAPHIC INSPECTOR
+    ========================================================================= */
+    function buildRailFlawScene() {
+      camera.position.set(2.5, 2.2, 4.2);
+      controls.target.set(0, 0.2, 0);
+
+      // 1. Concrete Sleeper Base with Chamfered Edges
+      const sleeperGeo = new THREE.BoxGeometry(4.8, 0.45, 1.4);
+      const sleeperMat = new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        roughness: 0.85,
+        metalness: 0.1
+      });
+      const sleeper = new THREE.Mesh(sleeperGeo, sleeperMat);
+      sleeper.position.set(0, -0.75, 0);
+      sleeper.receiveShadow = true;
+      scene.add(sleeper);
+
+      // Fasteners (Pandrol Elastic Rail Clips)
+      const clipMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.3 });
+      const leftClip1 = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.05, 8, 16, Math.PI), clipMat);
+      leftClip1.rotation.x = Math.PI / 2;
+      leftClip1.position.set(-0.85, -0.5, 0.4);
+      scene.add(leftClip1);
+
+      const leftClip2 = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.05, 8, 16, Math.PI), clipMat);
+      leftClip2.rotation.x = -Math.PI / 2;
+      leftClip2.position.set(0.85, -0.5, 0.4);
+      scene.add(leftClip2);
+
+      // 2. High-Fidelity UIC-60 Rail Extrusion
+      const railShape = new THREE.Shape();
+      // Base foot flange (150mm standard scaled)
+      railShape.moveTo(-1.1, -0.5);
+      railShape.lineTo(1.1, -0.5);
+      railShape.lineTo(1.0, -0.3);
+      railShape.lineTo(0.22, -0.15);
+      // Web (16.5mm standard scaled)
+      railShape.lineTo(0.18, 0.55);
+      // Head (72mm standard scaled)
+      railShape.lineTo(0.75, 0.65);
+      railShape.lineTo(0.75, 1.15);
+      railShape.lineTo(-0.75, 1.15);
+      railShape.lineTo(-0.75, 0.65);
+      // Left Web & Base
+      railShape.lineTo(-0.18, 0.55);
+      railShape.lineTo(-0.22, -0.15);
+      railShape.lineTo(-1.0, -0.3);
+      railShape.closePath();
+
+      const extrudeSettings = { depth: 5.5, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.03, bevelThickness: 0.03 };
+      const railGeo = new THREE.ExtrudeGeometry(railShape, extrudeSettings);
+      railGeo.center();
+
+      const railMat = new THREE.MeshStandardMaterial({
+        color: state.xrayMode ? 0x38bdf8 : 0x64748b,
+        metalness: state.xrayMode ? 0.3 : 0.92,
+        roughness: state.xrayMode ? 0.1 : 0.22,
+        transparent: true,
+        opacity: state.xrayMode ? 0.42 : 0.95,
+        wireframe: false
+      });
+      const railMesh = new THREE.Mesh(railGeo, railMat);
+      railMesh.castShadow = true;
+      railMesh.receiveShadow = true;
+      scene.add(railMesh);
+      animatedMeshes.push({ mesh: railMesh, type: 'rail-body' });
+
+      // 3. Volumetric Internal Flaw Mesh (Depending on type)
+      let flawMesh;
+      if (state.flawType === 'TRANSVERSE') {
+        // Internal Transverse Fracture Disc in Rail Head
+        const flawGeo = new THREE.CylinderGeometry(0.55, 0.5, 0.1, 24);
+        const flawMat = new THREE.MeshStandardMaterial({
+          color: 0xff0033,
+          emissive: 0xff0033,
+          emissiveIntensity: 2.2,
+          roughness: 0.1
+        });
+        flawMesh = new THREE.Mesh(flawGeo, flawMat);
+        flawMesh.rotation.z = Math.PI / 2.3;
+        flawMesh.position.set(0.05, 0.82, 0.3);
+      } else if (state.flawType === 'THERMITE_VOID') {
+        // Porous weld void cluster
+        const flawGroup = new THREE.Group();
+        const voidMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 2.0 });
+        for (let i = 0; i < 7; i++) {
+          const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.12 + Math.random() * 0.08, 12, 12), voidMat);
+          sphere.position.set((Math.random() - 0.5) * 0.4, 0.75 + (Math.random() - 0.5) * 0.3, (Math.random() - 0.5) * 0.4);
+          flawGroup.add(sphere);
+        }
+        flawMesh = flawGroup;
+      } else {
+        // Horizontal Head-Web Split Fissure
+        const flawGeo = new THREE.BoxGeometry(0.35, 0.08, 2.2);
+        const flawMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 2.2 });
+        flawMesh = new THREE.Mesh(flawGeo, flawMat);
+        flawMesh.position.set(0, 0.48, 0);
+      }
+      scene.add(flawMesh);
+      animatedMeshes.push({ mesh: flawMesh, type: 'flaw' });
+
+      // 4. USFD Robotic Scanning Trolley Sled & Ultrasonic Probe Beams
+      const sledGeo = new THREE.BoxGeometry(0.9, 0.22, 0.6);
+      const sledMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8 });
+      const sled = new THREE.Mesh(sledGeo, sledMat);
+      sled.position.set(0, 1.25, 0.3);
+      scene.add(sled);
+      animatedMeshes.push({ mesh: sled, type: 'probe-sled' });
+
+      // Ultrasonic Laser Wavefront Cone
+      const coneGeo = new THREE.ConeGeometry(0.85, 1.8, 32, 1, true);
+      const coneMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide
+      });
+      const cone = new THREE.Mesh(coneGeo, coneMat);
+      cone.rotation.x = Math.PI;
+      cone.position.set(0, 0.4, 0.3);
+      scene.add(cone);
+      animatedMeshes.push({ mesh: cone, type: 'probe-cone' });
+
+      // Ground Ballast Grid
+      const grid = new THREE.GridHelper(12, 16, 0x2b7fff, 0x1e293b);
+      grid.position.y = -1.0;
+      scene.add(grid);
+
+      renderFlawControls();
+    }
+
+    function renderFlawControls() {
+      const el = document.getElementById('interactive-controls');
+      el.innerHTML = `
+        <!-- Flaw Type Selector -->
+        <div class="flex items-center gap-1.5 w-full md:w-auto">
+          <span class="text-xs font-bold text-inkSlate mr-1">Flaw Type:</span>
+          <button onclick="setFlawType('TRANSVERSE')" class="px-2.5 py-1.5 text-xs font-bold ${state.flawType === 'TRANSVERSE' ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-700'} rounded btn-action">
+            Transverse Fracture
+          </button>
+          <button onclick="setFlawType('THERMITE_VOID')" class="px-2.5 py-1.5 text-xs font-bold ${state.flawType === 'THERMITE_VOID' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700'} rounded btn-action">
+            Thermite Weld Void
+          </button>
+          <button onclick="setFlawType('HEAD_WEB_SPLIT')" class="px-2.5 py-1.5 text-xs font-bold ${state.flawType === 'HEAD_WEB_SPLIT' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'} rounded btn-action">
+            Head-Web Split
+          </button>
+        </div>
+
+        <!-- Crack Depth & Toggles -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-inkSlate">Crack Depth:</label>
+            <input type="range" min="4" max="28" step="0.5" value="${state.crackDepth}" oninput="updateFlawDepth(this.value)" class="w-28 accent-rose-600" />
+            <span id="crack-val-badge" class="text-xs font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">${state.crackDepth} mm</span>
+          </div>
+
+          <button onclick="toggleXrayMode()" class="px-3 py-1.5 text-xs font-bold ${state.xrayMode ? 'bg-signalBlue text-white' : 'bg-slate-200 text-slate-700'} rounded btn-action">
+            ${state.xrayMode ? '🩻 X-Ray Volumetric: ON' : '🩻 X-Ray Volumetric: OFF'}
+          </button>
+          <button onclick="toggleScanActive()" class="px-3 py-1.5 text-xs font-bold ${state.scanActive ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'} rounded btn-action">
+            ${state.scanActive ? '📡 USFD Probe: SCANNING' : '📡 USFD Probe: PAUSED'}
+          </button>
+        </div>
+      `;
+    }
+
+    function setFlawType(type) {
+      state.flawType = type;
+      const typeNames = {
+        'TRANSVERSE': 'Transverse (IMR-804)',
+        'THERMITE_VOID': 'Thermite Weld Void (W-42)',
+        'HEAD_WEB_SPLIT': 'Horizontal Head-Web Split (OBS-105)'
+      };
+      document.getElementById('hud-flaw-type').textContent = typeNames[type] || type;
+      clearScene();
+      buildRailFlawScene();
+    }
+
+    function updateFlawDepth(val) {
+      state.crackDepth = parseFloat(val);
+      document.getElementById('crack-val-badge').textContent = `${state.crackDepth} mm`;
+      const pct = Math.min(100, (state.crackDepth / 38 * 100)).toFixed(0);
+      document.getElementById('hud-crack-depth').textContent = `${state.crackDepth} mm / ${pct}% Head`;
+      
+      const badge = document.getElementById('hud-severity-badge');
+      const footerBadge = document.getElementById('hud-badge-text');
+      if (state.crackDepth >= 14.0) {
+        badge.textContent = 'IMR DEFECT (EMERGENCY CLAMP)';
+        badge.className = 'text-rose-400 font-black';
+        footerBadge.textContent = 'IRPWM 2020 CLASSIFICATION: IMR EMERGENCY CLAMP';
+      } else if (state.crackDepth >= 8.0) {
+        badge.textContent = 'OBS DEFECT (SPEED RESTRICTION)';
+        badge.className = 'text-amber-400 font-black';
+        footerBadge.textContent = 'IRPWM 2020 CLASSIFICATION: OBS CAUTION ORDER (30 KM/H)';
+      } else {
+        badge.textContent = 'MONITORING (HEALTHY TRACK)';
+        badge.className = 'text-emerald-400 font-bold';
+        footerBadge.textContent = 'IRPWM 2020 CLASSIFICATION: NORMAL RUNNING';
+      }
+
+      const flaw = animatedMeshes.find(m => m.type === 'flaw');
+      if (flaw && flaw.mesh.scale) {
+        const s = state.crackDepth / 14.2;
+        flaw.mesh.scale.set(s, s, s);
+      }
+    }
+
+    function toggleXrayMode() {
+      state.xrayMode = !state.xrayMode;
+      const rail = animatedMeshes.find(m => m.type === 'rail-body');
+      if (rail) {
+        rail.mesh.material.opacity = state.xrayMode ? 0.42 : 0.95;
+        rail.mesh.material.color.setHex(state.xrayMode ? 0x38bdf8 : 0x64748b);
+        rail.mesh.material.metalness = state.xrayMode ? 0.3 : 0.92;
+      }
+      renderFlawControls();
+    }
+
+    function toggleScanActive() {
+      state.scanActive = !state.scanActive;
+      renderFlawControls();
+    }
+
+
+    /* =========================================================================
+       MODULE 2: UPGRADED 3D POINT SWITCH TURNOUT & INTERLOCKING YARD (SW-04)
+    ========================================================================= */
+    function buildSwitchScene() {
+      camera.position.set(0, 6.5, 9);
+      controls.target.set(0, 0, 0);
+
+      // 1. Concrete Turnout Sleepers with progressive length fan-out
+      const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+      for (let z = -8; z <= 8; z += 0.85) {
+        // Longer sleepers near the turnout curve
+        const width = z > -1 ? 4.5 + (z + 1) * 0.28 : 4.5;
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(width, 0.2, 0.45), sleeperMat);
+        sleeper.position.set((width - 4.5) * 0.5, -0.22, z);
+        sleeper.receiveShadow = true;
+        scene.add(sleeper);
+      }
+
+      // Ballast Bed
+      const ballastGeo = new THREE.PlaneGeometry(16, 20);
+      const ballastMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.95 });
+      const ballast = new THREE.Mesh(ballastGeo, ballastMat);
+      ballast.rotation.x = -Math.PI / 2;
+      ballast.position.y = -0.32;
+      ballast.receiveShadow = true;
+      scene.add(ballast);
+
+      // 2. Fixed Stock Rails (Straight Mainline CSMT-Kalyan)
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.92, roughness: 0.2 });
+      const leftStock = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.32, 18), railMat);
+      leftStock.position.set(-1.3, 0, 0);
+      leftStock.castShadow = true;
+      scene.add(leftStock);
+
+      const rightStock = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.32, 18), railMat);
+      rightStock.position.set(1.3, 0, 0);
+      rightStock.castShadow = true;
+      scene.add(rightStock);
+
+      // 3. Diverging Curved Turnout Rail (1:12 Standard Turnout to Platform 18)
+      const curveGeo = new THREE.BoxGeometry(0.16, 0.32, 12);
+      const rightDiverge = new THREE.Mesh(curveGeo, railMat);
+      rightDiverge.rotation.y = 0.26;
+      rightDiverge.position.set(1.4, 0, 2.5);
+      rightDiverge.castShadow = true;
+      scene.add(rightDiverge);
+
+      // Crossing Frog (V-piece) and Check Rails
+      const frogMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.9 });
+      const frog = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 2.0), frogMat);
+      frog.position.set(1.3, 0, 4.0);
+      scene.add(frog);
+
+      // 4. Moving Tongue Rail Blades (Left & Right Connected via Stretcher Bar)
+      const tongueMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.92, roughness: 0.15 });
+      
+      const leftTongue = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 6.5), tongueMat);
+      leftTongue.position.set(-1.12, 0, -1.0); // Tightly clamped to left stock in NORMAL
+      scene.add(leftTongue);
+      animatedMeshes.push({ mesh: leftTongue, type: 'left-tongue' });
+
+      const rightTongue = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 6.5), tongueMat);
+      rightTongue.position.set(0.85, 0, -1.0); // Open gap in NORMAL
+      scene.add(rightTongue);
+      animatedMeshes.push({ mesh: rightTongue, type: 'right-tongue' });
+
+      // Stretcher Bar connecting both blades
+      const stretcherMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 });
+      const stretcher = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.08, 0.15), stretcherMat);
+      stretcher.position.set(-0.13, -0.05, -3.2);
+      scene.add(stretcher);
+      animatedMeshes.push({ mesh: stretcher, type: 'stretcher' });
+
+      // 5. Electric Point Machine Housing Box (SW-04)
+      const motorGeo = new THREE.BoxGeometry(1.1, 0.5, 0.9);
+      const motorMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, metalness: 0.7, roughness: 0.3 });
+      const motorBox = new THREE.Mesh(motorGeo, motorMat);
+      motorBox.position.set(-2.4, 0.1, -3.2);
+      scene.add(motorBox);
+
+      // Throw Rod from motor to stretcher bar
+      const rodGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.3);
+      const rodMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 });
+      const throwRod = new THREE.Mesh(rodGeo, rodMat);
+      throwRod.rotation.z = Math.PI / 2;
+      throwRod.position.set(-1.75, 0, -3.2);
+      scene.add(throwRod);
+      animatedMeshes.push({ mesh: throwRod, type: 'throw-rod' });
+
+      // 6. 4-Aspect Signal Mast with 5-Lamp Route Feather
+      const mastGeo = new THREE.CylinderGeometry(0.09, 0.09, 4.2);
+      const mastMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 });
+      const mast = new THREE.Mesh(mastGeo, mastMat);
+      mast.position.set(-2.8, 1.8, -4.5);
+      scene.add(mast);
+
+      // Signal Head Box
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.8, 0.4), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+      head.position.set(-2.8, 3.2, -4.5);
+      scene.add(head);
+
+      // 4 Main Aspect Lenses (Top Yellow, Green, Red, Bottom Yellow)
+      const aspectMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+      const aspectLight = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), aspectMat);
+      aspectLight.position.set(-2.8, 3.4, -4.3);
+      scene.add(aspectLight);
+      animatedMeshes.push({ mesh: aspectLight, type: 'main-aspect' });
+
+      // Route Indicator (5-Lamp White Feather pointing to Platform 18)
+      const featherGroup = new THREE.Group();
+      const featherMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      for (let i = 0; i < 5; i++) {
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), featherMat);
+        lamp.position.set(-2.8 + i * 0.12, 4.3 + i * 0.10, -4.3);
+        featherGroup.add(lamp);
+      }
+      featherGroup.visible = false;
+      scene.add(featherGroup);
+      animatedMeshes.push({ mesh: featherGroup, type: 'feather-route' });
+
+      // 7. Axle Counter Sensor Heads (Clamped to rail)
+      const sensorMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, metalness: 0.8 });
+      const acSensor = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.15, 0.3), sensorMat);
+      acSensor.position.set(-1.3, -0.05, -5.5);
+      scene.add(acSensor);
+
+      // Simulation Wheelset
+      const wheelGroup = new THREE.Group();
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.95 });
+      const leftWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.12, 24), wheelMat);
+      leftWheel.rotation.z = Math.PI / 2;
+      leftWheel.position.set(-1.3, 0.35, 0);
+      wheelGroup.add(leftWheel);
+
+      const rightWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.12, 24), wheelMat);
+      rightWheel.rotation.z = Math.PI / 2;
+      rightWheel.position.set(1.3, 0.35, 0);
+      wheelGroup.add(rightWheel);
+
+      const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.6), wheelMat);
+      axle.rotation.z = Math.PI / 2;
+      axle.position.set(0, 0.35, 0);
+      wheelGroup.add(axle);
+
+      wheelGroup.position.z = -14;
+      wheelGroup.visible = false;
+      scene.add(wheelGroup);
+      animatedMeshes.push({ mesh: wheelGroup, type: 'wheelset' });
+
+      renderSwitchControls();
+    }
+
+    function renderSwitchControls() {
+      const el = document.getElementById('interactive-controls');
+      el.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-inkSlate">SW-04 Interlocking:</span>
+          <button onclick="setSwitchRoute('NORMAL')" class="px-3.5 py-1.5 text-xs font-black ${state.switchPosition === 'NORMAL' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'} rounded btn-action">
+            🟢 MAINLINE (NORMAL)
+          </button>
+          <button onclick="setSwitchRoute('REVERSE')" class="px-3.5 py-1.5 text-xs font-black ${state.switchPosition === 'REVERSE' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700'} rounded btn-action">
+            🟡 PLATFORM 18 (REVERSE)
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="simulateTrainPassage()" id="btn-train-pass" class="px-3 py-1.5 text-xs font-bold bg-signalBlue text-white rounded btn-action">
+            🚆 Simulate Train Passing
+          </button>
+          <button onclick="toggleLockout()" class="px-3 py-1.5 text-xs font-bold ${state.lockoutActive ? 'bg-rose-700 text-white' : 'bg-rose-50 text-rose-700 border border-rose-300'} rounded btn-action">
+            ${state.lockoutActive ? '🔒 Form S&T/T-351: CLAMPED' : '🔒 Form S&T/T-351 Lockout'}
+          </button>
+        </div>
+      `;
+    }
+
+    function setSwitchRoute(route) {
+      if (state.lockoutActive) {
+        alert('Action Blocked: Switch SW-04 is clamped under Statutory Form S&T/T-351 Lockout.');
+        return;
+      }
+      state.switchPosition = route;
+      state.isSwitching = true;
+      renderSwitchControls();
+
+      const feather = animatedMeshes.find(m => m.type === 'feather-route');
+      const aspect = animatedMeshes.find(m => m.type === 'main-aspect');
+      
+      if (feather) feather.mesh.visible = route === 'REVERSE';
+      if (aspect) aspect.mesh.material.color.setHex(route === 'NORMAL' ? 0x10b981 : 0xf59e0b);
+
+      document.getElementById('hud-stats').innerHTML = `
+        <div class="text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-1">Interlocking Telemetry (SW-04)</div>
+        <div class="flex justify-between py-1 border-b border-slate-700/50"><span>Point Position:</span> <span class="text-amber-400 font-bold">${route} (${route === 'NORMAL' ? 'Mainline' : 'P-18 Loop'})</span></div>
+        <div class="flex justify-between py-1 border-b border-slate-700/50"><span>Signal Aspect:</span> <span class="${route === 'NORMAL' ? 'text-emerald-400' : 'text-amber-400'} font-bold">${route === 'NORMAL' ? 'GREEN (Clear)' : 'CAUTION (Feather ON)'}</span></div>
+        <div class="flex justify-between pt-1"><span>Detection Contacts:</span> <span class="text-emerald-400 font-bold">115mm Stroke LOCKED</span></div>
+      `;
+    }
+
+    function simulateTrainPassage() {
+      state.trainPassing = true;
+      state.wheelsetZ = -12;
+      const wheel = animatedMeshes.find(m => m.type === 'wheelset');
+      if (wheel) wheel.mesh.visible = true;
+
+      // Drop signal to RED on axle counter trip
+      const aspect = animatedMeshes.find(m => m.type === 'main-aspect');
+      if (aspect) aspect.mesh.material.color.setHex(0xef4444);
+    }
+
+    function toggleLockout() {
+      state.lockoutActive = !state.lockoutActive;
+      const aspect = animatedMeshes.find(m => m.type === 'main-aspect');
+      if (state.lockoutActive && aspect) {
+        aspect.mesh.material.color.setHex(0xef4444);
+      }
+      renderSwitchControls();
+    }
+
+
+    /* =========================================================================
+       MODULE 3: 3D KAVACH DECELERATION RUN (PRESERVED EXACTLY AS REQUESTED)
+    ========================================================================= */
+    function buildCabScene() {
+      camera.position.set(0, 1.6, 3);
+      controls.target.set(0, 1.2, -10);
+
+      // Rails streaming into distance
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95 });
+      const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 60), railMat);
+      leftRail.position.set(-1.0, 0, -20);
+      scene.add(leftRail);
+
+      const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 60), railMat);
+      rightRail.position.set(1.0, 0, -20);
+      scene.add(rightRail);
+
+      // Procedural moving sleepers
+      const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+      for (let z = -50; z <= 10; z += 1.5) {
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.12, 0.35), sleeperMat);
+        sleeper.position.set(0, -0.15, z);
+        scene.add(sleeper);
+        animatedMeshes.push({ mesh: sleeper, type: 'sleeper', initialZ: z });
+      }
+
+      // Overhead OHE Catenary Masts
+      const mastMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+      for (let z = -45; z <= 5; z += 15) {
+        const mast = new THREE.Mesh(new THREE.BoxGeometry(0.2, 4.5, 0.2), mastMat);
+        mast.position.set(2.5, 2.0, z);
+        scene.add(mast);
+        animatedMeshes.push({ mesh: mast, type: 'mast', initialZ: z });
+      }
+
+      renderCabControls();
+    }
+
+    function renderCabControls() {
+      const el = document.getElementById('interactive-controls');
+      el.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-inkSlate">Train Speed:</span>
+          <span id="speedometer-val" class="text-base font-mono font-black ${state.trainSpeed > 30 ? 'text-blue-600' : 'text-emerald-600'}">${state.trainSpeed.toFixed(0)} KM/H</span>
+          <span class="text-xs text-mutedSlate">(TSR Limit: 30 km/h)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="triggerKavachBraking()" id="btn-brake" class="px-4 py-2 text-xs font-black bg-rose-600 text-white rounded btn-action">
+            🚨 Trigger Kavach EBD Braking
+          </button>
+          <button onclick="resetTrainSpeed()" class="px-3 py-2 text-xs font-bold bg-white text-inkSlate border border-borderSlate rounded hover:bg-slate-50 btn-action">
+            ⚡ Accelerate to 110k
+          </button>
+        </div>
+      `;
+    }
+
+    function triggerKavachBraking() {
+      state.isBraking = true;
+      document.getElementById('hud-stats').innerHTML = `
+        <div class="text-[10px] text-rose-400 font-bold uppercase tracking-wider mb-1">Kavach TCAS Emergency HUD</div>
+        <div class="flex justify-between py-0.5 border-b border-slate-700/50"><span>Solenoid:</span> <span class="text-rose-400 font-bold">EMERGENCY CLAMP</span></div>
+        <div class="flex justify-between py-0.5 border-b border-slate-700/50"><span>Brake Cyl:</span> <span class="text-amber-400 font-bold">3.8 kg/cm²</span></div>
+        <div class="flex justify-between py-0.5"><span>Target Margin:</span> <span class="text-emerald-400 font-bold">+112 m Safe</span></div>
+      `;
+    }
+
+    function resetTrainSpeed() {
+      state.trainSpeed = 110;
+      state.isBraking = false;
+      renderCabControls();
+    }
+
+
+    /* =========================================================================
+       MODULE 4: 3D HOLOGRAPHIC SHA-256 DIGITAL SEAL
+    ========================================================================= */
+    function buildSealScene() {
+      camera.position.set(0, 0, 4.2);
+      controls.target.set(0, 0, 0);
+
+      // Gold Embossed RDSO Shield
+      const shieldGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.25, 32);
+      const shieldMat = new THREE.MeshStandardMaterial({
+        color: state.sealTampered ? 0xef4444 : 0x2b7fff,
+        metalness: 0.85,
+        roughness: 0.2,
+        emissive: state.sealTampered ? 0x991b1b : 0x1e3a8a,
+        emissiveIntensity: 0.4
+      });
+      const shield = new THREE.Mesh(shieldGeo, shieldMat);
+      shield.rotation.x = Math.PI / 2;
+      scene.add(shield);
+      animatedMeshes.push({ mesh: shield, type: 'seal' });
+
+      // Orbiting Merkle Blockchain Nodes
+      const nodeGeo = new THREE.SphereGeometry(0.18, 16, 16);
+      for (let i = 0; i < 4; i++) {
+        const nodeMat = new THREE.MeshStandardMaterial({
+          color: 0x38bdf8,
+          emissive: 0x38bdf8,
+          emissiveIntensity: 0.8
+        });
+        const node = new THREE.Mesh(nodeGeo, nodeMat);
+        scene.add(node);
+        animatedMeshes.push({ mesh: node, type: 'orbit-node', index: i });
+      }
+
+      renderSealControls();
+    }
+
+    function renderSealControls() {
+      const el = document.getElementById('interactive-controls');
+      el.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-inkSlate">RFC 8785 Canonical Seal:</span>
+          <span class="text-xs font-mono font-bold ${state.sealTampered ? 'text-rose-600 bg-rose-50' : 'text-emerald-600 bg-emerald-50'} px-2 py-1 rounded border">
+            ${state.sealTampered ? '❌ TAMPER DETECTED (SHA-256 Mismatch)' : '✓ CRYPTOGRAPHICALLY ATTESTED'}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleTamper()" class="px-3 py-1.5 text-xs font-bold ${state.sealTampered ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'} rounded btn-action">
+            ${state.sealTampered ? '↺ Restore Canonical Hash' : '⚠️ Simulate Payload Tampering'}
+          </button>
+        </div>
+      `;
+    }
+
+    function toggleTamper() {
+      state.sealTampered = !state.sealTampered;
+      buildSealScene();
+    }
+
+
+    /* =========================================================================
+       MAIN ANIMATION & TICKER LOOP
+    ========================================================================= */
+    function switch3DModule(mod, tabElement) {
+      currentModule = mod;
+      clearScene();
+
+      document.querySelectorAll('.mod-tab').forEach(t => {
+        t.className = 'mod-tab px-3.5 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate rounded btn-action';
+      });
+      tabElement.className = 'mod-tab px-3.5 py-2 text-xs font-black bg-signalBlue text-white rounded btn-action';
+
+      const titles = {
+        'flaw': '1. Ultrasonic USFD Volumetric Rail Fracture Hologram (UIC-60 Section)',
+        'switch': '2. Interactive 3D Point Switch Turnout (SW-04) & 5-Lamp Feather Route',
+        'cab': '3. 3D Kavach Cab HUD & Dynamic Deceleration Run',
+        'seal': '4. 3D Holographic SHA-256 Merkle Digital Seal'
+      };
+      document.getElementById('module-title').textContent = titles[mod] || mod;
+
+      loadModuleScene(mod);
+    }
+
+    function loadModuleScene(mod) {
+      if (mod === 'flaw') buildRailFlawScene();
+      else if (mod === 'switch') buildSwitchScene();
+      else if (mod === 'cab') buildCabScene();
+      else if (mod === 'seal') buildSealScene();
+    }
+
+    function animate() {
+      animationId = requestAnimationFrame(animate);
+
+      // --- MODULE 1 (USFD) ANIMATION ---
+      if (currentModule === 'flaw') {
+        const sled = animatedMeshes.find(m => m.type === 'probe-sled');
+        const cone = animatedMeshes.find(m => m.type === 'probe-cone');
+
+        if (state.scanActive && sled && cone) {
+          state.probeX += 0.012 * state.probeDir;
+          if (state.probeX > 1.4) state.probeDir = -1;
+          if (state.probeX < -1.4) state.probeDir = 1;
+
+          sled.mesh.position.z = 0.3 + state.probeX;
+          cone.mesh.position.z = 0.3 + state.probeX;
+          cone.mesh.material.opacity = 0.35 + Math.sin(Date.now() * 0.01) * 0.25;
+        }
+      } 
+      // --- MODULE 2 (SWITCH) ANIMATION ---
+      else if (currentModule === 'switch') {
+        const targetProgress = state.switchPosition === 'REVERSE' ? 1.0 : 0.0;
+        if (state.switchProgress !== targetProgress) {
+          state.switchProgress += (targetProgress - state.switchProgress) * 0.12;
+          if (Math.abs(state.switchProgress - targetProgress) < 0.005) {
+            state.switchProgress = targetProgress;
+            state.isSwitching = false;
+          }
+
+          const leftTongue = animatedMeshes.find(m => m.type === 'left-tongue');
+          const rightTongue = animatedMeshes.find(m => m.type === 'right-tongue');
+          const stretcher = animatedMeshes.find(m => m.type === 'stretcher');
+          const throwRod = animatedMeshes.find(m => m.type === 'throw-rod');
+
+          // Smooth mechanical slide (115mm scaled)
+          const offset = state.switchProgress * 0.35;
+          if (leftTongue) leftTongue.mesh.position.x = -1.12 + offset;
+          if (rightTongue) rightTongue.mesh.position.x = 0.85 + offset;
+          if (stretcher) stretcher.mesh.position.x = -0.13 + offset;
+          if (throwRod) throwRod.mesh.position.x = -1.75 + offset * 0.5;
+        }
+
+        // Wheelset roll simulation
+        if (state.trainPassing) {
+          const wheel = animatedMeshes.find(m => m.type === 'wheelset');
+          if (wheel) {
+            state.wheelsetZ += 0.22;
+            wheel.mesh.position.z = state.wheelsetZ;
+            if (state.switchPosition === 'REVERSE' && state.wheelsetZ > 0) {
+              wheel.mesh.position.x += 0.055; // Diverge onto loop track
+            }
+
+            if (state.wheelsetZ > 10) {
+              state.trainPassing = false;
+              wheel.mesh.visible = false;
+              // Signal recovers to caution/green
+              const aspect = animatedMeshes.find(m => m.type === 'main-aspect');
+              if (aspect && !state.lockoutActive) {
+                aspect.mesh.material.color.setHex(state.switchPosition === 'NORMAL' ? 0x10b981 : 0xf59e0b);
+              }
+            }
+          }
+        }
+      }
+      // --- MODULE 3 (KAVACH RUN) ANIMATION - PRESERVED EXACTLY ---
+      else if (currentModule === 'cab') {
+        if (state.isBraking && state.trainSpeed > 30) {
+          state.trainSpeed = Math.max(30, state.trainSpeed - 0.35);
+          const spEl = document.getElementById('speedometer-val');
+          if (spEl) spEl.textContent = `${state.trainSpeed.toFixed(0)} KM/H`;
+        }
+
+        const moveSpeed = (state.trainSpeed / 110) * 0.6;
+        animatedMeshes.forEach(item => {
+          if (item.type === 'sleeper' || item.type === 'mast') {
+            item.mesh.position.z += moveSpeed;
+            if (item.mesh.position.z > 8) {
+              item.mesh.position.z = item.type === 'sleeper' ? -50 : -45;
+            }
+          }
+        });
+      } 
+      // --- MODULE 4 (SEAL) ANIMATION ---
+      else if (currentModule === 'seal') {
+        const seal = animatedMeshes.find(m => m.type === 'seal');
+        if (seal) seal.mesh.rotation.z += 0.008;
+
+        const time = Date.now() * 0.0015;
+        animatedMeshes.filter(m => m.type === 'orbit-node').forEach(node => {
+          const angle = time + (node.index * Math.PI / 2);
+          node.mesh.position.x = Math.cos(angle) * 2.2;
+          node.mesh.position.y = Math.sin(angle) * 2.2;
+        });
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', initThree);
+  </script>
+</body>
+</html>

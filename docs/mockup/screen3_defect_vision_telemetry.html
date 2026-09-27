@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -70,6 +72,9 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .clay-btn-primary:active {
+      transform: scale(0.97);
+    }
     .clay-btn-surface {
       background: #F4F8FD;
       color: #0F172A;
@@ -81,6 +86,9 @@
       border: 1px solid rgba(208, 223, 238, 0.6);
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .clay-btn-surface:active {
+      transform: scale(0.97);
+    }
     .clay-inset {
       background: #E2EEFA;
       border-radius: 16px;
@@ -89,6 +97,16 @@
         inset -4px -4px 10px rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.5);
     }
+    .viewport-3d {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: radial-gradient(circle at 50% 30%, #151e2e 0%, #080c14 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid #233348;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
   </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8 min-h-screen">
@@ -103,6 +121,7 @@
         <div class="flex items-center gap-2">
           <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">Defect Vision & Loco Cab Telemetry Console</h1>
           <span class="px-2.5 py-0.5 text-xs font-black text-red-600 bg-red-100 rounded-[10px] mono">KAVACH TCAS ACTIVE</span>
+          <span class="px-2.5 py-0.5 text-xs font-black text-signalBlue bg-blue-100 rounded-[10px] mono">3D DIGITAL TWIN INTEGRATED</span>
         </div>
         <p class="text-xs text-mutedSlate font-medium">Onboard Locomotive WAP-7 #30412 • Section: Dadar TC-03 Approaching</p>
       </div>
@@ -121,31 +140,47 @@
   <!-- 4-PANE CLAY TACTICAL GRID -->
   <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- PANE 1: USFD VISION AI WITH ACTUAL TRACK CORRIDOR FEED (6 COLS) -->
+    <!-- PANE 1: USFD VISION AI WITH LIVE 2D PHOTO / 3D VOLUMETRIC VIEWPORT (6 COLS) -->
     <div class="lg:col-span-6 clay-card p-6 flex flex-col justify-between">
       <div>
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
           <h2 class="text-sm font-extrabold text-inkSlate flex items-center gap-1.5">
             <span>🔬</span> 1. TMS Civil Track Cam (USFD Vision AI)
           </h2>
-          <span class="px-3 py-1 text-[10px] font-black bg-red-100 text-red-700 rounded-[10px] mono">CONFIDENCE: 98.2%</span>
+          <!-- 2D vs 3D View Switcher -->
+          <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <button onclick="setTrackViewMode('2d')" id="btn-track-2d" class="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-inkSlate rounded transition-all">
+              📹 2D Camera
+            </button>
+            <button onclick="setTrackViewMode('3d')" id="btn-track-3d" class="px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm transition-all">
+              🔬 3D USFD Hologram
+            </button>
+          </div>
         </div>
 
-        <!-- Real Photographic Track Feed Container -->
-        <div class="relative w-full h-56 bg-slate-950 rounded-[18px] overflow-hidden border border-slate-700 flex items-center justify-center shadow-lg">
+        <!-- 2D Photographic Feed Container -->
+        <div id="track-feed-2d" class="hidden relative w-full h-56 bg-slate-950 rounded-[18px] overflow-hidden border border-slate-700 flex items-center justify-center shadow-lg">
           <img src="assets/track_corridor.jpg" alt="Live Track Corridor Feed" class="w-full h-full object-cover" />
-
-          <!-- Dynamic Bounding Box Overlay on Rail Joint -->
           <div class="absolute bottom-6 left-32 w-28 h-16 border-2 border-red-500 bg-red-500/25 rounded-[6px] flex flex-col justify-between p-1.5 shadow-xl backdrop-blur-[1px]">
             <span class="text-[9px] font-bold text-white bg-red-600 px-1 py-0.5 rounded mono">IMR FLAW #804</span>
             <span class="text-[9px] font-mono text-white text-right font-black">98.2% USFD</span>
           </div>
-
           <div class="absolute top-2 left-2 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-[10px] text-emerald-400 font-mono rounded-[8px]">
             ● REC [LIVE FEED 1080p 60FPS]
           </div>
           <div class="absolute bottom-2 right-2 px-2.5 py-1 bg-black/75 text-[10px] text-sky-300 font-mono rounded-[8px]">
             KM 9/2 Dadar Up Fast
+          </div>
+        </div>
+
+        <!-- 3D USFD Volumetric Viewport -->
+        <div id="track-feed-3d" class="viewport-3d">
+          <canvas id="usfd-3d-canvas"></canvas>
+          <div class="absolute top-2 left-2 px-2.5 py-1 bg-black/80 backdrop-blur-sm text-[10px] text-cyan-300 font-mono rounded-[8px] border border-cyan-500/30">
+            🔮 3D USFD VOLUMETRIC X-RAY (UIC-60)
+          </div>
+          <div class="absolute bottom-2 right-2 px-2.5 py-1 bg-black/80 text-[10px] text-amber-300 font-mono rounded-[8px]">
+            🖱️ Orbit to inspect internal flaw depth
           </div>
         </div>
 
@@ -161,49 +196,79 @@
         </div>
       </div>
 
-      <button onclick="alert('Defect imagery dispatched to Civil Permanent Way Inspector (PW-09)')" class="mt-4 w-full py-2.5 clay-btn-surface text-signalBlue text-xs font-black">
-        Disseminate Defect Telemetry to P-Way
-      </button>
+      <div class="mt-4 flex gap-2">
+        <button onclick="toggleUsfdXray()" class="flex-1 py-2 clay-btn-surface text-signalBlue text-xs font-bold">
+          🩻 Toggle X-Ray Steel
+        </button>
+        <button onclick="alert('Defect imagery dispatched to Civil Permanent Way Inspector (PW-09)')" class="flex-1 py-2 clay-btn-primary text-white text-xs font-black">
+          Disseminate to P-Way
+        </button>
+      </div>
     </div>
 
-    <!-- PANE 2: KAVACH SPEEDOMETER & HUD (6 COLS) -->
+    <!-- PANE 2: KAVACH SPEEDOMETER & 3D TCAS DECELERATION RUN (6 COLS) -->
     <div class="lg:col-span-6 clay-card-dark text-slate-100 p-6 flex flex-col justify-between">
       <div>
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
           <h2 class="text-sm font-extrabold text-white flex items-center gap-1.5">
             <span>⚡</span> 2. Kavach TCAS Cab Speedometer & Braking Curve
           </h2>
-          <span class="px-3 py-1 text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-[10px] mono">BRAKE ENFORCED</span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 my-2">
-          <div class="p-4 bg-slate-900/90 rounded-[18px] border border-slate-800 text-center shadow-inner">
-            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Speed</div>
-            <div id="live-speed" class="text-4xl font-black text-sky-400 mono mt-1">68 <span class="text-sm font-normal text-slate-400">km/h</span></div>
-            <div class="text-[10px] text-emerald-400 font-semibold mt-1">Decelerating at 0.72 m/s²</div>
-          </div>
-          <div class="p-4 bg-slate-900/90 rounded-[18px] border border-red-500/40 text-center shadow-inner">
-            <div class="text-[10px] text-red-300 uppercase font-bold tracking-wider">Target TSR Limit</div>
-            <div class="text-4xl font-black text-red-500 mono mt-1">30 <span class="text-sm font-normal text-slate-400">km/h</span></div>
-            <div class="text-[10px] text-red-400 font-semibold mt-1">Target Distance: 420m</div>
+          <!-- 2D vs 3D Switcher -->
+          <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+            <button onclick="setCabViewMode('2d')" id="btn-cab-2d" class="px-2.5 py-1 text-[11px] font-bold text-slate-400 hover:text-white rounded transition-all">
+              📊 2D Gauge
+            </button>
+            <button onclick="setCabViewMode('3d')" id="btn-cab-3d" class="px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm transition-all">
+              ⚡ 3D Cab Run
+            </button>
           </div>
         </div>
 
-        <div class="p-4 bg-slate-900/60 rounded-[18px] border border-slate-800 mt-3 text-xs space-y-2">
-          <div class="flex justify-between text-slate-300">
-            <span>Emergency Braking Distance (EBD):</span>
-            <span class="font-mono font-bold text-white">480 meters</span>
+        <!-- 2D Speedometer Gauge Container -->
+        <div id="cab-feed-2d" class="hidden">
+          <div class="grid grid-cols-2 gap-4 my-2">
+            <div class="p-4 bg-slate-900/90 rounded-[18px] border border-slate-800 text-center shadow-inner">
+              <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Speed</div>
+              <div id="live-speed" class="text-4xl font-black text-sky-400 mono mt-1">68 <span class="text-sm font-normal text-slate-400">km/h</span></div>
+              <div class="text-[10px] text-emerald-400 font-semibold mt-1">Decelerating at 0.72 m/s²</div>
+            </div>
+            <div class="p-4 bg-slate-900/90 rounded-[18px] border border-red-500/40 text-center shadow-inner">
+              <div class="text-[10px] text-red-300 uppercase font-bold tracking-wider">Target TSR Limit</div>
+              <div class="text-4xl font-black text-red-500 mono mt-1">30 <span class="text-sm font-normal text-slate-400">km/h</span></div>
+              <div class="text-[10px] text-red-400 font-semibold mt-1">Target Distance: 420m</div>
+            </div>
           </div>
-          <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 shadow-inner">
-            <div class="bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 h-full w-[72%] rounded-full"></div>
+          <div class="p-4 bg-slate-900/60 rounded-[18px] border border-slate-800 mt-3 text-xs space-y-2">
+            <div class="flex justify-between text-slate-300">
+              <span>Emergency Braking Distance (EBD):</span>
+              <span class="font-mono font-bold text-white">480 meters</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 shadow-inner">
+              <div class="bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 h-full w-[72%] rounded-full"></div>
+            </div>
           </div>
         </div>
+
+        <!-- 3D Kavach Forward Deceleration Viewport -->
+        <div id="cab-feed-3d" class="viewport-3d">
+          <canvas id="cab-3d-canvas"></canvas>
+          <div class="absolute top-2 left-2 px-2.5 py-1 bg-black/80 backdrop-blur-sm text-[10px] text-cyan-300 font-mono rounded-[8px] border border-cyan-500/30">
+            ⚡ 3D FORWARD KAVACH TCAS RUN
+          </div>
+          <div class="absolute top-2 right-2 px-3 py-1 bg-slate-900/90 text-xs font-mono font-black text-sky-400 rounded-lg border border-sky-500/40">
+            <span id="cab-3d-speed">110</span> KM/H
+          </div>
+          <div class="absolute bottom-2 left-2 px-2.5 py-1 bg-black/80 text-[10px] text-rose-400 font-mono rounded-[8px]">
+            TSR CLAMP: 30 KM/H
+          </div>
+        </div>
+
       </div>
 
-      <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+      <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 mt-3">
         <span>Kavach Radio: <strong class="text-emerald-400">450 MHz UHF Locked</strong></span>
-        <button onclick="simulateBraking()" class="px-4 py-2 clay-btn-primary text-xs font-black">
-          Simulate Braking Step
+        <button onclick="triggerCabBraking3D()" class="px-4 py-2 clay-btn-primary text-xs font-black">
+          🚨 Simulate Kavach Braking
         </button>
       </div>
     </div>
@@ -220,7 +285,7 @@
 
         <!-- Real Photographic Shadow Block Maintenance Feed -->
         <div class="relative w-full h-44 bg-slate-950 rounded-[18px] overflow-hidden border border-slate-700 flex items-center justify-center shadow-lg">
-          <img src="assets/shadow_block_work.jpg" alt="Active Joint Shadow Block Maintenance (CSM Tamper + OHE Wagon)" class="w-full h-full object-cover" />
+          <img src="assets/shadow_block_work.jpg" alt="Active Joint Shadow Block Maintenance" class="w-full h-full object-cover" />
           <div class="absolute top-2 left-2 px-2.5 py-1 bg-red-600 text-white text-[10px] font-black rounded-[8px] mono">
             ● OHE TOWER WAGON #60515 ACTIVE
           </div>
@@ -271,17 +336,181 @@
   </main>
 
   <script>
-    let speed = 68;
-    function simulateBraking() {
-      if (speed > 30) {
-        speed -= 8;
-        if (speed < 30) speed = 30;
-        document.getElementById('live-speed').innerHTML = `${speed} <span class="text-sm font-normal text-slate-400">km/h</span>`;
-      } else {
-        alert('Train successfully stabilized at Kavach TSR speed ceiling: 30 km/h.');
+    // --- VIEW TOGGLE LOGIC ---
+    function setTrackViewMode(mode) {
+      document.getElementById('track-feed-2d').classList.toggle('hidden', mode === '3d');
+      document.getElementById('track-feed-3d').classList.toggle('hidden', mode === '2d');
+      document.getElementById('btn-track-2d').className = mode === '2d' ? 'px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm' : 'px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-inkSlate rounded';
+      document.getElementById('btn-track-3d').className = mode === '3d' ? 'px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm' : 'px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-inkSlate rounded';
+    }
+
+    function setCabViewMode(mode) {
+      document.getElementById('cab-feed-2d').classList.toggle('hidden', mode === '3d');
+      document.getElementById('cab-feed-3d').classList.toggle('hidden', mode === '2d');
+      document.getElementById('btn-cab-2d').className = mode === '2d' ? 'px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm' : 'px-2.5 py-1 text-[11px] font-bold text-slate-400 hover:text-white rounded';
+      document.getElementById('btn-cab-3d').className = mode === '3d' ? 'px-2.5 py-1 text-[11px] font-black bg-signalBlue text-white rounded shadow-sm' : 'px-2.5 py-1 text-[11px] font-bold text-slate-400 hover:text-white rounded';
+    }
+
+    // --- THREE.JS 3D VIEWPORT 1: USFD VOLUMETRIC RAIL HOLOGRAPH ---
+    let usfdScene, usfdCamera, usfdRenderer, usfdControls;
+    let usfdRailMesh, usfdFlawMesh, usfdProbeMesh;
+    let isUsfdXray = true;
+
+    function initUsfd3D() {
+      const container = document.getElementById('track-feed-3d');
+      const canvas = document.getElementById('usfd-3d-canvas');
+      if (!canvas) return;
+
+      usfdScene = new THREE.Scene();
+      usfdCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      usfdCamera.position.set(2.5, 2.0, 3.8);
+
+      usfdRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      usfdRenderer.setSize(container.clientWidth, container.clientHeight);
+      usfdRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      usfdControls = new THREE.OrbitControls(usfdCamera, usfdRenderer.domElement);
+      usfdControls.enableDamping = true;
+
+      // Lights
+      usfdScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      dirLight.position.set(5, 8, 5);
+      usfdScene.add(dirLight);
+
+      // UIC-60 Rail Extrusion
+      const shape = new THREE.Shape();
+      shape.moveTo(-1.0, -0.4);
+      shape.lineTo(1.0, -0.4);
+      shape.lineTo(0.9, -0.2);
+      shape.lineTo(0.2, -0.1);
+      shape.lineTo(0.16, 0.5);
+      shape.lineTo(0.7, 0.6);
+      shape.lineTo(0.7, 1.05);
+      shape.lineTo(-0.7, 1.05);
+      shape.lineTo(-0.7, 0.6);
+      shape.lineTo(-0.16, 0.5);
+      shape.lineTo(-0.2, -0.1);
+      shape.lineTo(-0.9, -0.2);
+      shape.closePath();
+
+      const railGeo = new THREE.ExtrudeGeometry(shape, { depth: 4.5, bevelEnabled: true, bevelSegments: 2 });
+      railGeo.center();
+      const railMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        metalness: 0.3,
+        roughness: 0.1,
+        transparent: true,
+        opacity: 0.45
+      });
+      usfdRailMesh = new THREE.Mesh(railGeo, railMat);
+      usfdScene.add(usfdRailMesh);
+
+      // Glowing Transverse Crack Flaw
+      const flawGeo = new THREE.CylinderGeometry(0.5, 0.45, 0.08, 16);
+      const flawMat = new THREE.MeshStandardMaterial({ color: 0xff1744, emissive: 0xff1744, emissiveIntensity: 2.0 });
+      usfdFlawMesh = new THREE.Mesh(flawGeo, flawMat);
+      usfdFlawMesh.rotation.z = Math.PI / 2.5;
+      usfdFlawMesh.position.set(0, 0.72, 0.2);
+      usfdScene.add(usfdFlawMesh);
+
+      // Probe Beam
+      const probeGeo = new THREE.ConeGeometry(0.7, 1.4, 24, 1, true);
+      const probeMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+      usfdProbeMesh = new THREE.Mesh(probeGeo, probeMat);
+      usfdProbeMesh.rotation.x = Math.PI;
+      usfdProbeMesh.position.set(0, 0.4, 0.2);
+      usfdScene.add(usfdProbeMesh);
+
+      animateUsfd();
+    }
+
+    function animateUsfd() {
+      requestAnimationFrame(animateUsfd);
+      if (usfdProbeMesh) {
+        usfdProbeMesh.material.opacity = 0.3 + Math.sin(Date.now() * 0.008) * 0.2;
+      }
+      if (usfdControls) usfdControls.update();
+      if (usfdRenderer && usfdScene && usfdCamera) usfdRenderer.render(usfdScene, usfdCamera);
+    }
+
+    function toggleUsfdXray() {
+      isUsfdXray = !isUsfdXray;
+      if (usfdRailMesh) {
+        usfdRailMesh.material.opacity = isUsfdXray ? 0.45 : 0.95;
+        usfdRailMesh.material.color.setHex(isUsfdXray ? 0x38bdf8 : 0x64748b);
+        usfdRailMesh.material.metalness = isUsfdXray ? 0.3 : 0.92;
       }
     }
 
+    // --- THREE.JS 3D VIEWPORT 2: FORWARD KAVACH TCAS DECELERATION RUN ---
+    let cabScene, cabCamera, cabRenderer;
+    let cabSleepers = [], cabSpeed3D = 110, isCabBraking3D = false;
+
+    function initCab3D() {
+      const container = document.getElementById('cab-feed-3d');
+      const canvas = document.getElementById('cab-3d-canvas');
+      if (!canvas) return;
+
+      cabScene = new THREE.Scene();
+      cabCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      cabCamera.position.set(0, 1.6, 3);
+      cabCamera.lookAt(0, 1.2, -10);
+
+      cabRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      cabRenderer.setSize(container.clientWidth, container.clientHeight);
+      cabRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      cabScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const light = new THREE.DirectionalLight(0xffffff, 1.2);
+      light.position.set(3, 8, 5);
+      cabScene.add(light);
+
+      // Rails
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95 });
+      const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 50), railMat);
+      leftRail.position.set(-1.0, 0, -15);
+      cabScene.add(leftRail);
+
+      const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 50), railMat);
+      rightRail.position.set(1.0, 0, -15);
+      cabScene.add(rightRail);
+
+      // Moving Sleepers
+      const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+      for (let z = -40; z <= 10; z += 1.5) {
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.12, 0.35), sleeperMat);
+        sleeper.position.set(0, -0.15, z);
+        cabScene.add(sleeper);
+        cabSleepers.push(sleeper);
+      }
+
+      animateCab();
+    }
+
+    function animateCab() {
+      requestAnimationFrame(animateCab);
+      if (isCabBraking3D && cabSpeed3D > 30) {
+        cabSpeed3D = Math.max(30, cabSpeed3D - 0.4);
+        const el = document.getElementById('cab-3d-speed');
+        if (el) el.textContent = cabSpeed3D.toFixed(0);
+      }
+
+      const moveSpeed = (cabSpeed3D / 110) * 0.55;
+      cabSleepers.forEach(s => {
+        s.position.z += moveSpeed;
+        if (s.position.z > 6) s.position.z = -40;
+      });
+
+      if (cabRenderer && cabScene && cabCamera) cabRenderer.render(cabScene, cabCamera);
+    }
+
+    function triggerCabBraking3D() {
+      isCabBraking3D = true;
+      playEmergencyChime();
+    }
+
+    // --- AUDIO SYNTHESIZERS ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playCautionChime() {
@@ -317,6 +546,11 @@
       osc1.stop(audioCtx.currentTime + 0.5);
       osc2.stop(audioCtx.currentTime + 0.5);
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initUsfd3D();
+      initCab3D();
+    });
   </script>
 </body>
 </html>

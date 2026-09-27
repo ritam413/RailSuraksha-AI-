@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Card } from '../Common/Card';
 import { ExplainableDecisionDossier, MaintenanceDemand } from '@/types/apiContracts';
 import {
@@ -11,6 +12,18 @@ import {
   createCanonicalDossierPayload
 } from '@/lib/agents/explainableLogger';
 import { playActionConfirmedChime, playPlatformHoldChime, playCabEmergencyAlarm } from '@/lib/audioAlerts';
+
+const CryptographicSeal3D = dynamic(
+  () => import('../Three/CryptographicSeal3D').then((mod) => mod.CryptographicSeal3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[360px] bg-[#090D16] border border-[#D0DFEE] rounded-[16px] animate-pulse flex items-center justify-center text-slate-400 font-mono text-xs">
+        Loading 3D Cryptographic Verification Seal...
+      </div>
+    )
+  }
+);
 
 interface LedgerItem {
   id: string;
@@ -135,6 +148,7 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
   const [expandedStep, setExpandedStep] = useState<number | null>(1);
 
   // Verification & Tamper Simulation States
+  const [show3DSeal, setShow3DSeal] = useState<boolean>(false);
   const [isTampered, setIsTampered] = useState<boolean>(false);
   const [tamperedTsrSpeed, setTamperedTsrSpeed] = useState<number>(60); // Tampered speed > 30 km/h
   const [forgedOfficer, setForgedOfficer] = useState<string>('UNAUTHORIZED_USER_99');
@@ -675,6 +689,26 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
             title="Explainable AI Decision Dossier"
             action={
               <div className="flex items-center space-x-2">
+                <div className="flex bg-[#F0F6FC] p-0.5 rounded border border-[#D0DFEE]">
+                  <button
+                    onClick={() => setShow3DSeal(false)}
+                    className={`px-2 py-0.5 text-[10px] font-mono font-bold transition-all ${
+                      !show3DSeal ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-[#2B7FFF]'
+                    }`}
+                    style={{ borderRadius: '3px' }}
+                  >
+                    📄 2D Banner
+                  </button>
+                  <button
+                    onClick={() => setShow3DSeal(true)}
+                    className={`px-2 py-0.5 text-[10px] font-mono font-bold transition-all ${
+                      show3DSeal ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-[#2B7FFF]'
+                    }`}
+                    style={{ borderRadius: '3px' }}
+                  >
+                    🛡️ 3D Hologram Seal
+                  </button>
+                </div>
                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-mono font-bold rounded">
                   RDSO FORM 14B
                 </span>
@@ -685,6 +719,17 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
             }
           >
             <div className="space-y-4">
+              {/* 3D Cryptographic Hologram Seal Interactive Twin */}
+              {show3DSeal && (
+                <div className="mb-2">
+                  <CryptographicSeal3D
+                    hashDigest={effectiveDossier.sha256Signature}
+                    isTamperVerified={!isTampered}
+                    onInspectDossier={() => setActiveDossierTab('PAYLOAD')}
+                  />
+                </div>
+              )}
+
               {/* Cryptographic SHA-256 Seal Banner */}
               <div
                 className={`p-4 text-white border shadow-inner font-mono text-xs space-y-2.5 transition-all ${

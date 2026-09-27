@@ -1,13 +1,24 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { JointBlockSchedule, TrainScheduleSlot, TrainClassification } from '@/types/apiContracts';
+
+const CorridorTwin3D = dynamic(() => import('@/components/Three/CorridorTwin3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[460px] bg-[#090D16] border border-[#D0DFEE] rounded-[16px] flex items-center justify-center text-cyan-400 font-mono text-xs animate-pulse">
+      Loading 3D Corridor Twin Engine...
+    </div>
+  )
+});
 
 export interface StringChartProps {
   activeBlocks: JointBlockSchedule[];
   trainPaths?: TrainScheduleSlot[];
   selectedBlockId?: string;
   onSelectBlock: (blockId: string) => void;
+  onViewDossier?: (blockId: string) => void;
   horizon?: 'TACTICAL_24H' | 'OPERATIONAL_7D' | 'STRATEGIC_30D';
 }
 
@@ -31,8 +42,10 @@ export const CorridorStringChart: React.FC<StringChartProps> = ({
   trainPaths = [],
   selectedBlockId,
   onSelectBlock,
+  onViewDossier,
   horizon = 'TACTICAL_24H'
 }) => {
+  const [viewMode, setViewMode] = useState<'2D_CHART' | '3D_TWIN'>('2D_CHART');
   const width = 860;
   const height = 440;
   const padding = { top: 30, right: 30, bottom: 40, left: 110 };
@@ -108,19 +121,57 @@ export const CorridorStringChart: React.FC<StringChartProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* 2D vs 3D Viewport Switcher */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-[4px] border border-slate-200 text-xs font-mono">
+            <button
+              onClick={() => setViewMode('2D_CHART')}
+              className={`px-2.5 py-1 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                viewMode === '2D_CHART'
+                  ? 'bg-white text-blue-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              data-testid="view-2d-button"
+            >
+              📈 2D String Chart
+            </button>
+            <button
+              onClick={() => setViewMode('3D_TWIN')}
+              className={`px-2.5 py-1 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                viewMode === '3D_TWIN'
+                  ? 'bg-[#2B7FFF] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              data-testid="view-3d-button"
+            >
+              🌐 3D Corridor Twin
+            </button>
+          </div>
+
           <span className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-0.5 rounded-[4px] border border-blue-200 font-semibold">
             ⚡ White-Corridor: 01:30 - 04:45 IST
           </span>
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-auto min-w-[700px] select-none"
-          role="img"
-          aria-label="CSMT to Kalyan Marey String Chart"
-        >
+      {viewMode === '3D_TWIN' ? (
+        <div className="w-full mt-2">
+          <CorridorTwin3D
+            activeBlocks={activeBlocks}
+            trainPaths={trainPaths}
+            selectedBlockId={selectedBlockId}
+            onSelectBlock={onSelectBlock}
+            onViewDossier={onViewDossier}
+          />
+        </div>
+      ) : (
+        <>
+          <div className="w-full overflow-x-auto">
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              className="w-full h-auto min-w-[700px] select-none"
+              role="img"
+              aria-label="CSMT to Kalyan Marey String Chart"
+            >
           {backgroundGrid}
 
           {/* 2. Train Stringline Trajectories */}
@@ -238,7 +289,9 @@ export const CorridorStringChart: React.FC<StringChartProps> = ({
           <span>Scale: 0-54 KM | 24 Hours</span>
         </div>
       </div>
-    </div>
+    </>
+  )}
+</div>
   );
 };
 

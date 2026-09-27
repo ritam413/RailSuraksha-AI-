@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -219,7 +221,8 @@
             <!-- View Mode Switcher -->
             <div class="clay-inset p-1 flex items-center rounded-[12px] text-xs">
               <button id="view-chart-btn" onclick="toggleChartView('chart')" class="px-3 py-1 font-bold clay-btn-primary text-xs">String Chart</button>
-              <button id="view-photo-btn" onclick="toggleChartView('photo')" class="px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs">Live Track & Block Cam 📷</button>
+              <button id="view-photo-btn" onclick="toggleChartView('photo')" class="px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs">Live Cam 📷</button>
+              <button id="view-3d-btn" onclick="toggleChartView('3d')" class="px-3 py-1 font-bold text-signalBlue hover:text-blue-800 transition-all text-xs">🌐 3D Corridor Twin</button>
             </div>
           </div>
         </div>
@@ -329,6 +332,20 @@
                 <div class="text-[10px] text-slate-200 mt-0.5">Location: TC-03 Dadar • S&T, Civil & Electrical Joint Crew</div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- 3. THREE.JS 3D QUADRUPLED TRACK CORRIDOR DIGITAL TWIN -->
+        <div id="corridor-3d-container" class="hidden relative w-full h-[470px] clay-inset overflow-hidden rounded-[16px]">
+          <canvas id="corridor-3d-canvas" class="w-full h-full block"></canvas>
+          <div class="absolute top-3 left-3 px-3 py-1.5 bg-slate-900/85 backdrop-blur-md text-cyan-300 font-mono text-xs font-bold rounded-[10px] border border-cyan-500/30 shadow-lg">
+            🌐 3D QUADRUPLED CORRIDOR TWIN (CSMT → KALYAN 54 KM)
+          </div>
+          <div class="absolute top-3 right-3 px-3 py-1.5 bg-slate-900/85 backdrop-blur-md text-emerald-400 font-mono text-xs font-bold rounded-[10px] border border-emerald-500/30">
+            ● 4 ACTIVE TRAIN CAPSULES • 1 NOCTURNAL SHADOW BLOCK
+          </div>
+          <div class="absolute bottom-3 left-3 px-3 py-1.5 bg-slate-900/85 text-[11px] font-mono text-slate-300 rounded-[10px]">
+            🖱️ Orbit: Drag • Zoom: Scroll • Real-time CP-SAT Scheduled Corridor
           </div>
         </div>
 
@@ -503,20 +520,121 @@
     function toggleChartView(view) {
       const chartContainer = document.getElementById('string-chart-container');
       const photoContainer = document.getElementById('photo-stream-container');
+      const corridor3dContainer = document.getElementById('corridor-3d-container');
       const chartBtn = document.getElementById('view-chart-btn');
       const photoBtn = document.getElementById('view-photo-btn');
+      const view3dBtn = document.getElementById('view-3d-btn');
+
+      chartContainer.classList.add('hidden');
+      photoContainer.classList.add('hidden');
+      corridor3dContainer.classList.add('hidden');
+
+      chartBtn.className = 'px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs';
+      photoBtn.className = 'px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs';
+      view3dBtn.className = 'px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs';
 
       if (view === 'photo') {
-        chartContainer.classList.add('hidden');
         photoContainer.classList.remove('hidden');
         photoBtn.className = 'px-3 py-1 font-bold clay-btn-primary text-xs';
-        chartBtn.className = 'px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs';
+      } else if (view === '3d') {
+        corridor3dContainer.classList.remove('hidden');
+        view3dBtn.className = 'px-3 py-1 font-bold clay-btn-primary text-xs';
+        if (!corridorRenderer) initCorridor3D();
       } else {
-        photoContainer.classList.add('hidden');
         chartContainer.classList.remove('hidden');
         chartBtn.className = 'px-3 py-1 font-bold clay-btn-primary text-xs';
-        photoBtn.className = 'px-3 py-1 font-semibold text-mutedSlate hover:text-inkSlate transition-all text-xs';
       }
+    }
+
+    // --- THREE.JS 3D QUADRUPLED CORRIDOR TWIN ---
+    let corridorScene, corridorCamera, corridorRenderer, corridorControls;
+    let trainCapsules = [];
+
+    function initCorridor3D() {
+      const container = document.getElementById('corridor-3d-container');
+      const canvas = document.getElementById('corridor-3d-canvas');
+      if (!canvas) return;
+
+      corridorScene = new THREE.Scene();
+      corridorCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      corridorCamera.position.set(0, 10, 18);
+
+      corridorRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      corridorRenderer.setSize(container.clientWidth, container.clientHeight);
+      corridorRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      corridorControls = new THREE.OrbitControls(corridorCamera, corridorRenderer.domElement);
+      corridorControls.enableDamping = true;
+      corridorControls.target.set(0, 0, 0);
+
+      corridorScene.add(new THREE.AmbientLight(0xffffff, 0.7));
+      const light = new THREE.DirectionalLight(0xffffff, 1.4);
+      light.position.set(8, 15, 10);
+      corridorScene.add(light);
+
+      // 4 Quadrupled Tracks (UP Slow, UP Fast, DOWN Fast, DOWN Slow)
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9 });
+      for (let track = -2; track <= 1; track++) {
+        const xOffset = track * 1.8 + 0.9;
+        const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.15, 26), railMat);
+        leftRail.position.set(xOffset - 0.4, 0, 0);
+        corridorScene.add(leftRail);
+
+        const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.15, 26), railMat);
+        rightRail.position.set(xOffset + 0.4, 0, 0);
+        corridorScene.add(rightRail);
+      }
+
+      // Station Landmark Pillars (CSMT, Dadar, Thane, Kalyan)
+      const stationMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.5 });
+      const stations = [
+        { name: 'CSMT (KM 0)', z: 11 },
+        { name: 'Dadar (KM 9)', z: 5 },
+        { name: 'Thane (KM 34)', z: -4 },
+        { name: 'Kalyan (KM 54)', z: -11 }
+      ];
+      stations.forEach(st => {
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.3, 0.8), stationMat);
+        pillar.position.set(0, -0.2, st.z);
+        corridorScene.add(pillar);
+      });
+
+      // Glowing Nocturnal Shadow Block Zone (Dadar TC-03)
+      const blockMat = new THREE.MeshStandardMaterial({
+        color: 0x2b7fff,
+        transparent: true,
+        opacity: 0.45,
+        emissive: 0x2b7fff,
+        emissiveIntensity: 0.6
+      });
+      const blockBox = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 5.0), blockMat);
+      blockBox.position.set(0.9, 0.6, 5.0);
+      corridorScene.add(blockBox);
+
+      // 4 Moving Train Capsules
+      const trainColors = [0x22c55e, 0x3b82f6, 0xa855f7, 0xf59e0b];
+      for (let i = 0; i < 4; i++) {
+        const trainGeo = new THREE.BoxGeometry(0.5, 0.4, 2.2);
+        const tMat = new THREE.MeshStandardMaterial({ color: trainColors[i], emissive: trainColors[i], emissiveIntensity: 0.4 });
+        const train = new THREE.Mesh(trainGeo, tMat);
+        train.position.set((i - 1.5) * 1.8, 0.25, (Math.random() - 0.5) * 18);
+        corridorScene.add(train);
+        trainCapsules.push({ mesh: train, speed: 0.04 + i * 0.015, dir: i % 2 === 0 ? -1 : 1 });
+      }
+
+      animateCorridor();
+    }
+
+    function animateCorridor() {
+      requestAnimationFrame(animateCorridor);
+      trainCapsules.forEach(t => {
+        t.mesh.position.z += t.speed * t.dir;
+        if (t.mesh.position.z > 12) t.mesh.position.z = -12;
+        if (t.mesh.position.z < -12) t.mesh.position.z = 12;
+      });
+
+      if (corridorControls) corridorControls.update();
+      if (corridorRenderer && corridorScene && corridorCamera) corridorRenderer.render(corridorScene, corridorCamera);
     }
 
     function openDossierModal() {

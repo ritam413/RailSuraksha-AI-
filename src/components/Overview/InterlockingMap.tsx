@@ -1,12 +1,19 @@
-// src/components/Overview/InterlockingMap.tsx
-'use client';
-
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Card } from '../Common/Card';
 import { SignalHead } from '../Common/SignalHead';
 import { TrackCircuitState, SignalAspect, CircuitOperationalStatus } from '@/types/apiContracts';
 import { MOCK_TRACK_CIRCUITS } from '@/lib/mockData';
 import { ShieldAlert, Zap, ZapOff, Activity, Lock, GitBranch } from 'lucide-react';
+
+const PointSwitchTurnout3D = dynamic(() => import('@/components/Three/PointSwitchTurnout3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[460px] bg-[#090D16] border border-[#D0DFEE] rounded-[16px] flex items-center justify-center text-cyan-400 font-mono text-xs animate-pulse">
+      Loading 3D Yard Point Switch & Signal Mast Engine...
+    </div>
+  )
+});
 
 export interface InterlockingMapProps {
   circuits?: TrackCircuitState[];
@@ -52,6 +59,7 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
   onSignalClick,
   onToggleClamp
 }) => {
+  const [viewMode, setViewMode] = useState<'2D_SCHEMATIC' | '3D_TWIN'>('2D_SCHEMATIC');
   const [activeSwitch, setActiveSwitch] = useState<'NORMAL' | 'REVERSE'>('NORMAL');
   const [internalSelectedId, setInternalSelectedId] = useState<string>(
     normalizeCircuitId(selectedCircuitId || selectedTrackId)
@@ -59,6 +67,16 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
   const [localCircuits, setLocalCircuits] = useState<TrackCircuitState[]>(
     circuits && circuits.length > 0 ? circuits : MOCK_TRACK_CIRCUITS
   );
+
+  const mapTo3DAspect = (aspect?: SignalAspect): 'CLEAR' | 'CAUTION' | 'ATTENTION' | 'DANGER' => {
+    switch (aspect) {
+      case 'GREEN': return 'CLEAR';
+      case 'DOUBLE_YELLOW': return 'ATTENTION';
+      case 'YELLOW': return 'CAUTION';
+      case 'RED':
+      default: return 'DANGER';
+    }
+  };
 
   // Sync state when upstream props change (Avoids State Stall)
   useEffect(() => {
@@ -189,6 +207,32 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
             </button>
           </div>
 
+          {/* 2D vs 3D Switcher */}
+          <div className="flex items-center bg-slate-200/80 p-0.5 rounded-[4px] border border-slate-300 text-xs font-mono">
+            <button
+              onClick={() => setViewMode('2D_SCHEMATIC')}
+              className={`px-2.5 py-1 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                viewMode === '2D_SCHEMATIC'
+                  ? 'bg-white text-blue-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              data-testid="view-2d-schematic"
+            >
+              🗺️ 2D Schematic
+            </button>
+            <button
+              onClick={() => setViewMode('3D_TWIN')}
+              className={`px-2.5 py-1 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                viewMode === '3D_TWIN'
+                  ? 'bg-[#2B7FFF] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              data-testid="view-3d-turnout"
+            >
+              🔀 3D Point Switch Twin
+            </button>
+          </div>
+
           {/* Axle Counter & Lockout Telemetry */}
           <div className="flex items-center space-x-4 text-[11px] text-slate-600">
             <div className="flex items-center space-x-1.5">
@@ -213,8 +257,21 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
           </div>
         </div>
 
-        {/* Form S&T/T-351 Statutory Lockout Banner */}
-        {hasAnyClampedCircuit && (
+        {viewMode === '3D_TWIN' ? (
+          <div className="w-full mt-2">
+            <PointSwitchTurnout3D
+              switchId="SW-04"
+              signalId={currentCircuit.signalId}
+              signalAspect={mapTo3DAspect(currentCircuit.signalAspect)}
+              switchRoute={activeSwitch === 'NORMAL' ? 'MAINLINE' : 'TURNOUT'}
+              onToggleRoute={(route) => setActiveSwitch(route === 'MAINLINE' ? 'NORMAL' : 'REVERSE')}
+              isLockedOut={currentCircuit.isSignalClamped || currentCircuit.status === 'BLOCK_SANCTIONED'}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Form S&T/T-351 Statutory Lockout Banner */}
+            {hasAnyClampedCircuit && (
           <div
             className="p-3 bg-red-50 border-2 border-red-300 text-red-900 flex items-center justify-between gap-3 shadow-xs animate-pulse"
             style={{ borderRadius: '8px' }}
@@ -385,7 +442,9 @@ export const InterlockingMap: React.FC<InterlockingMapProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </Card>
+      </>
+    )}
+  </div>
+</Card>
   );
 };

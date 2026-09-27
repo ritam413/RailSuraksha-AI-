@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -62,10 +64,7 @@
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .clay-btn-primary:active {
-      transform: translateY(2px) scale(0.98);
-      box-shadow: 
-        inset 3px 3px 6px rgba(0, 0, 0, 0.35),
-        inset -2px -2px 5px rgba(255, 255, 255, 0.2);
+      transform: scale(0.97);
     }
     .clay-btn-surface {
       background: #F4F8FD;
@@ -94,6 +93,16 @@
         inset 3px 3px 8px rgba(255, 255, 255, 0.95),
         0 0 20px rgba(239, 68, 68, 0.3);
     }
+    .viewport-3d-switch {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: radial-gradient(circle at 50% 30%, #151e2e 0%, #080c14 100%);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid #233348;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
   </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8 min-h-screen">
@@ -108,6 +117,7 @@
         <div class="flex items-center gap-2">
           <h1 class="text-xl font-extrabold text-inkSlate tracking-tight">Section Interlocking & Track Circuit Map</h1>
           <span class="px-2.5 py-0.5 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-[10px] mono">LIVE SYNCHRONIZED</span>
+          <span class="px-2.5 py-0.5 text-xs font-bold text-signalBlue bg-blue-100 rounded-[10px] mono">3D YARD TWIN INTEGRATED</span>
         </div>
         <p class="text-xs text-mutedSlate font-medium">Corridor: Central Railway UP Fast Main Line (CSMT 0.0km → Kalyan 54.0km)</p>
       </div>
@@ -143,7 +153,6 @@
 
       <!-- 6 TRACK CIRCUITS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-
         <!-- TC-01 -->
         <div onclick="selectCircuit('TC-01', 'CSMT Main Yard', 'CLEAR', 'GREEN (S-02)', '100 km/h', 'None')" class="cursor-pointer p-4 clay-card-elevated hover:translate-y-[-2px] transition-all">
           <div class="flex items-center justify-between">
@@ -209,70 +218,59 @@
           <div class="text-[10px] text-mutedSlate mono mt-0.5">KM 34.0 - 54.0</div>
           <div class="mt-3 text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-1 rounded-[8px] text-center">🟢 ASPECT: GREEN</div>
         </div>
-
       </div>
     </div>
 
-    <!-- DETAIL SPLIT -->
+    <!-- DETAIL SPLIT WITH INTEGRATED 3D POINT SWITCH TURNOUT TWIN -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      <!-- LEFT: RELAY HEALTH (7 COLS) -->
-      <div class="lg:col-span-7 clay-card p-6">
-        <h3 class="text-sm font-extrabold text-inkSlate flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-          <span>⚡ Selected Circuit: <strong id="selected-tc-name" class="text-signalBlue mono">TC-03 (Dadar Junction)</strong></span>
-          <span id="selected-tc-status" class="px-3 py-1 text-xs font-black bg-red-100 text-red-700 rounded-[10px] mono">🔴 BLOCKED (TSR 30)</span>
-        </h3>
+      <!-- LEFT: 3D POINT SWITCH TURNOUT DIGITAL TWIN (7 COLS) -->
+      <div class="lg:col-span-7 clay-card p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <h3 class="text-sm font-extrabold text-inkSlate flex items-center gap-2">
+              <span>🔀</span> 3D Yard Point Switch Turnout (SW-04) & 4-Aspect Signal Twin
+            </h3>
+            <span class="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-800 rounded-[10px] mono">
+              115mm MECHANICAL STROKE
+            </span>
+          </div>
 
-        <div class="grid grid-cols-3 gap-3 mb-4">
-          <div class="p-3 clay-inset text-center">
-            <div class="text-[10px] text-mutedSlate uppercase font-bold">Signal Aspect</div>
-            <div id="selected-aspect" class="text-xs font-black text-red-600 mono mt-0.5">RED (S-12)</div>
-          </div>
-          <div class="p-3 clay-inset text-center">
-            <div class="text-[10px] text-mutedSlate uppercase font-bold">Speed Limit</div>
-            <div id="selected-speed" class="text-xs font-black text-red-600 mono mt-0.5">30 km/h (TSR)</div>
-          </div>
-          <div class="p-3 clay-inset text-center">
-            <div class="text-[10px] text-mutedSlate uppercase font-bold">Block ID</div>
-            <div id="selected-block" class="text-xs font-black text-inkSlate mono mt-0.5">BLK-0906-01</div>
+          <!-- 3D Switch Canvas Viewport -->
+          <div class="viewport-3d-switch">
+            <canvas id="switch-3d-canvas"></canvas>
+            <div class="absolute top-2 left-2 px-2.5 py-1 bg-black/80 backdrop-blur-sm text-[10px] text-cyan-300 font-mono rounded-[8px] border border-cyan-500/30">
+              🔀 DADAR JUNCTION SW-04 (1:12 TURNOUT)
+            </div>
+            <div class="absolute top-2 right-2 px-2.5 py-1 bg-black/80 text-[10px] font-mono text-emerald-400 rounded-[8px]">
+              ROUTE: <span id="hud-route-name">MAINLINE (NORMAL)</span>
+            </div>
           </div>
         </div>
 
-        <div class="clay-inset p-3 overflow-hidden">
-          <table class="w-full text-left text-xs">
-            <thead class="text-mutedSlate font-bold">
-              <tr>
-                <th class="pb-2">Sub-System</th>
-                <th class="pb-2">Device Tag</th>
-                <th class="pb-2">Interlocking State</th>
-                <th class="pb-2">Statutory Lockout</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200/60">
-              <tr>
-                <td class="py-2.5 font-bold text-inkSlate">Civil P-Way</td>
-                <td class="py-2.5 mono text-slate-600">USFD-FLAW-09</td>
-                <td class="py-2.5"><span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-black rounded-[6px]">IMR Flaw</span></td>
-                <td class="py-2.5 text-mutedSlate font-medium">IRPWM Para 504</td>
-              </tr>
-              <tr>
-                <td class="py-2.5 font-bold text-inkSlate">TRD 25kV OHE</td>
-                <td class="py-2.5 mono text-slate-600">CB-DADAR-04</td>
-                <td class="py-2.5"><span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-black rounded-[6px]">Earthed / Safe</span></td>
-                <td class="py-2.5 text-mutedSlate font-medium">ACTM Vol II Permit</td>
-              </tr>
-              <tr>
-                <td class="py-2.5 font-bold text-inkSlate">Point Switch</td>
-                <td class="py-2.5 mono text-slate-600">SW-04 Turnout</td>
-                <td class="py-2.5"><span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-black rounded-[6px]">PADLOCKED</span></td>
-                <td class="py-2.5 text-red-700 font-extrabold">Form S&T/T-351 Active</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- 3D Point Switch Controls -->
+        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button onclick="setSwitchRoute3D('NORMAL')" id="btn-sw-normal" class="px-3 py-1.5 text-xs font-black bg-emerald-600 text-white rounded btn-action">
+              🟢 MAINLINE (NORMAL)
+            </button>
+            <button onclick="setSwitchRoute3D('REVERSE')" id="btn-sw-reverse" class="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded btn-action">
+              🟡 PLATFORM 18 (REVERSE)
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="simulateTrainPassage3D()" class="px-3 py-1.5 text-xs font-bold bg-signalBlue text-white rounded btn-action">
+              🚆 Simulate Train Passing
+            </button>
+            <button onclick="toggleLockout3D()" id="btn-lockout" class="px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 rounded btn-action">
+              🔒 Form S&T/T-351 Lockout
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- RIGHT: KAVACH TSR DISSEMINATION (5 COLS) -->
+      <!-- RIGHT: RELAY HEALTH & KAVACH TSR BROADCASTER (5 COLS) -->
       <div class="lg:col-span-5 clay-card p-6 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
@@ -284,11 +282,11 @@
 
           <div class="p-4 bg-slate-950 text-slate-100 rounded-[18px] font-mono text-xs space-y-2 shadow-2xl border border-slate-800">
             <div class="text-emerald-400 font-extrabold">// KAVACH PACKET #409_TSR</div>
-            <div>STATUS: <span class="text-amber-400">BROADCAST_ACTIVE</span></div>
+            <div>STATUS: <span class="text-amber-400 font-bold">BROADCAST_ACTIVE</span></div>
             <div>SECTION: <span class="text-sky-300">TC-03 Dadar (KM 8.2 - 12.0)</span></div>
             <div>SPEED_LIMIT: <span class="text-red-400 font-bold">30 KM/H</span></div>
-            <div>BRAKING_CURVE: <span class="text-sky-300">SERVICE_BRAKE_ENFORCED</span></div>
-            <div>LOCOS_ACK: <span class="text-emerald-300">#22221, #12127 (ACKNOWLEDGED)</span></div>
+            <div>POINT_CONTACTS: <span class="text-emerald-400">SW-04 MOTOR DETECT LOCKED</span></div>
+            <div>AXLE_COUNTER: <span class="text-emerald-300">AC-04 HEALTHY (0 DELTA)</span></div>
           </div>
         </div>
 
@@ -305,14 +303,220 @@
     </div>
   </main>
 
+  <!-- JAVASCRIPT: THREE.JS 3D POINT SWITCH SCENE -->
   <script>
-    function selectCircuit(id, name, status, aspect, speed, block) {
-      document.getElementById('selected-tc-name').textContent = `${id} (${name})`;
-      document.getElementById('selected-tc-status').textContent = status;
-      document.getElementById('selected-aspect').textContent = aspect;
-      document.getElementById('selected-speed').textContent = speed;
-      document.getElementById('selected-block').textContent = block;
+    let switchScene, switchCamera, switchRenderer, switchControls;
+    let switchTongueLeft, switchTongueRight, switchStretcher, switchThrowRod;
+    let switchSignalAspect, switchFeatherGroup, switchWheelGroup;
+    let switchState = {
+      position: 'NORMAL',
+      progress: 0,
+      targetProgress: 0,
+      lockout: false,
+      trainPassing: false,
+      wheelZ: -12
+    };
+
+    function initSwitch3D() {
+      const container = document.querySelector('.viewport-3d-switch');
+      const canvas = document.getElementById('switch-3d-canvas');
+      if (!canvas) return;
+
+      switchScene = new THREE.Scene();
+      switchCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+      switchCamera.position.set(0, 5.5, 8.5);
+
+      switchRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      switchRenderer.setSize(container.clientWidth, container.clientHeight);
+      switchRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      switchControls = new THREE.OrbitControls(switchCamera, switchRenderer.domElement);
+      switchControls.enableDamping = true;
+      switchControls.target.set(0, 0, 0);
+
+      // Lights
+      switchScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const light = new THREE.DirectionalLight(0xffffff, 1.4);
+      light.position.set(5, 10, 8);
+      switchScene.add(light);
+
+      // Concrete Sleepers
+      const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+      for (let z = -7; z <= 7; z += 0.9) {
+        const width = z > -1 ? 4.5 + (z + 1) * 0.25 : 4.5;
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(width, 0.18, 0.4), sleeperMat);
+        sleeper.position.set((width - 4.5) * 0.5, -0.2, z);
+        switchScene.add(sleeper);
+      }
+
+      // Stock Rails
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.92, roughness: 0.2 });
+      const leftStock = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 16), railMat);
+      leftStock.position.set(-1.25, 0, 0);
+      switchScene.add(leftStock);
+
+      const rightStock = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 16), railMat);
+      rightStock.position.set(1.25, 0, 0);
+      switchScene.add(rightStock);
+
+      // Diverging Curve Rail
+      const curveGeo = new THREE.BoxGeometry(0.15, 0.3, 11);
+      const rightDiverge = new THREE.Mesh(curveGeo, railMat);
+      rightDiverge.rotation.y = 0.25;
+      rightDiverge.position.set(1.3, 0, 2.2);
+      switchScene.add(rightDiverge);
+
+      // Moving Tongue Blades
+      const tongueMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.92, roughness: 0.15 });
+      switchTongueLeft = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.26, 6), tongueMat);
+      switchTongueLeft.position.set(-1.1, 0, -1.0);
+      switchScene.add(switchTongueLeft);
+
+      switchTongueRight = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.26, 6), tongueMat);
+      switchTongueRight.position.set(0.85, 0, -1.0);
+      switchScene.add(switchTongueRight);
+
+      // Stretcher Bar
+      switchStretcher = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.08, 0.12), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+      switchStretcher.position.set(-0.12, -0.05, -3.0);
+      switchScene.add(switchStretcher);
+
+      // Motor Box & Throw Rod
+      const motorBox = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.45, 0.8), new THREE.MeshStandardMaterial({ color: 0x0369a1 }));
+      motorBox.position.set(-2.3, 0.1, -3.0);
+      switchScene.add(motorBox);
+
+      switchThrowRod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+      switchThrowRod.rotation.z = Math.PI / 2;
+      switchThrowRod.position.set(-1.7, 0, -3.0);
+      switchScene.add(switchThrowRod);
+
+      // 4-Aspect Signal Mast with Feather
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.8), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      mast.position.set(-2.6, 1.6, -4.0);
+      switchScene.add(mast);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.35), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+      head.position.set(-2.6, 3.0, -4.0);
+      switchScene.add(head);
+
+      switchSignalAspect = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+      switchSignalAspect.position.set(-2.6, 3.2, -3.8);
+      switchScene.add(switchSignalAspect);
+
+      // Route Feather Lamps
+      switchFeatherGroup = new THREE.Group();
+      for (let i = 0; i < 5; i++) {
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        lamp.position.set(-2.6 + i * 0.11, 4.0 + i * 0.09, -3.8);
+        switchFeatherGroup.add(lamp);
+      }
+      switchFeatherGroup.visible = false;
+      switchScene.add(switchFeatherGroup);
+
+      // Train Wheelset Simulation
+      switchWheelGroup = new THREE.Group();
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9 });
+      const wLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.1, 24), wheelMat);
+      wLeft.rotation.z = Math.PI / 2;
+      wLeft.position.set(-1.25, 0.3, 0);
+      switchWheelGroup.add(wLeft);
+
+      const wRight = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.1, 24), wheelMat);
+      wRight.rotation.z = Math.PI / 2;
+      wRight.position.set(1.25, 0.3, 0);
+      switchWheelGroup.add(wRight);
+
+      const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.5), wheelMat);
+      axle.rotation.z = Math.PI / 2;
+      axle.position.set(0, 0.3, 0);
+      switchWheelGroup.add(axle);
+
+      switchWheelGroup.position.z = -14;
+      switchWheelGroup.visible = false;
+      switchScene.add(switchWheelGroup);
+
+      animateSwitch();
     }
+
+    function animateSwitch() {
+      requestAnimationFrame(animateSwitch);
+
+      if (switchState.progress !== switchState.targetProgress) {
+        switchState.progress += (switchState.targetProgress - switchState.progress) * 0.12;
+        if (Math.abs(switchState.progress - switchState.targetProgress) < 0.005) {
+          switchState.progress = switchState.targetProgress;
+        }
+
+        const offset = switchState.progress * 0.35;
+        if (switchTongueLeft) switchTongueLeft.position.x = -1.1 + offset;
+        if (switchTongueRight) switchTongueRight.position.x = 0.85 + offset;
+        if (switchStretcher) switchStretcher.position.x = -0.12 + offset;
+        if (switchThrowRod) switchThrowRod.position.x = -1.7 + offset * 0.5;
+      }
+
+      if (switchState.trainPassing) {
+        switchState.wheelZ += 0.2;
+        switchWheelGroup.position.z = switchState.wheelZ;
+        if (switchState.position === 'REVERSE' && switchState.wheelZ > 0) {
+          switchWheelGroup.position.x += 0.05;
+        }
+        if (switchState.wheelZ > 10) {
+          switchState.trainPassing = false;
+          switchWheelGroup.visible = false;
+          if (switchSignalAspect && !switchState.lockout) {
+            switchSignalAspect.material.color.setHex(switchState.position === 'NORMAL' ? 0x10b981 : 0xf59e0b);
+          }
+        }
+      }
+
+      if (switchControls) switchControls.update();
+      if (switchRenderer && switchScene && switchCamera) switchRenderer.render(switchScene, switchCamera);
+    }
+
+    function setSwitchRoute3D(route) {
+      if (switchState.lockout) {
+        alert('Blocked: Form S&T/T-351 Lockout is Active.');
+        return;
+      }
+      switchState.position = route;
+      switchState.targetProgress = route === 'REVERSE' ? 1.0 : 0.0;
+
+      document.getElementById('btn-sw-normal').className = route === 'NORMAL' ? 'px-3 py-1.5 text-xs font-black bg-emerald-600 text-white rounded btn-action' : 'px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded btn-action';
+      document.getElementById('btn-sw-reverse').className = route === 'REVERSE' ? 'px-3 py-1.5 text-xs font-black bg-amber-600 text-white rounded btn-action' : 'px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded btn-action';
+      document.getElementById('hud-route-name').textContent = route === 'NORMAL' ? 'MAINLINE (NORMAL)' : 'PLATFORM 18 (REVERSE)';
+
+      if (switchFeatherGroup) switchFeatherGroup.visible = route === 'REVERSE';
+      if (switchSignalAspect) switchSignalAspect.material.color.setHex(route === 'NORMAL' ? 0x10b981 : 0xf59e0b);
+    }
+
+    function simulateTrainPassage3D() {
+      switchState.trainPassing = true;
+      switchState.wheelZ = -12;
+      switchWheelGroup.position.x = 0;
+      switchWheelGroup.visible = true;
+      if (switchSignalAspect) switchSignalAspect.material.color.setHex(0xef4444);
+    }
+
+    function toggleLockout3D() {
+      switchState.lockout = !switchState.lockout;
+      const btn = document.getElementById('btn-lockout');
+      if (switchState.lockout) {
+        btn.className = 'px-3 py-1.5 text-xs font-bold bg-rose-700 text-white rounded btn-action';
+        btn.textContent = '🔒 Form S&T/T-351: CLAMPED';
+        if (switchSignalAspect) switchSignalAspect.material.color.setHex(0xef4444);
+      } else {
+        btn.className = 'px-3 py-1.5 text-xs font-bold bg-rose-50 text-rose-700 border border-rose-300 rounded btn-action';
+        btn.textContent = '🔒 Form S&T/T-351 Lockout';
+        if (switchSignalAspect) switchSignalAspect.material.color.setHex(switchState.position === 'NORMAL' ? 0x10b981 : 0xf59e0b);
+      }
+    }
+
+    function selectCircuit(id, name, status, aspect, speed, block) {
+      alert(`Selected Circuit: ${id} (${name}) - Aspect: ${aspect}`);
+    }
+
+    window.addEventListener('DOMContentLoaded', initSwitch3D);
   </script>
 </body>
 </html>

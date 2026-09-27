@@ -104,6 +104,9 @@
       <button onclick="loadScreen('screen4_auditor_workspace.html', this)" class="screen-tab px-4 py-2 text-xs font-bold text-mutedSlate hover:text-inkSlate transition-all">
         ⚖️ Screen 4: Auditor Workspace
       </button>
+      <button onclick="loadScreen('3d_webgl_interactive_prototype.html', this)" class="screen-tab px-4 py-2 text-xs font-bold text-purple-600 hover:text-purple-800 transition-all">
+        🔮 3D WebGL Digital Twin
+      </button>
     </div>
   </header>
 
@@ -135,7 +138,8 @@
         'screen1_master_corridor_cockpit.html': 'Screen 1: Master Corridor Block Command Cockpit (/)',
         'screen2_interlocking_track_map.html': 'Screen 2: Section Interlocking & Track Circuit Map (/interlocking)',
         'screen3_defect_vision_telemetry.html': 'Screen 3: Defect Vision & Cab Telemetry Console (/vision-telemetry)',
-        'screen4_auditor_workspace.html': 'Screen 4: Auditor Workspace & Explainable Decision Dossier (/auditor-workspace)'
+        'screen4_auditor_workspace.html': 'Screen 4: Auditor Workspace & Explainable Decision Dossier (/auditor-workspace)',
+        '3d_webgl_interactive_prototype.html': '3D WebGL Digital Twin & Immersion Prototype (/3d-twin)'
       };
       document.getElementById('current-screen-title').textContent = titles[url] || url;
 

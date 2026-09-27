@@ -1,5 +1,31 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-27 — TICKET-04 Complete: 3D Holographic Cryptographic Audit Seal & Tamper Engine (/tdd + /impeccable + /addyosmani-perf)
+
+### Objective
+Implement `TICKET-04` (`tickets/TICKET-04-cryptographic-seal-3d.md`):
+1. Build `src/components/Three/CryptographicSeal3D.tsx` featuring dual contra-rotating Gold and Turquoise SHA-256 rings, dynamic central octahedron Merkle core (emerald verified vs ruby tampered), orbiting satellite data nodes, and interactive `<OrbitControls>` / `<Float>` camera rigs.
+2. Integrate `CryptographicSeal3D` into `src/components/Auditor/AuditorWorkspace.tsx` in Screen 4 behind an interactive `[ 📄 2D Banner ]` $\leftrightarrow$ `[ 🛡️ 3D Hologram Seal ]` view switcher with live penetration & tamper testing synchronization.
+3. Verify all 19 test suites and 128 tests pass at 100%.
+
+### Changes Made
+- Created `tests/CryptographicSeal3D.test.tsx` (TDD Step 1: Red $\rightarrow$ verified).
+- Created `src/components/Three/CryptographicSeal3D.tsx` (TDD Step 2: Green).
+- Integrated into `src/components/Auditor/AuditorWorkspace.tsx` with dynamic Next.js 16 SSR-safe loading (`next/dynamic({ ssr: false })`) and view mode switcher.
+- Updated `features_implemented.md` and `tracker.md`.
+
+### Verification
+- `npm test` (`npx vitest run`) — 19/19 test files passed, 128/128 tests passed (100%).
+- `tests/CryptographicSeal3D.test.tsx` — 2/2 passing tests.
+- `tests/AuditorWorkspace.test.tsx` — 4/4 passing tests.
+
+### Current State
+All 4 componentized 3D WebGL Digital Twin modules are fully built, isolated in `src/components/Three/`, integrated into their respective cockpit screens with zero CLS layout shift, and covered by automated unit tests.
+
+### Next Agent Instructions
+1. All 4 tickets (TICKET-01, TICKET-02, TICKET-03, TICKET-04) are complete.
+2. Commit and push all changes to `origin/main`.
+
 ## 2026-09-27 — Branch Merge into Main & Suite Validation
 
 ### Objective
@@ -74,6 +100,143 @@ Document comprehensive safety validation, ground execution verification, and Rol
 - Signal heads render with 3 lights (Orange/Yellow, Green, Red).
 - Clicking any track circuit card selects and highlights that section and inspects it in the deep-dive drawer without switching tabs or navigating away.
 
+### Verification
+- `npm test` (`npx vitest run`) — 19/19 test files passed, 128/128 tests passed (100%).
+- `tests/CryptographicSeal3D.test.tsx` — 2/2 passing tests.
+- `tests/AuditorWorkspace.test.tsx` — 4/4 passing tests.
+
+### Current State
+All 4 componentized 3D WebGL Digital Twin modules are fully built, isolated in `src/components/Three/`, integrated into their respective cockpit screens with zero CLS layout shift, and covered by automated unit tests.
+
+### Next Agent Instructions
+1. All 4 tickets (TICKET-01, TICKET-02, TICKET-03, TICKET-04) are complete.
+2. Commit and push all changes to `origin/main`.
+
+## 2026-09-27 — TICKET-03 Complete: Refined 3D UIC-60 Rail Flaw Hologram & Kavach Cab Run (/tdd + /impeccable + /addyosmani-perf)
+
+### Objective
+Implement `TICKET-03` (`tickets/TICKET-03-defect-vision-kavach-3d.md`):
+1. Left Pane: Build `src/components/Three/RailFlawHologram3D.tsx` featuring an authentic extruded **UIC-60 rail cross-section profile** (head, web, foot), internal ruby flaw ($d=18\text{mm}$ below crown), oscillating ultrasonic transducer wave cone, `<Float>` hovering, and solid/X-ray steel toggle.
+2. Right Pane: Build `src/components/Three/KavachCabRun3D.tsx` featuring a smooth forward track perspective run with moving sleepers, catenary wires, and interactive deceleration simulation ($68 \to 30\text{ km/h}$).
+3. Seamlessly integrate both into `src/components/Vision/DefectVisionTelemetry.tsx` with view switcher tabs (`[ 📷 Live Cam ]` $\leftrightarrow$ `[ 🔮 3D USFD ]` and `[ 📊 Telemetry ]` $\leftrightarrow$ `[ ⚡ 3D Cab Run ]`).
+
+### Changes Made
+- Created `tests/DefectVisionKavach3D.test.tsx` (TDD Step 1: Red $\rightarrow$ verified).
+- Created `src/components/Three/RailFlawHologram3D.tsx` (TDD Step 2: Green).
+- Created `src/components/Three/KavachCabRun3D.tsx` (TDD Step 2: Green).
+- Integrated into `src/components/Vision/DefectVisionTelemetry.tsx` with dynamic imports and view mode toggles.
+- Updated `features_implemented.md` and `tracker.md`.
+
+### Verification
+- `npm test` — 126/126 tests passed across 18 test suites (100%).
+- `tests/DefectVisionKavach3D.test.tsx` — 2/2 passing tests.
+- `tests/DefectVisionTelemetry.test.tsx` — 4/4 passing tests.
+
+### Next Agent Instructions
+1. Proceed with `TICKET-04` (`tickets/TICKET-04-cryptographic-seal-3d.md`):
+   - Build `src/components/Three/CryptographicSeal3D.tsx` for Screen 4 (Auditor Workspace).
+   - Write test `tests/CryptographicSeal3D.test.tsx`, integrate into `src/components/Auditor/AuditorWorkspace.tsx`, and verify 100% test pass.
+
+### Objective
+Implement `TICKET-02` (`tickets/TICKET-02-point-switch-turnout-3d.md`): Build reactive client-side React 19 / Next.js 16 component `src/components/Three/PointSwitchTurnout3D.tsx` with R3F, Drei, and GSAP. Wire it directly into `src/components/Overview/InterlockingMap.tsx` with a view switcher tab (`[ 🗺️ 2D Schematic ]` $\leftrightarrow$ `[ 🔀 3D Point Switch Twin ]`).
+
+### Changes Made
+- Created `tests/PointSwitchTurnout3D.test.tsx` (TDD Step 1: Red $\rightarrow$ verified failure).
+- Created `src/components/Three/PointSwitchTurnout3D.tsx` (TDD Step 2: Green):
+  - 1:12 Turnout Track Geometry with mainline and Platform 18 diverging curve.
+  - Electric Point Machine with $115\text{mm}$ mechanical tie-rod throw and movable switch tongue blade.
+  - 4-Aspect Signal Mast Head (Top Yellow, Upper-Middle Green, Lower-Middle Yellow, Bottom Red) reacting dynamically to circuit signal state.
+  - Wheelset Train Passing simulation animating across the turnout.
+  - Form S&T/T-351 Lockout indicator banner.
+- Updated `src/components/Overview/InterlockingMap.tsx` with dynamic import and 2D/3D view mode switcher.
+- Updated `features_implemented.md` and `tracker.md`.
+
+### Verification
+- `npm test` — 124/124 tests passed across 17 test suites (100%).
+- `tests/PointSwitchTurnout3D.test.tsx` — 3/3 passing tests.
+
+### Next Agent Instructions
+1. Proceed with `TICKET-03` (`tickets/TICKET-03-defect-vision-kavach-3d.md`):
+   - Left Pane: Build `src/components/Three/RailFlawHologram3D.tsx` with authentic extruded **UIC-60 rail cross-section geometry** (head, web, foot), internal ruby flaw, and ultrasonic transducer pulse wave.
+   - Right Pane: Build `src/components/Three/KavachCabRun3D.tsx` with procedural forward track run and interactive deceleration simulation ($110 \to 30\text{ km/h}$).
+   - Integrate into `src/components/Vision/DefectVisionTelemetry.tsx` and run full test suite.
+
+### Objective
+Implement `TICKET-01` (`tickets/TICKET-01-corridor-twin-3d.md`): Create production React 19 / Next.js 16 client component `src/components/Three/CorridorTwin3D.tsx` using `@react-three/fiber`, `@react-three/drei`, and `three`, and integrate it into `src/components/Planner/CorridorStringChart.tsx` behind a seamless `[ 📈 2D String Chart ]` $\leftrightarrow$ `[ 🌐 3D Corridor Twin ]` view switcher.
+
+### Changes Made
+- Installed dependencies: `three`, `@types/three`, `@react-three/fiber`, `@react-three/drei`, `gsap`, `@gsap/react`.
+- Created `tests/CorridorTwin3D.test.tsx` (TDD Step 1: Red $\rightarrow$ verified failure).
+- Created `src/components/Three/CorridorTwin3D.tsx` (TDD Step 2: Green):
+  - 4 Quadrupled Track meshes (`UP_THROUGH`, `UP_SLOW`, `DOWN_FAST`, `DOWN_SLOW`) with ballast sleepers and catenary portals.
+  - 4 Moving Train Capsules (`12051 Jan Shatabdi`, `12137 Punjab Mail`, `22221 Rajdhani`, `Suburban EMU`) with direct ref mutations inside `useFrame` for 60 FPS hardware acceleration.
+  - Cyan translucent Nocturnal Shadow Maintenance Block with harmonic breathing animation.
+  - Top and bottom HUD telemetry overlays with CP-SAT solver status (184ms) and Orbit/Zoom guidance.
+  - Strict WebGL memory lifecycle and dynamic SSR hydration fallback.
+- Updated `src/components/Planner/CorridorStringChart.tsx` with dynamic import and 2D/3D view mode toggle button.
+- Updated `features_implemented.md` and `tracker.md`.
+
+### Verification
+- `npm test` — 121/121 tests passed across 16 test suites (100%).
+- `tests/CorridorTwin3D.test.tsx` — 4/4 passing tests.
+
+### Next Agent Instructions
+1. Proceed with `TICKET-02` (`tickets/TICKET-02-point-switch-turnout-3d.md`):
+   - Write failing test `tests/PointSwitchTurnout3D.test.tsx`.
+   - Build `src/components/Three/PointSwitchTurnout3D.tsx` (SW-04 electric point machine 115mm stroke with GSAP dampening + reactive 4-Aspect Signal Mast).
+   - Integrate into `src/components/Overview/InterlockingMap.tsx` and run full test suite.
+
+### Files Created / Modified
+- `tickets/TICKET-01-corridor-twin-3d.md` (Created)
+- `tickets/TICKET-02-point-switch-turnout-3d.md` (Created)
+- `tickets/TICKET-03-defect-vision-kavach-3d.md` (Created)
+- `tickets/TICKET-04-cryptographic-seal-3d.md` (Created)
+- `tracker.md` (Updated)
+
+### Implementation Decisions
+- **R3F Declarative Bridge**: React props directly drive 3D scene graphs; Three.js `useFrame` mutates `useRef` directly (bypassing React re-renders for 60 FPS).
+- **GSAP Timelines**: Used for physical mechanical strokes (115mm with elastic kickback), signal crossfades, and Kavach deceleration curves.
+- **Addy Osmani Performance**: Enforced sub-50ms INP with React 19 `startTransition`, dynamic hardware concurrency tiering (`navigator.hardwareConcurrency`), complete WebGL traversal disposal on unmount, and zero-CLS containers.
+
+### Next Agent Instructions
+1. Execute `TICKET-01` first: install required packages (`three`, `@types/three`, `@react-three/fiber`, `@react-three/drei`, `gsap`, `@gsap/react`), write failing test `tests/Three/CorridorTwin3D.test.tsx`, implement `src/components/Three/CorridorTwin3D.tsx`, verify green pass, and integrate into `CorridorStringChart.tsx`.
+2. Follow with `TICKET-02`, `TICKET-03`, and `TICKET-04` using the vertical-slice TDD loop.
+
+---
+
+## 2026-09-27 — Direct 3D WebGL Digital Twin Integration Across All 4 Sections (/threejs-webgl + /emil-prototype)
+
+### Objective
+Embed the specialized 3D WebGL digital twin modules directly into the 4 functional screens of RailSuraksha AI so users can immediately experience how 3D spatial graphics fit into the mission control workflow:
+1. **Screen 1 (`screen1_master_corridor_cockpit.html`)**: Integrated **3D Quadrupled Track Corridor Elevation Twin** (CSMT $\to$ Kalyan 54 KM) alongside the 2D Marey string chart, with 4 moving train capsules and glowing possessory nocturnal shadow block zones.
+2. **Screen 2 (`screen2_interlocking_track_map.html`)**: Integrated **3D Point Switch Turnout (SW-04) & 4-Aspect Signal Mast Twin** directly in the interlocking pane with $115\text{ mm}$ mechanical throw animation, 5-lamp feather route indicator, and wheelset axle counter trip simulation.
+3. **Screen 3 (`screen3_defect_vision_telemetry.html`)**: Integrated **3D Ultrasonic USFD Volumetric Rail Hologram** (360° orbit, X-ray mode, flaw depth slider) in Pane 1, and **3D Forward Kavach TCAS Deceleration Run** (110k $\to$ 30k clamp) in Pane 2.
+4. **Screen 4 (`screen4_auditor_workspace.html`)**: Integrated **Rotating 3D Holographic SHA-256 Merkle Security Seal** directly inside the regulatory certificate dossier card with real-time cryptographic tamper detection.
+
+### Files Changed
+- `docs/mockup/screen1_master_corridor_cockpit.html` (Modified)
+- `docs/mockup/screen2_interlocking_track_map.html` (Modified)
+- `docs/mockup/screen3_defect_vision_telemetry.html` (Modified)
+- `docs/mockup/screen4_auditor_workspace.html` (Modified)
+- `tracker.md` (Updated)
+
+---
+
+## 2026-09-27 — 3D WebGL Digital Twin & Immersion Prototype Suite (/threejs-webgl + /emil-prototype)
+
+### Objective
+Create an interactive 3D WebGL prototype in `docs/mockup/3d_webgl_interactive_prototype.html` demonstrating how real-time Three.js GPU rendering elevates RailSuraksha AI from a flat 2D dashboard to an immersive Railway Digital Twin:
+1. **USFD Volumetric Rail Fracture Hologram**: Rotatable UIC-60 rail section with internal glowing transverse flaw depth slider and ultrasonic probe beam.
+2. **Interactive 3D Point Switch Turnout (SW-04)**: Real-time blade tongue rail throw animation between `NORMAL` and `REVERSE` with 4-aspect signal head illumination.
+3. **Kavach 3D Cab Deceleration Run**: Procedural moving track sleepers and catenary masts with live RDSO TCAS emergency deceleration from 110 km/h down to 30 km/h.
+4. **Holographic SHA-256 Tamper Seal**: Rotating gold shield with orbiting Merkle blockchain nodes and interactive cryptographic tamper simulation.
+
+### Files Changed
+- `docs/mockup/3d_webgl_interactive_prototype.html` (Created)
+- `docs/mockup/index.html` (Modified)
+- `tracker.md` (Updated)
+
+>>>>>>> c577cce (feat: complete 3D WebGL digital twin componentization suite across all 4 screens)
 ---
 
 ## 2026-09-27 — Code Review Verification & Physics / Audio / Deceleration Lifecycle Hardening

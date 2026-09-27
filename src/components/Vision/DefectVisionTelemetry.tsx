@@ -1,11 +1,27 @@
-// src/components/Vision/DefectVisionTelemetry.tsx
-'use client';
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Card } from '../Common/Card';
 import { WeatherCondition, DepartmentCode } from '@/types/apiContracts';
 import { calculateKavachEbd, getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
 import { getAudioContext, playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
+
+const RailFlawHologram3D = dynamic(() => import('@/components/Three/RailFlawHologram3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-[#090D16] border border-[#D0DFEE] rounded-[16px] flex items-center justify-center text-purple-400 font-mono text-xs animate-pulse">
+      Loading 3D USFD Rail Hologram Engine...
+    </div>
+  )
+});
+
+const KavachCabRun3D = dynamic(() => import('@/components/Three/KavachCabRun3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-[#090D16] border border-[#D0DFEE] rounded-[16px] flex items-center justify-center text-cyan-400 font-mono text-xs animate-pulse">
+      Loading 3D Kavach TCAS Cab Run Engine...
+    </div>
+  )
+});
 
 export interface MaintenanceDefectScenario {
   id: string;
@@ -130,6 +146,8 @@ export const DefectVisionTelemetry: React.FC = () => {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('SCENARIO_TMS_804');
   const [weatherCondition, setWeatherCondition] = useState<WeatherCondition>('DRY');
   const [activeCameraAngle, setActiveCameraAngle] = useState<'FORWARD_CAB' | 'OHE_PANTOGRAPH' | 'BOGIE_TRACK'>('FORWARD_CAB');
+  const [pane1ViewMode, setPane1ViewMode] = useState<'LIVE_CAM' | '3D_HOLOGRAM'>('LIVE_CAM');
+  const [pane2ViewMode, setPane2ViewMode] = useState<'TELEMETRY' | '3D_CAB_RUN'>('TELEMETRY');
 
   const selectedScenario = useMemo(
     () => MAINTENANCE_SCENARIOS.find((s) => s.id === selectedScenarioId) || MAINTENANCE_SCENARIOS[0],
@@ -449,67 +467,100 @@ export const DefectVisionTelemetry: React.FC = () => {
           <Card
             title={`1. ${selectedScenario.departmentLabel} Cam (USFD Vision AI)`}
             action={
-              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-mono font-bold border border-red-300 rounded">
-                CONFIDENCE: {selectedScenario.confidence}%
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-slate-100 p-0.5 rounded-[4px] border border-slate-200 text-xs font-mono">
+                  <button
+                    onClick={() => setPane1ViewMode('LIVE_CAM')}
+                    className={`px-2 py-0.5 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                      pane1ViewMode === 'LIVE_CAM'
+                        ? 'bg-white text-blue-700 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    📷 Live Cam
+                  </button>
+                  <button
+                    onClick={() => setPane1ViewMode('3D_HOLOGRAM')}
+                    className={`px-2 py-0.5 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                      pane1ViewMode === '3D_HOLOGRAM'
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    🔮 3D USFD
+                  </button>
+                </div>
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-mono font-bold border border-red-300 rounded">
+                  CONFIDENCE: {selectedScenario.confidence}%
+                </span>
+              </div>
             }
           >
-            <div className="space-y-4">
-              {/* Photographic Track Feed Container */}
-              <div
-                className="relative w-full h-56 bg-slate-950 overflow-hidden border border-slate-700 flex items-center justify-center shadow-md select-none"
-                style={{ borderRadius: '12px' }}
-              >
-                <img
-                  src={selectedScenario.imagePath}
-                  alt={selectedScenario.name}
-                  className="w-full h-full object-cover transition-opacity duration-300"
-                />
-
-                {/* Dynamic Bounding Box Overlay on Rail / OHE */}
+            {pane1ViewMode === '3D_HOLOGRAM' ? (
+              <RailFlawHologram3D
+                defectClassification={selectedScenario.defectClass}
+                remediationMachine={selectedScenario.remediationMachine}
+                depthMm={18}
+                onDisseminate={handleDisseminatePWay}
+              />
+            ) : (
+              <div className="space-y-4">
+                {/* Photographic Track Feed Container */}
                 <div
-                  className={`absolute bottom-6 left-24 sm:left-36 w-32 h-16 border-2 ${selectedScenario.boundingBox.color} flex flex-col justify-between p-1.5 shadow-xl backdrop-blur-xs`}
+                  className="relative w-full h-56 bg-slate-950 overflow-hidden border border-slate-700 flex items-center justify-center shadow-md select-none"
+                  style={{ borderRadius: '12px' }}
+                >
+                  <img
+                    src={selectedScenario.imagePath}
+                    alt={selectedScenario.name}
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                  />
+
+                  {/* Dynamic Bounding Box Overlay on Rail / OHE */}
+                  <div
+                    className={`absolute bottom-6 left-24 sm:left-36 w-32 h-16 border-2 ${selectedScenario.boundingBox.color} flex flex-col justify-between p-1.5 shadow-xl backdrop-blur-xs`}
+                    style={{ borderRadius: '4px' }}
+                  >
+                    <span className="text-[9px] font-bold text-white bg-red-600 px-1 py-0.5 rounded font-mono">
+                      {selectedScenario.boundingBox.label}
+                    </span>
+                    <span className="text-[9px] font-mono text-white text-right font-black">
+                      {selectedScenario.boundingBox.confText}
+                    </span>
+                  </div>
+
+                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-[10px] text-emerald-400 font-mono rounded">
+                    ● REC [LIVE FEED 1080p 60FPS]
+                  </div>
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/75 text-[10px] text-sky-300 font-mono rounded">
+                    {selectedScenario.chainage} {selectedScenario.trackSection}
+                  </div>
+                </div>
+
+                <div className="text-xs text-slate-600 font-mono space-y-1.5 bg-[#F0F6FC] p-3 border border-[#D0DFEE] rounded-lg">
+                  <div className="flex justify-between">
+                    <span>Defect Classification:</span>
+                    <strong className="text-red-700 font-bold">{selectedScenario.defectClass}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Governing Standard:</span>
+                    <span className="text-slate-800">{selectedScenario.defectStandard}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remediation Machine:</span>
+                    <strong className="text-[#0F172A]">{selectedScenario.remediationMachine}</strong>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleDisseminatePWay}
+                  className="w-full py-2 bg-[#E6F0FA] hover:bg-[#D0DFEE] text-[#2B7FFF] text-xs font-bold font-mono border border-[#D0DFEE] transition-all shadow-xs"
                   style={{ borderRadius: '4px' }}
                 >
-                  <span className="text-[9px] font-bold text-white bg-red-600 px-1 py-0.5 rounded font-mono">
-                    {selectedScenario.boundingBox.label}
-                  </span>
-                  <span className="text-[9px] font-mono text-white text-right font-black">
-                    {selectedScenario.boundingBox.confText}
-                  </span>
-                </div>
-
-                <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-[10px] text-emerald-400 font-mono rounded">
-                  ● REC [LIVE FEED 1080p 60FPS]
-                </div>
-                <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/75 text-[10px] text-sky-300 font-mono rounded">
-                  {selectedScenario.chainage} {selectedScenario.trackSection}
-                </div>
+                  [DISSEMINATE DEFECT TELEMETRY TO {selectedScenario.department.replace('_', ' ')}]
+                </button>
               </div>
-
-              <div className="text-xs text-slate-600 font-mono space-y-1.5 bg-[#F0F6FC] p-3 border border-[#D0DFEE] rounded-lg">
-                <div className="flex justify-between">
-                  <span>Defect Classification:</span>
-                  <strong className="text-red-700 font-bold">{selectedScenario.defectClass}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span>Governing Standard:</span>
-                  <span className="text-slate-800">{selectedScenario.defectStandard}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Remediation Machine:</span>
-                  <strong className="text-[#0F172A]">{selectedScenario.remediationMachine}</strong>
-                </div>
-              </div>
-
-              <button
-                onClick={handleDisseminatePWay}
-                className="w-full py-2 bg-[#E6F0FA] hover:bg-[#D0DFEE] text-[#2B7FFF] text-xs font-bold font-mono border border-[#D0DFEE] transition-all shadow-xs"
-                style={{ borderRadius: '4px' }}
-              >
-                [DISSEMINATE DEFECT TELEMETRY TO {selectedScenario.department.replace('_', ' ')}]
-              </button>
-            </div>
+            )}
           </Card>
         </div>
 
@@ -525,91 +576,132 @@ export const DefectVisionTelemetry: React.FC = () => {
                   <span>⚡</span>
                   <span>2. Kavach TCAS Cab Speedometer &amp; RDSO Physics</span>
                 </h3>
-                <span
-                  className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border ${
-                    currentSpeed <= selectedScenario.tsrSpeedKmh
-                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                      : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                  }`}
-                  style={{ borderRadius: '4px' }}
-                >
-                  {currentSpeed <= selectedScenario.tsrSpeedKmh ? 'TSR STABILIZED' : 'BRAKE SUPERVISED'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 my-2">
-                <div
-                  className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 text-center shadow-inner"
-                  style={{ borderRadius: '10px' }}
-                >
-                  <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">Current Speed</div>
-                  <div className="text-3xl font-black text-sky-400 font-mono mt-1">
-                    {currentSpeed} <span className="text-xs font-normal text-slate-400">km/h</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-slate-800 p-0.5 rounded-[4px] border border-slate-700 text-xs font-mono">
+                    <button
+                      onClick={() => setPane2ViewMode('TELEMETRY')}
+                      className={`px-2 py-0.5 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                        pane2ViewMode === 'TELEMETRY'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      📊 Telemetry
+                    </button>
+                    <button
+                      onClick={() => setPane2ViewMode('3D_CAB_RUN')}
+                      className={`px-2 py-0.5 rounded-[3px] font-semibold transition-all cursor-pointer ${
+                        pane2ViewMode === '3D_CAB_RUN'
+                          ? 'bg-cyan-600 text-white shadow-xs'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      ⚡ 3D Cab Run
+                    </button>
                   </div>
-                  <div className="text-[10px] text-emerald-400 font-mono mt-0.5">
-                    {isDecelerating ? `Decelerating at ${(ebdResult.requiredDecelerationMs2 || 0.72).toFixed(2)} m/s²` : 'Cruising Nominal'}
-                  </div>
-                </div>
-
-                <div
-                  className="p-3.5 bg-slate-950 rounded-lg border border-red-500/40 text-center shadow-inner"
-                  style={{ borderRadius: '10px' }}
-                >
-                  <div className="text-[10px] text-red-300 uppercase font-mono font-bold">Target TSR Limit</div>
-                  <div className="text-3xl font-black text-red-500 font-mono mt-1">
-                    {selectedScenario.tsrSpeedKmh} <span className="text-xs font-normal text-slate-400">km/h</span>
-                  </div>
-                  <div className="text-[10px] text-red-400 font-mono mt-0.5">
-                    Target Distance: {selectedScenario.targetDistanceMeters}m
-                  </div>
+                  <span
+                    className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border ${
+                      currentSpeed <= selectedScenario.tsrSpeedKmh
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                        : 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                    }`}
+                    style={{ borderRadius: '4px' }}
+                  >
+                    {currentSpeed <= selectedScenario.tsrSpeedKmh ? 'TSR STABILIZED' : 'BRAKE SUPERVISED'}
+                  </span>
                 </div>
               </div>
 
-              {/* Dynamic EBD Gauges */}
-              <div
-                className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 mt-3 text-xs font-mono space-y-2"
-                style={{ borderRadius: '10px' }}
-              >
-                <div className="flex justify-between text-slate-300 text-[11px]">
-                  <span>Calculated RDSO EBD Stopping Distance:</span>
-                  <span className="font-bold text-emerald-400">{ebdResult.calculatedStoppingDistanceMeters} meters</span>
-                </div>
-                <div className="flex justify-between text-slate-400 text-[10px]">
-                  <span>Friction Factor: μ={weatherParams.frictionCoefficient} ({weatherParams.label})</span>
-                  <span>Brake Cyl: <strong className="text-sky-300">{brakePressure.toFixed(1)} BAR</strong></span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 shadow-inner">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 h-full rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (ebdResult.calculatedStoppingDistanceMeters / 600) * 100)}%` }}
+              {pane2ViewMode === '3D_CAB_RUN' ? (
+                <div className="my-2">
+                  <KavachCabRun3D
+                    currentSpeed={currentSpeed}
+                    targetTsrSpeed={selectedScenario.tsrSpeedKmh}
+                    onBrakingComplete={() => {
+                      setCurrentSpeed(selectedScenario.tsrSpeedKmh);
+                      setIsDecelerating(false);
+                      setNotification(`✓ Train stabilized at Kavach TSR ceiling: ${selectedScenario.tsrSpeedKmh} km/h.`);
+                      setTimeout(() => setNotification(null), 3000);
+                    }}
                   />
                 </div>
-              </div>
-            </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-3 my-2">
+                    <div
+                      className="p-3.5 bg-slate-950 rounded-lg border border-slate-800 text-center shadow-inner"
+                      style={{ borderRadius: '10px' }}
+                    >
+                      <div className="text-[10px] text-slate-400 uppercase font-mono font-bold">Current Speed</div>
+                      <div className="text-3xl font-black text-sky-400 font-mono mt-1">
+                        {currentSpeed} <span className="text-xs font-normal text-slate-400">km/h</span>
+                      </div>
+                      <div className="text-[10px] text-emerald-400 font-mono mt-0.5">
+                        {isDecelerating ? `Decelerating at ${(ebdResult.requiredDecelerationMs2 || 0.72).toFixed(2)} m/s²` : 'Cruising Nominal'}
+                      </div>
+                    </div>
 
-            <div className="pt-4 mt-3 border-t border-slate-800 flex justify-between items-center text-xs font-mono text-slate-400">
-              <span>Radio: <strong className="text-emerald-400">450 MHz UHF Locked</strong></span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleResetSpeed}
-                  className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded transition-all"
-                  style={{ borderRadius: '4px' }}
-                >
-                  ↺ Reset
-                </button>
-                <button
-                  onClick={handleSimulateBraking}
-                  disabled={isDecelerating || currentSpeed <= selectedScenario.tsrSpeedKmh}
-                  className={`px-3.5 py-1.5 text-xs font-bold font-mono transition-all shadow-xs ${
-                    currentSpeed <= selectedScenario.tsrSpeedKmh
-                      ? 'bg-emerald-900 text-emerald-200 cursor-not-allowed'
-                      : 'bg-[#2B7FFF] hover:bg-blue-600 text-white active:scale-95'
-                  }`}
-                  style={{ borderRadius: '4px' }}
-                >
-                  {currentSpeed <= selectedScenario.tsrSpeedKmh ? 'TSR 30 LOCKED' : '[SIMULATE BRAKING STEP]'}
-                </button>
-              </div>
+                    <div
+                      className="p-3.5 bg-slate-950 rounded-lg border border-red-500/40 text-center shadow-inner"
+                      style={{ borderRadius: '10px' }}
+                    >
+                      <div className="text-[10px] text-red-300 uppercase font-mono font-bold">Target TSR Limit</div>
+                      <div className="text-3xl font-black text-red-500 font-mono mt-1">
+                        {selectedScenario.tsrSpeedKmh} <span className="text-xs font-normal text-slate-400">km/h</span>
+                      </div>
+                      <div className="text-[10px] text-red-400 font-mono mt-0.5">
+                        Target Distance: {selectedScenario.targetDistanceMeters}m
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic EBD Gauges */}
+                  <div
+                    className="p-3.5 bg-slate-950/80 rounded-lg border border-slate-800 mt-3 text-xs font-mono space-y-2"
+                    style={{ borderRadius: '10px' }}
+                  >
+                    <div className="flex justify-between text-slate-300 text-[11px]">
+                      <span>Calculated RDSO EBD Stopping Distance:</span>
+                      <span className="font-bold text-emerald-400">{ebdResult.calculatedStoppingDistanceMeters} meters</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400 text-[10px]">
+                      <span>Friction Factor: μ={weatherParams.frictionCoefficient} ({weatherParams.label})</span>
+                      <span>Brake Cyl: <strong className="text-sky-300">{brakePressure.toFixed(1)} BAR</strong></span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 shadow-inner">
+                      <div
+                        className="bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(100, (ebdResult.calculatedStoppingDistanceMeters / 600) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-3 border-t border-slate-800 flex justify-between items-center text-xs font-mono text-slate-400">
+                    <span>Radio: <strong className="text-emerald-400">450 MHz UHF Locked</strong></span>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleResetSpeed}
+                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded transition-all"
+                        style={{ borderRadius: '4px' }}
+                      >
+                        ↺ Reset
+                      </button>
+                      <button
+                        onClick={handleSimulateBraking}
+                        disabled={isDecelerating || currentSpeed <= selectedScenario.tsrSpeedKmh}
+                        className={`px-3.5 py-1.5 text-xs font-bold font-mono transition-all shadow-xs ${
+                          currentSpeed <= selectedScenario.tsrSpeedKmh
+                            ? 'bg-emerald-900 text-emerald-200 cursor-not-allowed'
+                            : 'bg-[#2B7FFF] hover:bg-blue-600 text-white active:scale-95'
+                        }`}
+                        style={{ borderRadius: '4px' }}
+                      >
+                        {currentSpeed <= selectedScenario.tsrSpeedKmh ? 'TSR 30 LOCKED' : '[SIMULATE BRAKING STEP]'}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
