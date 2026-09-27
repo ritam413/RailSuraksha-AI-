@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Card } from '../Common/Card';
 import { WeatherCondition, DepartmentCode } from '@/types/apiContracts';
 import { calculateKavachEbd, getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
-import { playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
+import { getAudioContext, playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
 
 export interface MaintenanceDefectScenario {
   id: string;
@@ -121,21 +121,6 @@ export const MAINTENANCE_SCENARIOS: MaintenanceDefectScenario[] = [
   }
 ];
 
-let sharedAudioCtx: AudioContext | null = null;
-function getSharedAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
-  const AudioContextClass =
-    window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  if (!AudioContextClass) return null;
-  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
-    sharedAudioCtx = new AudioContextClass();
-  }
-  if (sharedAudioCtx.state === 'suspended') {
-    sharedAudioCtx.resume().catch(() => {});
-  }
-  return sharedAudioCtx;
-}
-
 /**
  * Render preset maintenance imagery, weather-dependent braking telemetry,
  * and a local speed simulation with audible alerts. Scenario changes reset
@@ -157,10 +142,13 @@ export const DefectVisionTelemetry: React.FC = () => {
   const [notification, setNotification] = useState<string | null>(null);
 
   const decelTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const activeBrakingScenarioRef = useRef<string | null>(null);
+  const stabilizationTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync initial speed when scenario changes
   useEffect(() => {
     if (decelTimerRef.current) clearInterval(decelTimerRef.current);
+    activeBrakingScenarioRef.current = null;
     setCurrentSpeed(selectedScenario.initialSpeedKmh);
     setActiveCameraAngle(selectedScenario.cameraAngle);
     setBrakePressure(0.0);
@@ -170,23 +158,34 @@ export const DefectVisionTelemetry: React.FC = () => {
   useEffect(() => {
     return () => {
       if (decelTimerRef.current) clearInterval(decelTimerRef.current);
+      if (stabilizationTimerRef.current) clearTimeout(stabilizationTimerRef.current);
     };
   }, []);
 
   // Handle deceleration stop side effects cleanly outside React state updater
   useEffect(() => {
-    if (isDecelerating && currentSpeed <= selectedScenario.tsrSpeedKmh) {
-      if (decelTimerRef.current) {
-        clearInterval(decelTimerRef.current);
-        decelTimerRef.current = null;
-      }
-      setIsDecelerating(false);
-      setBrakePressure(2.1);
-      setNotification(`✓ Train stabilized at Kavach TSR ceiling: ${selectedScenario.tsrSpeedKmh} km/h.`);
-      const timer = setTimeout(() => setNotification(null), 4000);
-      return () => clearTimeout(timer);
+    if (
+      !isDecelerating ||
+      activeBrakingScenarioRef.current !== selectedScenario.id ||
+      currentSpeed > selectedScenario.tsrSpeedKmh
+    ) {
+      return;
     }
-  }, [currentSpeed, isDecelerating, selectedScenario.tsrSpeedKmh]);
+
+    if (decelTimerRef.current) {
+      clearInterval(decelTimerRef.current);
+      decelTimerRef.current = null;
+    }
+    activeBrakingScenarioRef.current = null;
+    setIsDecelerating(false);
+    setBrakePressure(2.1);
+    setNotification(`✓ Train stabilized at Kavach TSR ceiling: ${selectedScenario.tsrSpeedKmh} km/h.`);
+    if (stabilizationTimerRef.current) clearTimeout(stabilizationTimerRef.current);
+    stabilizationTimerRef.current = setTimeout(() => {
+      setNotification(null);
+      stabilizationTimerRef.current = null;
+    }, 4000);
+  }, [currentSpeed, isDecelerating, selectedScenario]);
 
   // Live RDSO Physics Calculation
   const ebdResult = useMemo(() => {
@@ -209,7 +208,7 @@ export const DefectVisionTelemetry: React.FC = () => {
    */
   const playCautionChime = () => {
     try {
-      const audioCtx = getSharedAudioContext();
+      const audioCtx = getAudioContext();
       if (!audioCtx) throw new Error('No AudioContext');
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -237,7 +236,7 @@ export const DefectVisionTelemetry: React.FC = () => {
    */
   const playEmergencyChime = () => {
     try {
-      const audioCtx = getSharedAudioContext();
+      const audioCtx = getAudioContext();
       if (!audioCtx) throw new Error('No AudioContext');
       const osc1 = audioCtx.createOscillator();
       const osc2 = audioCtx.createOscillator();
@@ -273,6 +272,7 @@ export const DefectVisionTelemetry: React.FC = () => {
   const handleSimulateBraking = () => {
     if (currentSpeed <= selectedScenario.tsrSpeedKmh) return;
 
+    activeBrakingScenarioRef.current = selectedScenario.id;
     setIsDecelerating(true);
     setBrakePressure(3.8);
     playCautionChime();
@@ -290,6 +290,7 @@ export const DefectVisionTelemetry: React.FC = () => {
    */
   const handleResetSpeed = () => {
     if (decelTimerRef.current) clearInterval(decelTimerRef.current);
+    activeBrakingScenarioRef.current = null;
     setCurrentSpeed(selectedScenario.initialSpeedKmh);
     setBrakePressure(0.0);
     setIsDecelerating(false);
