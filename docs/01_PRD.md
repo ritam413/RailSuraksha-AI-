@@ -79,10 +79,11 @@ graph TD
 **IRIS AI (Intelligent Railway Inspection and Restoration AI)** unifies maintenance requisitions across all engineering directorates and synchronizes them with real-time train paths from COA:
 
 1. **Pluggable Multi-Source Ingestion:** Ingests defect logs from TMS, TDMS, and SMMS, automatically mapping physical linear chainages into discrete electrical Track Circuit IDs via configurable spatial lookup tables.
-2. **Automated Joint Shadow Blocking:** Clusters co-located demands into coordinated Joint Shadow Blocks underneath de-energized OHE windows during natural nocturnal traffic lulls.
-3. **CP-SAT Disjunctive Optimization:** Solves corridor time-distance scheduling with zero passenger train cancellations, configurable safety headways, and parameter-driven earthing buffers.
-4. **Multi-Horizon Rolling Framework (RHF):** Grounded planning across **24-Hour Tactical**, **7-Day Operational**, and **30-Day Strategic** rolling horizons.
-5. **Decoupled Safety Dispatch & Compliance:** Emits speed restrictions via Kavach adapters, interlocking lockouts, caution orders, and immutable SHA-256 audit dossiers.
+2. **Direct Online Requisition Portal:** Provides an interactive web form for TDMS (Electrical TRD), SMMS (S&T), and TMS (Civil) officers to submit live block demands with instant AI feasibility previews, shadow bundling synergy feedback, and regulatory notice issuance.
+3. **Automated Joint Shadow Blocking:** Clusters co-located demands into coordinated Joint Shadow Blocks underneath de-energized OHE windows during natural nocturnal traffic lulls.
+4. **CP-SAT Disjunctive Optimization:** Solves corridor time-distance scheduling with zero passenger train cancellations, configurable safety headways, and parameter-driven earthing buffers.
+5. **Multi-Horizon Rolling Framework (RHF):** Grounded planning across **24-Hour Tactical**, **7-Day Operational**, and **30-Day Strategic** rolling horizons.
+6. **Decoupled Safety Dispatch & Compliance:** Emits speed restrictions via Kavach adapters, interlocking lockouts, caution orders, and immutable SHA-256 audit dossiers.
 
 ---
 

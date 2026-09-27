@@ -47,17 +47,20 @@ src/
 │   ├── AgentPipelineCanvas.tsx       # 4-stage Kavach execution pipeline visualizer
 │   ├── PlatformGatewayFeed.tsx       # View 3 Platform CCTV crowd surge monitor
 │   ├── Charts/                       # Recharts analytics visualizers
-│   │   ├── KinematicDecelChart.tsx   # Kavach EBD velocity & brake pressure curve
-│   │   ├── CrowdSurgeTrendChart.tsx  # Platform bottleneck PAX flow & surge threshold
-│   │   └── IncidentTriageDonutChart.tsx # Severity P1/P2/P3/P4 distribution
+│   │   ├── DecelerationCurve.tsx     # RDSO Kavach EBD kinematic deceleration curve & weather friction simulator
+│   │   ├── TriageDonut.tsx           # Multi-department TMS/TDMS/SMMS demand distribution & shadow bundling donut
+│   │   └── index.ts                  # Recharts module exports
 │   ├── Common/
 │   │   └── Card.tsx                  # Standard Mintlify card wrapper
 │   ├── Overview/
 │   │   ├── KpiStrip.tsx              # 6-metric operational summary strip
 │   │   ├── InterlockingMap.tsx       # Track block & signaling aspect diagram
 │   │   └── IncidentQueue.tsx         # AI Triage incident priority list
-│   └── Auditor/
-│       └── DecisionLogModal.tsx      # 4-step explainable AI audit timeline modal
+│   ├── Auditor/
+│   │   ├── DecisionLogModal.tsx      # 4-step explainable AI audit timeline modal
+│   │   └── AuditorWorkspace.tsx      # Regulatory compliance terminal & CRS attestation
+│   └── Requisition/
+│       └── BlockRequisitionModal.tsx # Direct TDMS/SMMS/TMS online block requisition portal
 ├── lib/
 │   ├── apiClient.ts                  # Type-safe API client connecting to FastAPI port 8000
 │   ├── audioAlerts.ts                # Web Audio API synthesizer for RDSO cab alarms & chimes

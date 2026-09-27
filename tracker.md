@@ -1,4 +1,226 @@
-﻿# Agent Handoff Log (tracker.md)
+# Agent Handoff Log (tracker.md)
+
+## 2026-09-27 — Direct Departmental Block Requisition Portal (TDMS / SMMS / TMS)
+
+### Objective
+Provide a direct, high-craft online form and portal on the website where **TDMS Electrical (TRD)**, **SMMS Signal & Telecom (S&T)**, and **TMS Civil (P-Way)** officers can directly submit block demands and receive AI-optimized block schedules:
+- **Interactive Multi-Department Selector**:
+  - `⚡ TDMS Electrical`: Presets with 25kV AC Catenary/Contact Wire wear, Mast Isolation, Tower Wagon `#60515`, and automated $\Delta_{\text{earth}} \ge 10\text{m}$ double earthing buffer.
+  - `🟢 SMMS Signal`: Presets with Form S&T/T-351 Disconnection Notice, Point Machine `SW-04` stroke overhaul, and AFTC impedance calibration.
+  - `🛤️ TMS Civil`: Presets with IRPWM 2020 track tamping, USFD IMR fracture at Welded Joint `W-42`, and CSM Tamping Machine `#5109`.
+- **Live AI Feasibility & Corridor Optimization Preview**:
+  - Real-time detection of co-located demands on the same track circuit (`TC-01` to `TC-06`).
+  - Prediction of optimal nocturnal white corridor slot (e.g. `01:30 - 04:45 AM`) with 0 passenger delays.
+  - Estimation of saved track downtime (e.g. `38.4% saved`).
+- **Seamless Live Integration**:
+  - Available via a prominent `+ Request Block` button in the persistent Navbar and in the Screen 1 Corridor Planner dashboard.
+  - Form submission dynamically injects the new demand into state, updates joint shadow block bundling schedules, plays acoustic confirmation chime, and displays an IST timestamped success banner.
+
+### Changes Made
+- Created and hardened `src/components/Requisition/BlockRequisitionModal.tsx` with raw string chainage state, circuit range bounds validation in `handleSubmit`, and timer cleanup on modal close/unmount.
+- Updated `src/components/Navbar.tsx` with `onRequestBlock` prop and button.
+- Updated `src/app/page.tsx` with `handleDemandSubmit` (gated bundling on PROPOSED status), `handleSanctionBlock` (updating block status to SANCTIONED), explicit string chart block sanction strip, and live `currentDossier` passing to `AuditorWorkspace`.
+- Updated `src/components/Auditor/AuditorWorkspace.tsx` to integrate live dossiers into ledger search/verification and display `{forgedOfficer}`.
+- Updated `src/components/Charts/TriageDonut.tsx` to fallback to 0% on empty demand arrays.
+- Updated `src/components/Vision/DefectVisionTelemetry.tsx` to reuse shared `AudioContext` and move deceleration stop side effects into a pure `useEffect`.
+- Created `tests/BlockRequisitionModal.test.tsx` (4/4 passing tests).
+
+### Verification
+- `npm test` — 107/107 tests passed across 14 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
+### Objective
+Make Screen 4 (`src/components/Auditor/AuditorWorkspace.tsx`) fully dynamic, interactive, and compliant with statutory CRS & RDSO standards:
+- **Interactive Search & Multi-Filter Ledger**:
+  - Live search input matching Block ID, station name, section, or sanctioning officer.
+  - Department filter chips (`ALL`, `JOINT`, `TMS`, `TDMS`, `SMMS`).
+  - Status filter chips (`ALL`, `SANCTIONED & LOCKED`, `COMPLETED & VERIFIED`, `ARCHIVED`).
+  - 6 realistic grounded records across CSMT, Dadar, Kurla, Thane, Kalyan, Byculla, and Matunga.
+- **Auditor Penetration & Tamper Simulation Console**:
+  - Interactive toggle to simulate unauthorized modifications (e.g. forging TSR speed from 30 km/h to 45k/60k or forging operator credentials).
+  - Real-time cryptographic detection comparing recomputed SHA-256 digests against digital seal signatures with audio feedback (`playCabEmergencyAlarm` vs `playActionConfirmedChime`).
+- **3-Tab Dossier Inspector**:
+  - `1. 4-Step Reasoning Pipeline`: Interactive accordion with deep inspection of agent parameters, execution stages, and regulatory rule references (*IRPWM Ch 5 / ACTM Vol II / SEM Part II*).
+  - `2. RDSO Form 14B Certificate`: Official Ministry of Railways certificate preview with statutory permit status, caution order details, and bundled demand metrics.
+  - `3. RFC 8785 Raw Payload`: Canonical delimiter string inspector with character metrics and policy version.
+- **CRS Auditor Sign & Attest Workflow**:
+  - Interactive `[✓ Sign & Attest (Compliant)]` and `[⚠️ Flag for Technical Inquiry]` sign-off workflows generating permanent attestation stamps with timestamps.
+  - Client-side downloadable `RDSO_Form14B_Certificate_<blockId>.json`.
+
+### Changes Made
+- **Updated `src/components/Auditor/AuditorWorkspace.tsx`**:
+  - Implemented dynamic search, department filters, tamper penetration toggle, 3-tab dossier inspector, and CRS auditor attestation workflow.
+- **Created `tests/AuditorWorkspace.test.tsx`**:
+  - 4 automated Vitest tests covering terminal header, ledger filtering, SHA-256 seal verification, and 4-step pipeline rendering.
+
+### Verification
+- `npx vitest run tests/AuditorWorkspace.test.tsx` — 4/4 tests passed (100%).
+- `npm test` — 103/103 tests passed across 13 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
+## 2026-09-27 — Dynamic Screen 3 Defect Vision & Telemetry Console Implementation (/impeccable + /taste)
+
+### Objective
+Make Screen 3 (`src/components/Vision/DefectVisionTelemetry.tsx`) fully dynamic, interactive, and physics-driven for Auto-BDMS SIH-26027:
+- Interactive 4-Scenario Selector:
+  1. `TMS Civil Rail Transverse Fracture (IMR #804)` (Dadar UP Fast KM 9/2, 98.2% USFD, CSM Tamper #98).
+  2. `TDMS 25kV OHE Catenary Dropper Sag (#312)` (Kurla DOWN Fast KM 15/4, 96.4% CAT-AI, OHE Tower Wagon #60515).
+  3. `SMMS Point Switch Tongue Rail Gap (#105)` (Thane UP Slow KM 33/1, 99.1% OPTICAL, S&T Squad #42).
+  4. `TMS Thermite AT Weld Void (#601)` (Byculla UP Slow KM 4/8, 94.8% USFD, Mobile Flash Butt Welder #12).
+- Dynamic Atmospheric Friction Selector: `DRY (μ=0.134)`, `WET_MONSOON (μ=0.095)`, `DENSE_FOG (μ=0.115)`, `NIGHT_IR (μ=0.130)`.
+- Live RDSO Kavach Emergency Braking Distance (EBD) calculations updating stopping distances, required deceleration ($m/s^2$), and target margins in real-time.
+- Continuous kinematic deceleration animation loop smoothly bringing the locomotive from initial speed ($110\text{k}, 90\text{k}, 75\text{k}, 68\text{k}$) down to the exact TSR clamp ($30\text{ km/h}$).
+- Multi-angle sensor toggle: `📹 USFD Forward`, `⚡ OHE Cam`, `🔍 Bogie Cam`.
+- Authentic Web Audio API dual-tone chimes (`1200 Hz Caution Chime` and `800 Hz Emergency Alarm`).
+- Disseminate defect telemetry action dispatching work orders to Civil P-Way, Electrical TRD, and S&T.
+
+### Changes Made
+- **Updated `src/components/Vision/DefectVisionTelemetry.tsx`**:
+  - Implemented `MAINTENANCE_SCENARIOS` array with 4 grounded maintenance defects.
+  - Wired `calculateKavachEbd` and `getWeatherFrictionParams`.
+  - Added timer-based continuous deceleration ticker with brake cylinder pressure gauges.
+- **Created `tests/DefectVisionTelemetry.test.tsx`**:
+  - 4 automated Vitest tests covering scenario switching, USFD confidence labels, Kavach TCAS speedometer, and Web Audio synthesizers.
+
+### Verification
+- `npx vitest run tests/DefectVisionTelemetry.test.tsx` — 4/4 tests passed (100%).
+- `npm test` — 99/99 tests passed across 12 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
+### Objective
+Replace the legacy obstacle-detection screen with the Auto-BDMS SIH-26027 Maintenance Defect Vision & Telemetry Console matching `docs/mockup/screen3_defect_vision_telemetry.html`:
+- Pane 1: TMS Civil Track Cam (USFD Vision AI, IMR Flaw #804, Transverse Fracture IRPWM Ch 5, CSM Tamper #98, live track corridor photographic feed).
+- Pane 2: Kavach TCAS Cab Speedometer & Braking Curve (Current Speed 68 km/h, Target TSR Limit 30 km/h, EBD 480m, interactive deceleration simulation).
+- Pane 3: TDMS 25kV Pantograph Cam & Joint Shadow Block Maintenance Cam (OHE Tower Wagon #60515, PTW-TRD-0906-88).
+- Pane 4: RDSO Cab Alarm Synthesizer (1200 Hz Caution Chime, 800 Hz Dual Emergency Alarm via Web Audio API).
+
+### Changes Made
+- **Created `src/components/Vision/DefectVisionTelemetry.tsx`**:
+  - Implemented the exact 4-pane layout from `screen3_defect_vision_telemetry.html`.
+  - Added live USFD bounding box overlays on real rail corridor images.
+  - Added Kavach TCAS speedometer with interactive `[SIMULATE BRAKING STEP]` decelerating down to the 30 km/h ceiling.
+  - Added Web Audio API 1200Hz caution and 800Hz emergency chimes.
+  - Copied `track_corridor.jpg` and `shadow_block_work.jpg` into `public/assets/`.
+- **Updated `src/app/page.tsx`**:
+  - Wired `DefectVisionTelemetry` directly to Tab 3 (`3. Defect Vision & Telemetry`).
+- **Updated `src/components/Navbar.tsx`**:
+  - Maintained compact 4-screen navigation tabs without scrollbars.
+
+### Verification
+- `npm test` — 95/95 tests passing across 11 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
+## 2026-09-26 — 4-Screen Mockup Alignment & Auditor Workspace Full-Screen View (/impeccable + /taste)
+
+### Objective
+Align the top navigation bar and main view switcher in `src/components/Navbar.tsx` and `src/app/page.tsx` directly with the 4 mockups (`docs/mockup/screen1_master_corridor_cockpit.html` through `screen4_auditor_workspace.html`):
+1. `1. Corridor Planner` (Screen 1)
+2. `2. Interlocking Map` (Screen 2)
+3. `3. Defect Vision & Telemetry` (Screen 3)
+4. `4. Auditor Workspace` (Screen 4)
+Eliminate horizontal scrollbar overflow and create a dedicated full-screen `AuditorWorkspace.tsx` component matching Screen 4.
+
+### Changes Made
+- **Created `src/components/Auditor/AuditorWorkspace.tsx`**:
+  - Implemented the 5-col / 7-col split screen matching `screen4_auditor_workspace.html`:
+    - Left (5 cols): Immutable Decision Ledger with 142 records, block archive switcher, and SHA-256 chain verification.
+    - Right (7 cols): Explainable AI Decision Dossier with prominent SHA-256 seal box, 4-step explainable reasoning pipeline, copy token button, and downloadable RDSO Form 14B certificate.
+- **Updated `src/components/Navbar.tsx`**:
+  - Replaced legacy text labels with compact responsive buttons matching Screens 1–4: `1. Corridor Planner`, `2. Interlocking Map`, `3. Defect Vision & Telemetry`, `4. Auditor Workspace`.
+  - Eliminated navbar overflow and horizontal scrollbar on all screen resolutions.
+- **Updated `src/app/page.tsx`**:
+  - Integrated `AuditorWorkspace` as the dedicated 4th tab view.
+- **Updated `tests/MainCockpit.test.tsx`**:
+  - Verified 6/6 tests passing.
+
+### Verification
+- `npm test` — 95/95 tests passing across 11 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+---
+
+## 2026-09-26 — TICKET-DEV1-07 Master 4-View Command Cockpit Assembly & Horizon Switcher (/tdd + /ponytail)
+
+### Objective
+Assemble all Developer 1 and Developer 2 core and UI components into the Master IRIS AI Command Cockpit in `src/app/page.tsx` and `src/components/Navbar.tsx` featuring 4 tactical views (`Master Corridor Planner`, `Interlocking Map`, `Cab Vision & Kavach HUD`, `Platform Gateway CCTV`), React 19 `useTransition` rolling horizon switching (`24h Tactical`, `7D Operational`, `30D Strategic`), dual-layer SVG Marey String Chart, collapsible Recharts peripheral analytics drawer (`TriageDonut`, `DecelerationCurve`), and atomic Sanction Event Bus with statutory Form S&T/T-351 interlocking clamping and RFC 8785 SHA-256 Decision Dossier modal triggering.
+
+### Changes Made
+- **Updated `src/components/Navbar.tsx`**:
+  - Added 3-tier rolling horizon switcher (`[24h Tactical]`, `[7D Operational]`, `[30D Strategic]`) with `HorizonTier` prop integration.
+  - Added 4 tactical view switcher tabs (`Master Corridor Planner`, `Interlocking Map`, `Cab Vision & Kavach HUD`, `Platform Gateway CCTV`) with `NavbarTab` union type.
+  - Added live IST clock, API status indicator badge, Web Audio toggle, and Advisory vs Autonomous deployment mode switcher.
+  - Standardized all button geometry with Light-Blue Mintlify tokens (4px border radii, zero pill buttons).
+- **Updated `src/app/page.tsx`**:
+  - Implemented React 19 `useTransition` and `startTransition` for non-blocking rolling horizon shifts, dynamic `filteredBlocks` horizon window filtering, and `horizon` prop propagation to `CorridorStringChart`.
+  - Assembled View 1 (`CORRIDOR_PLANNER`): 6-metric `KpiStrip` summary strip, 70% `CorridorStringChart` + collapsible Recharts analytics drawer (`TriageDonut` and `DecelerationCurve`), and 30% `IncidentQueue` triage stream.
+  - Assembled View 2 (`INTERLOCKING`): 6-circuit schematic (`InterlockingMap`), 4-aspect signal heads ($S\text{-}12$, $S\text{-}14$, $S\text{-}16$), switch $SW\text{-}04$ controls, Form S&T/T-351 lockout banner, and full-width `IncidentQueue`.
+  - Assembled View 3 (`LOCO_CAB`): forward loco vision feed with multi-angle switcher, weather friction simulator, HUD gauges, and 4-stage `AgentPipelineCanvas`.
+  - Assembled View 4 (`PLATFORM_GATEWAY`): Platform 17/18 FOB CCTV with crowd surge monitor, 1s countdown ticker, and Station Master override controls.
+  - Implemented Master Sanction Event Bus (`handleSanctionBlock`): atomically updates target circuits to `BLOCK_SANCTIONED` / `POWER_ISOLATED`, dispatches `sanctionBlockRequest`, generates cryptographic RFC 8785 SHA-256 dossier, plays RDSO chime, shows 5s notification toast, and opens `DecisionLogModal`.
+- **Created `tests/MainCockpit.test.tsx`**:
+  - 6 automated Vitest tests validating Navbar horizon switcher, 4 tactical view switcher tabs, autonomous mode badge, default Master Corridor Planner layout, peripheral Recharts analytics tabs, and Explainable Decision Dossier integration.
+- **Updated `docs/ticket/TICKET-DEV1-07-master-cockpit-assembly.md`** status to `COMPLETE`.
+
+### Verification
+- `npx vitest run tests/MainCockpit.test.tsx` — 6/6 tests passed (100%).
+- `npm test` — 95/95 tests passed across 11 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+### Current State
+- `TICKET-DEV1-07` is **COMPLETE** and verified.
+- The master 4-view command cockpit is fully functional, type-safe, and integrated.
+
+### Next Agent Instructions
+1. The entire core suite across Developer 1 and Developer 2 is complete.
+2. Proceed to run end-to-end browser walkthroughs or prepare demo pitch deliverables as needed.
+
+---
+
+## 2026-09-26 — TICKET-DEV2-03 Recharts Analytics Suite & /taste Design Calibration
+
+### Objective
+Implement the Recharts Analytics Suite (`src/components/Charts/DecelerationCurve.tsx`, `src/components/Charts/TriageDonut.tsx`, `src/components/Charts/index.ts`) for `TICKET-DEV2-03` with `/taste` design dials calibrated for mission-critical railway operations (`DESIGN_VARIANCE: 6`, `MOTION_INTENSITY: 5`, `VISUAL_DENSITY: 8`), adhering to RDSO `RDSO/SPN/196/2020` braking physics benchmarks and Light-Blue Mintlify design tokens.
+
+### Changes Made
+- **Created `src/components/Charts/DecelerationCurve.tsx`**:
+  - Interactive RDSO Kavach Emergency Braking Distance (EBD) curve visualizer vs Normal Service Braking and TSR 30 km/h permanent restriction clamp.
+  - Dynamic weather friction selector (`DRY` $\mu=0.134$, `WET_MONSOON` $\mu=0.095$, `DENSE_FOG` $\mu=0.115$, `NIGHT_IR` $\mu=0.130$) with reaction time multiplier derating.
+  - Interactive initial speed presets ($75\text{k}, 90\text{k}, 110\text{k}, 130\text{k}, 160\text{k}$) and obstacle chainage slider ($200\text{m} \to 800\text{m}$).
+  - Collision risk detection with danger zone reference area overlay and fail-safe clearance margin badge.
+  - Telemetry stats cards: Calculated $D_{\text{stop}}$, clearance margin, required deceleration rate ($m/s^2$), and Kavach emergency solenoid status.
+- **Created `src/components/Charts/TriageDonut.tsx`**:
+  - Multi-department requisition distribution donut chart across TMS Civil Track, TDMS OHE Traction, SMMS Signaling & Telecom, and Rolling Stock.
+  - Central KPI metric displaying total demands and 75% joint shadow bundling rate.
+  - Department breakdown cards with requisition count, duration hours required, and urgent P1 flags.
+  - Slice selection highlight and hover tooltips.
+- **Created `src/components/Charts/index.ts`**:
+  - Exported `DecelerationCurve`, `TriageDonut`, and theme constants.
+- **Created `tests/ChartsSuite.test.tsx`**:
+  - 9 automated Vitest tests validating RDSO specification tags, speed presets, weather friction derating, collision risk detection, telemetry stat cards, and multi-department donut aggregations.
+- **Installed `recharts` (^3.10.1)**.
+
+### Verification
+- `npx vitest run tests/ChartsSuite.test.tsx` — 9/9 tests passed (100%).
+- `npm test` — 89/89 tests passed across 10 test suites (100%).
+- `npx tsc --noEmit` — 0 errors (clean exit code 0).
+
+### Current State
+- `TICKET-DEV2-03` is **COMPLETE**. All Dev 2 tickets are now finished.
+- Unblocks `TICKET-DEV1-07` (Master Command Cockpit Assembly).
+
+### Next Agent Instructions
+1. Inspect `docs/ticket/TICKET-DEV1-07-master-cockpit-assembly.md`.
+2. Assemble the multi-view command cockpit in `src/app/page.tsx` integrating `CorridorStringChart`, `InterlockingMap`, `KpiStrip`, `IncidentQueue`, `DecelerationCurve`, and `TriageDonut`.
+
+---
 
 ## 2026-09-26 — TICKET-DEV1-06 Dual-Mode API Client & Offline Fallback Architecture
 
