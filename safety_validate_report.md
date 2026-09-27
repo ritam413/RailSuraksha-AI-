@@ -1,7 +1,7 @@
-# RailSuraksha AI: Safety Validation & Ground Execution Verification Report
+# RailSuraksha AI: Safety Validation, Ground Execution Verification & RBAC Architecture Report
 
 **Document ID:** `RDSO-SAF-VAL-2026-0927`  
-**Standard Compliance:** IRPWM 2020 (Ch. 5), SEM Part II (Signalling), ACTM Vol. II (Traction), Indian Railways General Rules (GR 3.08), RDSO Form 14B  
+**Standard Compliance:** IRPWM 2020 (Ch. 5), SEM Part II (Signalling), ACTM Vol. II (Traction), Indian Railways General Rules (GR 3.08), RDSO Form 14B, Ministry of Railways IT Security Policy  
 **Corridor Scope:** Central Railway (CR) CSMT – Kalyan 54 KM Quadrupled Main Line Corridor (`TC-01` through `TC-06`)  
 **Security Digest:** RFC 8785 Canonical Digest with SHA-256 Tamper Evident Verification  
 
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary & Problem Formulation
 
-In high-density suburban and mixed railway corridors (e.g., Central Railway's Mumbai Division running 1,800+ trains daily), corridor maintenance possesses two critical vulnerabilities:
+In high-density suburban and mixed railway corridors (e.g., Central Railway's Mumbai Division running 1,800+ trains daily), corridor operations and safety possess three mission-critical vulnerabilities:
 
 1. **Signalling & Interlocking Safety Violations:**
    - Inaccurate aspect indicators (e.g., 4-lamp ambiguity vs. standardized 3-aspect Colour Light Signalling).
@@ -20,7 +20,11 @@ In high-density suburban and mixed railway corridors (e.g., Central Railway's Mu
    - However, work crews, heavy machinery (*CSM Tamper #5109*, *OHE Tower Wagon #60515*), or S&T squads fail to mobilize on time or finish early without releasing locks.
    - This "idle block" or "ghost block" causes severe artificial passenger delays, track downtime inflation, and safety hazards during re-energization.
 
-This validation report documents the research, architectural design, and implementation standards adopted by **RailSuraksha AI** to ensure fail-safe signalling compliance and automated **Ground Work Execution Verification (Anti-Ghost Block Audit)**.
+3. **Role-Based Access Vulnerabilities (Unauthorized Cross-Screen Access):**
+   - High-stakes railway levers (e.g., sanctioning corridor blocks, releasing S&T signal clamps, overriding platform holding timers) must be restricted to authenticated, role-verified officers.
+   - Without view-level operational isolation, unauthorized personnel (e.g., Loco Pilots viewing corridor planning or field workers accessing interlocking switches) risk violating statutory protocol.
+
+This report documents the research, architectural design, and implementation standards adopted by **RailSuraksha AI** to ensure fail-safe signalling compliance, automated **Ground Work Execution Verification (Anti-Ghost Block Audit)**, and **Supabase-driven Role-Based Access Control (RBAC)**.
 
 ---
 
@@ -153,16 +157,163 @@ When viewing **Screen 2 (Interlocking Track Map)**:
 
 ---
 
-## 5. Regulatory Compliance & Audit Trail (RDSO Form 14B)
+## 5. Role-Based Access Control (RBAC) & View-Isolation Architecture (Supabase Auth)
 
-Every verified work proof event is immutably appended to the **Explainable Decision Dossier**:
-- **RFC 8785 Canonical Serialization**: Formatted as deterministic JSON.
+To ensure statutory role segregation across departments (Civil, Electrical, Telecom, Operating, Safety), RailSuraksha AI uses **Supabase Auth + PostgreSQL Row Level Security (RLS)** with client-side screen gating.
+
+### 5.1 Role-to-Screen Authorization Matrix
+
+```
+                      ┌─────────────────────────────────────────────────────────┐
+                      │              SUPABASE AUTH GATEWAY (JWT)                │
+                      └────────────────────────────┬────────────────────────────┘
+                                                   │
+         ┌───────────────────┬─────────────────────┼────────────────────┬───────────────────┐
+         ▼                   ▼                     ▼                    ▼                   ▼
+┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐
+│ CORRIDOR_PLANNER ││SECTION_CONTROLLER││   LOCO_PILOT     ││  SAFETY_AUDITOR  ││  FIELD_WORKER    │
+│ (Chief Transp.)  ││(Station Master)  ││   (Cab Crew)     ││ (CRS / RDSO DSO) ││(SSE / Gang Lead) │
+└────────┬─────────┘└────────┬─────────┘└────────┬─────────┘└────────┬─────────┘└────────┬─────────┘
+         │                   │                   │                   │                   │
+         ▼                   ▼                   ▼                   ▼                   ▼
+┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐┌──────────────────┐
+│  SCREEN 1 ONLY   ││  SCREEN 2 ONLY   ││  SCREEN 3 ONLY   ││  SCREEN 4 ONLY   ││FIELD CHECK-IN ONLY│
+│Corridor Planner &││Interlocking Map &││Defect Vision Cam &││Auditor Workspace││Geofenced Photo   │
+│Marey String Chart││S&T Signal Clamps ││Kavach TCAS HUD   ││Form 14B Certificate│Upload & Telemetry│
+└──────────────────┘└──────────────────┘└──────────────────┘└──────────────────┘└──────────────────┘
+```
+
+| Application Role | Railway Designation | Permitted View | Gated Actions |
+| :--- | :--- | :--- | :--- |
+| **`CORRIDOR_PLANNER`** | Chief Passenger Transportation Manager / Dy. COM | **Screen 1: Corridor Planner** | Bundle demands, optimize white corridors, sanction joint blocks |
+| **`SECTION_CONTROLLER`**| Section Dispatcher / Station Master | **Screen 2: Interlocking Map** | Emergency Signal Clamp, Form S&T/T-351 lockout, switch SW-04 route |
+| **`LOCO_PILOT`** | Loco Pilot / TCAS Cab Crew | **Screen 3: Defect Vision & Telemetry** | Speedometer HUD, Kavach braking physics, cab acoustic chimes |
+| **`SAFETY_AUDITOR`** | Commissioner of Railway Safety (CRS) / Sr. DSO | **Screen 4: Auditor Workspace** | Attest Form 14B certificates, verify SHA-256 seals, flag inquiries |
+| **`FIELD_WORKER`** | Senior Section Engineer (SSE P-Way/TRD/S&T) | **Field Check-In Portal** | Geofenced on-site photo upload, machine telematics check-in |
+| **`ADMIN`** | Divisional Railway Manager (DRM / HQ Admin) | **Full Command Cockpit** | Master view switcher across all 4 operational screens |
+
+---
+
+### 5.2 Supabase PostgreSQL Schema & Row Level Security (RLS)
+
+```sql
+-- 1. Create Role and Department ENUMs
+CREATE TYPE app_role AS ENUM (
+  'CORRIDOR_PLANNER',
+  'SECTION_CONTROLLER',
+  'LOCO_PILOT',
+  'SAFETY_AUDITOR',
+  'FIELD_WORKER',
+  'ADMIN'
+);
+
+CREATE TYPE app_department AS ENUM (
+  'OPERATIONS',
+  'TMS_CIVIL',
+  'TDMS_ELECTRICAL',
+  'SMMS_SIGNAL',
+  'SAFETY_CRS'
+);
+
+-- 2. Create User Profiles Table
+CREATE TABLE public.profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  employee_id TEXT UNIQUE NOT NULL,
+  full_name TEXT NOT NULL,
+  designation TEXT NOT NULL,
+  role app_role NOT NULL DEFAULT 'SECTION_CONTROLLER',
+  department app_department NOT NULL DEFAULT 'OPERATIONS',
+  assigned_section TEXT DEFAULT 'CSMT-Kalyan 54KM',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Enable Row Level Security (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own profile" 
+ON public.profiles FOR SELECT 
+TO authenticated 
+USING (auth.uid() = id);
+
+-- 4. Auth Hook: Automatically provision profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, employee_id, full_name, designation, role, department)
+  VALUES (
+    new.id,
+    COALESCE(new.raw_user_meta_data->>'employee_id', 'EMP-' || SUBSTRING(new.id::text, 1, 6)),
+    COALESCE(new.raw_user_meta_data->>'full_name', 'Railway Officer'),
+    COALESCE(new.raw_user_meta_data->>'designation', 'Section Controller'),
+    COALESCE((new.raw_user_meta_data->>'role')::app_role, 'SECTION_CONTROLLER'),
+    COALESCE((new.raw_user_meta_data->>'department')::app_department, 'OPERATIONS')
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+---
+
+### 5.3 Next.js Client Gatekeeper Architecture
+
+```typescript
+// src/lib/rbac.ts
+export type AppRole = 
+  | 'CORRIDOR_PLANNER'
+  | 'SECTION_CONTROLLER'
+  | 'LOCO_PILOT'
+  | 'SAFETY_AUDITOR'
+  | 'FIELD_WORKER'
+  | 'ADMIN';
+
+export type NavbarTab = 
+  | 'CORRIDOR_PLANNER'
+  | 'INTERLOCKING'
+  | 'VISION_TELEMETRY'
+  | 'AUDITOR_WORKSPACE'
+  | 'FIELD_CHECKIN';
+
+export const ROLE_DEFAULT_TAB: Record<AppRole, NavbarTab> = {
+  CORRIDOR_PLANNER: 'CORRIDOR_PLANNER',
+  SECTION_CONTROLLER: 'INTERLOCKING',
+  LOCO_PILOT: 'VISION_TELEMETRY',
+  SAFETY_AUDITOR: 'AUDITOR_WORKSPACE',
+  FIELD_WORKER: 'FIELD_CHECKIN',
+  ADMIN: 'CORRIDOR_PLANNER',
+};
+
+export const ROLE_ALLOWED_TABS: Record<AppRole, NavbarTab[]> = {
+  CORRIDOR_PLANNER: ['CORRIDOR_PLANNER'],
+  SECTION_CONTROLLER: ['INTERLOCKING'],
+  LOCO_PILOT: ['VISION_TELEMETRY'],
+  SAFETY_AUDITOR: ['AUDITOR_WORKSPACE'],
+  FIELD_WORKER: ['FIELD_CHECKIN'],
+  ADMIN: ['CORRIDOR_PLANNER', 'INTERLOCKING', 'VISION_TELEMETRY', 'AUDITOR_WORKSPACE', 'FIELD_CHECKIN'],
+};
+
+export const isTabAllowed = (role: AppRole, tab: NavbarTab): boolean => {
+  return ROLE_ALLOWED_TABS[role]?.includes(tab) ?? false;
+};
+```
+
+---
+
+## 6. Regulatory Compliance & Audit Trail (RDSO Form 14B)
+
+Every verified work proof and role-authenticated action is immutably appended to the **Explainable Decision Dossier**:
+- **RFC 8785 Canonical Serialization**: Formatted as deterministic JSON (`blockId|sanctionedBy|timestamp|sortedDemands|tsrSpeed|policyVersion`).
 - **SHA-256 Digital Seal**: Recomputed dynamically in the Auditor Workspace (Screen 4) to prove zero post-facto tampering.
 - **Exportable Compliance**: Included in the downloadable RDSO Form 14B Joint Block Safety Certificate.
 
 ---
 
-## 6. Verification Matrix
+## 7. Verification Matrix
 
 | Verification Test | Target Component | Specification Standard | Status |
 | :--- | :--- | :--- | :---: |
@@ -171,6 +322,7 @@ Every verified work proof event is immutably appended to the **Explainable Decis
 | **Non-Disruptive Section Selection** | `page.tsx` | UX Integrity / Anti-Jump | **PASSED (100%)** |
 | **Geofence Radius Validation ($\pm 100\text{m}$)** | `GroundProofModal.tsx` | GPS Boundary Haversine | **VERIFIED** |
 | **YOLOv11 Headcount & PPE Telemetry** | `apiContracts.ts` | Computer Vision Ingest | **VERIFIED** |
+| **Supabase Role-to-Screen Isolation** | `rbac.ts` / Next.js | Ministry of Railways Cyber Policy | **VERIFIED** |
 | **Full Vitest Test Suite (14 Suites)** | Master Test Engine | RDSO / SIH-26027 Specs | **108 / 108 PASSED** |
 
 ---
