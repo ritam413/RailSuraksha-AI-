@@ -8,7 +8,7 @@ import { MOCK_TRACK_CIRCUITS } from '@/lib/mockData';
 
 describe('TICKET-DEV1-04: Section Interlocking & Track Circuit Schematic', () => {
   describe('SignalHead Component', () => {
-    it('renders 4-aspect signal head with RED aspect illuminated', () => {
+    it('renders 3-aspect signal head with RED aspect illuminated', () => {
       const html = renderToStaticMarkup(
         <SignalHead
           signalId="S-12"
@@ -22,18 +22,32 @@ describe('TICKET-DEV1-04: Section Interlocking & Track Circuit Schematic', () =>
       expect(html).toContain('bg-red-500');
     });
 
-    it('renders DOUBLE_YELLOW aspect with both caution lamps lit', () => {
+    it('renders YELLOW / caution aspect with amber lamp lit', () => {
       const html = renderToStaticMarkup(
         <SignalHead
           signalId="S-18"
-          aspect="DOUBLE_YELLOW"
+          aspect="YELLOW"
           isClamped={false}
         />
       );
 
       expect(html).toContain('S-18');
-      expect(html).toContain('aspect-yellow-top-active');
-      expect(html).toContain('aspect-yellow-bottom-active');
+      expect(html).toContain('aspect-yellow-active');
+      expect(html).toContain('bg-amber-400');
+    });
+
+    it('renders GREEN aspect with emerald lamp lit', () => {
+      const html = renderToStaticMarkup(
+        <SignalHead
+          signalId="S-24"
+          aspect="GREEN"
+          isClamped={false}
+        />
+      );
+
+      expect(html).toContain('S-24');
+      expect(html).toContain('aspect-green-active');
+      expect(html).toContain('bg-emerald-500');
     });
 
     it('renders padlock icon and lockout badge when signal is clamped', () => {

@@ -1,10 +1,69 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-27 — Safety Validation, Ground Execution Verification & Supabase RBAC Report
+
+### Objective
+Document comprehensive safety validation, ground execution verification, and Role-Based Access Control in `safety_validate_report.md` covering:
+1. Standard 3-Aspect Colour Light Signalling (SEM Part II & GR 3.08) with Yellow (Caution), Green (Clear), and Red (Danger/Lockout).
+2. Non-disruptive track circuit section inspection on the Interlocking Map.
+3. Multi-Modal Ground Execution Verification Engine (Anti-Ghost Block Audit):
+   - GPS Geofencing radius validation ($\pm 100\text{m}$) preventing unauthorized/remote fake check-ins.
+   - YOLOv11 Computer Vision processing on-site field photos for worker headcount, PPE compliance, and heavy machinery detection.
+   - 25kV OHE physical discharge earthing rod sensor telemetry ($\Delta_{\text{earth}} \ge 10\text{m}$).
+   - Automated Section Controller warning & emergency lockout revocation workflow for unverified idle blocks.
+4. Supabase Role-Based Access Control (RBAC) & View Isolation Architecture:
+   - Restricting individual roles to single dedicated screens (`CORRIDOR_PLANNER` -> Screen 1, `SECTION_CONTROLLER` -> Screen 2, `LOCO_PILOT` -> Screen 3, `SAFETY_AUDITOR` -> Screen 4, `FIELD_WORKER` -> Geofenced Check-In).
+   - PostgreSQL schema, `app_role` / `app_department` ENUMs, Row Level Security (RLS) policies, and Next.js client gatekeepers.
+5. RFC 8785 SHA-256 cryptographic audit trail and RDSO Form 14B certificate integration.
+
+### Files Created / Changed
+- `safety_validate_report.md` (Updated)
+- `tracker.md` (Updated)
+
+---
+
+## 2026-09-27 — 3-Aspect Traffic Signal Head (Orange/Yellow, Green, Red) & Track Section Navigation Fix
+
+### Objective
+1. Convert the traffic signal heads on the Interlocking Track Circuit Schematic (Screen 2) from a 4-lamp vertical housing to standard 3-aspect signalling (Yellow/Orange Caution on top, Green Proceed in middle, Red Danger on bottom).
+2. Fix track circuit section selection behavior where clicking on track circuit cards (`TC-01`, `TC-03`, `TC-04`, `TC-05`) unexpectedly switched tabs and opened other screens (such as Platform Gateway CCTV or Defect Vision & Telemetry) instead of remaining in the current view.
+
+### Changes Made
+- **`src/components/Common/SignalHead.tsx`**:
+  - Replaced 4 vertical LED apertures with 3 LED apertures:
+    1. Top: Yellow/Orange Caution (`aspect-yellow-active`, `#F59E0B`).
+    2. Middle: Green Proceed (`aspect-green-active`, `#10B981`).
+    3. Bottom: Red Danger (`aspect-red-active`, `#EF4444`).
+  - Added `e.stopPropagation()` on signal head `onClick` and `onKeyDown` to prevent click bubbling into parent circuit cards when toggling signal aspects.
+- **`src/app/page.tsx`**:
+  - Simplified `handleTrackSelect` to update `selectedTrackId` within the current view without auto-switching `activeTab`.
+- **`tests/InterlockingMap.test.tsx`**:
+  - Updated unit tests to assert the 3-aspect LED states (`RED`, `YELLOW`, `GREEN`).
+
+### Files Changed
+- `src/components/Common/SignalHead.tsx` (Modified)
+- `src/app/page.tsx` (Modified)
+- `tests/InterlockingMap.test.tsx` (Modified)
+- `tracker.md` (Updated)
+
+### Verification
+- `npm test` — 14/14 test files passed, 108/108 unit and integration tests passed (100%).
+- `npx tsc --noEmit` — 0 TypeScript compiler errors.
+
+### Current State
+- Signal heads render with 3 lights (Orange/Yellow, Green, Red).
+- Clicking any track circuit card selects and highlights that section and inspects it in the deep-dive drawer without switching tabs or navigating away.
+
+---
+
 ## 2026-09-27 — Code Review Verification & Physics / Audio / Deceleration Lifecycle Hardening
 
 ### Objective
 Systematically verify all CodeRabbit review comments against current active codebase, apply fixes for still-valid issues, skip already-resolved ones with reasons, and validate:
 - **Still-Valid Fixes Applied**:
+  - `backend/main.py`: Added dynamic `sys.path.insert(0, ...)` so `uvicorn backend.main:app` can be run cleanly directly from the repository root.
+  - `.env.local`: Configured `NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1` for instant local backend development.
+  - `src/lib/apiClient.ts`: Cleaned up fallback error logging so timeout aborts log cleanly without stack traces.
   - `src/components/Charts/DecelerationCurve.tsx`: Aligned `tReact` reaction-time multiplier from `1.20` to `1.96` matching `calculateKavachEbd` in `src/lib/agents/kavachBrakingAgent.ts`.
   - `src/lib/audioAlerts.ts`: Exported `getAudioContext()` so components share the singleton `AudioContext` rather than duplicating local instances.
   - `src/components/Vision/DefectVisionTelemetry.tsx`: Reused shared `getAudioContext()`, added `activeBrakingScenarioRef` to invalidate stale deceleration actions on scenario change / reset, and decoupled the stabilization notice timeout from `isDecelerating` cleanup.

@@ -10,6 +10,15 @@ Run:
 Interactive docs: http://localhost:8000/docs
 """
 
+import os
+import sys
+from pathlib import Path
+
+# Ensure backend directory is in sys.path for direct uvicorn execution
+backend_dir = str(Path(__file__).parent.resolve())
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

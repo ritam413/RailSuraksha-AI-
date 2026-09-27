@@ -22,19 +22,26 @@ export const SignalHead: React.FC<SignalHeadProps> = ({
 }) => {
   const isRedActive = aspect === 'RED' || isClamped;
   const isGreenActive = !isClamped && aspect === 'GREEN';
-  const isYellowTopActive = !isClamped && (aspect === 'YELLOW' || aspect === 'DOUBLE_YELLOW');
-  const isYellowBottomActive = !isClamped && aspect === 'DOUBLE_YELLOW';
+  const isYellowActive = !isClamped && (aspect === 'YELLOW' || aspect === 'DOUBLE_YELLOW');
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ' ') && onClick && !isClamped) {
       e.preventDefault();
+      e.stopPropagation();
+      onClick(signalId, aspect);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isClamped && onClick) {
       onClick(signalId, aspect);
     }
   };
 
   return (
     <div
-      onClick={() => !isClamped && onClick && onClick(signalId, aspect)}
+      onClick={handleClick}
       onKeyDown={handleKeyDown}
       className={`inline-flex flex-col items-center select-none group transition-transform ${
         isClamped ? 'cursor-not-allowed opacity-95' : 'cursor-pointer hover:scale-105'
@@ -55,18 +62,18 @@ export const SignalHead: React.FC<SignalHeadProps> = ({
         </div>
       )}
 
-      {/* 4-Aspect Vertical LED Housing Box */}
+      {/* 3-Aspect Vertical LED Housing Box (Yellow/Orange, Green, Red) */}
       <div
         className={`relative p-1.5 bg-[#0B132B] border-2 ${
           isClamped ? 'border-red-500 shadow-red-300' : 'border-slate-700 shadow-md'
         } flex flex-col items-center space-y-1.5`}
         style={{ borderRadius: '6px' }}
       >
-        {/* Aspect 1: Yellow Top */}
+        {/* Aspect 1: Yellow / Orange */}
         <div
           className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
-            isYellowTopActive
-              ? 'aspect-yellow-top-active bg-amber-400 border-amber-300 shadow-[0_0_8px_#F59E0B]'
+            isYellowActive
+              ? 'aspect-yellow-active bg-amber-400 border-amber-300 shadow-[0_0_8px_#F59E0B]'
               : 'bg-slate-900/90 border-slate-800'
           }`}
         />
@@ -85,15 +92,6 @@ export const SignalHead: React.FC<SignalHeadProps> = ({
           className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
             isRedActive
               ? 'aspect-red-active bg-red-500 border-red-300 shadow-[0_0_10px_#EF4444] animate-pulse'
-              : 'bg-slate-900/90 border-slate-800'
-          }`}
-        />
-
-        {/* Aspect 4: Yellow Bottom */}
-        <div
-          className={`w-3.5 h-3.5 rounded-full border transition-all duration-300 ${
-            isYellowBottomActive
-              ? 'aspect-yellow-bottom-active bg-amber-400 border-amber-300 shadow-[0_0_8px_#F59E0B]'
               : 'bg-slate-900/90 border-slate-800'
           }`}
         />
