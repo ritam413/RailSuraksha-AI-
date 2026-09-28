@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Navbar } from '@/components/Navbar';
-import CommandCenterPage from '@/app/page';
+import CommandCenterPage from '@/app/admin/page';
 
 describe('TICKET-DEV1-07: Master Cockpit Assembly & Horizon Switcher', () => {
   describe('Navbar Component & Horizon Switcher', () => {

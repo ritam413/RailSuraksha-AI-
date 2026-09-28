@@ -27,6 +27,14 @@ import { ThemeProvider } from '@/context/ThemeContext';
 export const metadata = {
   title: 'RailSuraksha AI — National Railway Safety & Incident Intelligence Platform',
   description: 'National-grade railway command center with AI multi-agent safety ecosystem and RDSO Kavach braking physics.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { OFFICER_PERSONAS, ROLE_DEFAULT_ROUTE } from '@/lib/rbac';
 import { AppRole } from '@/types/apiContracts';
+import { RailLogo } from '@/components/Brand/RailLogo';
 
 export default function LoginClient() {
   let router: any = null;
@@ -61,9 +62,9 @@ export default function LoginClient() {
     <div className="min-h-screen bg-[#F0F6FC] py-10 px-4 flex flex-col justify-center items-center">
       <div className="max-w-3xl w-full space-y-6">
         {/* Header Branding */}
-        <div className="bg-white border border-[#D0DFEE] p-6 text-center space-y-2 shadow-xs" style={{ borderRadius: '16px' }}>
-          <div className="w-12 h-12 bg-[#2B7FFF] text-white flex items-center justify-center font-black text-lg mx-auto shadow-sm" style={{ borderRadius: '8px' }}>
-            RS
+        <div className="bg-white border border-[#D0DFEE] p-6 text-center space-y-3 shadow-xs" style={{ borderRadius: '16px' }}>
+          <div className="flex justify-center">
+            <RailLogo size={52} variant="badge" glow={true} />
           </div>
           <h1 className="text-2xl font-bold font-display text-[#0F172A] tracking-tight">
             RailSuraksha AI • Officer Authentication Portal

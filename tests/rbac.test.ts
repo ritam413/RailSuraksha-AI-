@@ -39,7 +39,7 @@ describe('RBAC Domain & Route Permission Matrix', () => {
     expect(ROLE_DEFAULT_ROUTE.LOCO_PILOT).toBe('/vision-telemetry');
     expect(ROLE_DEFAULT_ROUTE.SAFETY_AUDITOR).toBe('/auditor');
     expect(ROLE_DEFAULT_ROUTE.FIELD_WORKER).toBe('/field-checkin');
-    expect(ROLE_DEFAULT_ROUTE.ADMIN).toBe('/planner');
+    expect(ROLE_DEFAULT_ROUTE.ADMIN).toBe('/admin');
   });
 
   it('correctly validates route permissions with isRouteAllowedForRole', () => {

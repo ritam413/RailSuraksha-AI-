@@ -357,7 +357,7 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
     <div className="space-y-6">
       {/* Screen 4 Regulatory Terminal Header Banner */}
       <div
-        className="bg-white border border-[#D0DFEE] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+        className="bg-white dark:bg-[#0c0d12] border border-[#D0DFEE] dark:border-[#1c1d22] p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
         style={{ borderRadius: '16px' }}
       >
         <div className="flex items-center space-x-3.5">
@@ -369,23 +369,23 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-bold text-[#0F172A] tracking-tight">
+              <h2 className="text-base font-bold text-[#0F172A] dark:text-[#e2e3e9] tracking-tight">
                 Auditor Workspace &amp; Regulatory Terminal (Screen 4)
               </h2>
               <span
-                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"
+                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60"
                 style={{ borderRadius: '4px' }}
               >
                 CRS &amp; RDSO COMPLIANT
               </span>
               <span
-                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-100 text-blue-800 border border-blue-200"
+                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700/60"
                 style={{ borderRadius: '4px' }}
               >
                 RFC 8785 IMMUTABLE LEDGER
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
               Commissioner of Railway Safety (CRS) Statutory Decision Log, Cryptographic Seal &amp; Form 14B Certification
             </p>
           </div>
@@ -393,7 +393,7 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
 
         <div className="flex items-center space-x-2 shrink-0">
           <div
-            className="px-3 py-1.5 bg-[#E6F0FA] text-[#2B7FFF] border border-[#D0DFEE] text-xs font-mono font-bold flex items-center space-x-2"
+            className="px-3 py-1.5 bg-[#E6F0FA] dark:bg-blue-950/40 text-[#2B7FFF] dark:text-blue-300 border border-[#D0DFEE] dark:border-blue-800/40 text-xs font-mono font-bold flex items-center space-x-2"
             style={{ borderRadius: '4px' }}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -532,12 +532,12 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                     const isSelected = selectedRecordId === record.id;
                     const deptColor =
                       record.department === 'JOINT'
-                        ? 'bg-purple-100 text-purple-800 border-purple-200'
+                        ? 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-700/60'
                         : record.department === 'TMS'
-                        ? 'bg-amber-100 text-amber-800 border-amber-200'
+                        ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60'
                         : record.department === 'TDMS'
-                        ? 'bg-blue-100 text-blue-800 border-blue-200'
-                        : 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                        ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700/60'
+                        : 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60';
 
                     return (
                       <div
@@ -548,33 +548,33 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                         }}
                         className={`p-3.5 border transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-[#2B7FFF] bg-blue-50/50 shadow-xs ring-1 ring-[#2B7FFF]'
-                            : 'border-[#D0DFEE] bg-white hover:border-[#2B7FFF]'
+                            ? 'border-[#2B7FFF] bg-blue-50/60 dark:bg-[#162032] shadow-xs ring-1 ring-[#2B7FFF]'
+                            : 'border-[#D0DFEE] dark:border-[#1c1d22] bg-white dark:bg-[#0c0d12] hover:border-[#2B7FFF] dark:hover:bg-[#121317]'
                         }`}
                         style={{ borderRadius: '8px' }}
                       >
                         <div className="flex items-center justify-between text-[10px] font-mono mb-1">
                           <div className="flex items-center space-x-1.5">
-                            <span className="font-bold text-[#2B7FFF]">#{record.blockId}</span>
+                            <span className="font-bold text-[#2B7FFF] dark:text-blue-400">#{record.blockId}</span>
                             <span className={`px-1.5 py-0.2 text-[9px] font-bold border rounded ${deptColor}`}>
                               {record.department}
                             </span>
                           </div>
-                          <span className="text-slate-400">{record.timestamp}</span>
+                          <span className="text-slate-400 dark:text-slate-500">{record.timestamp}</span>
                         </div>
 
-                        <h3 className="text-xs font-bold text-[#0F172A] leading-snug">{record.title}</h3>
-                        <p className="text-[11px] text-slate-500 font-mono mt-0.5 truncate">{record.section}</p>
+                        <h3 className="text-xs font-bold text-[#0F172A] dark:text-[#e2e3e9] leading-snug">{record.title}</h3>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 truncate">{record.section}</p>
 
-                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[10px] font-mono">
-                          <span className="text-emerald-700 font-bold">{record.downtimeSaved}</span>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-[#1c1d22] text-[10px] font-mono">
+                          <span className="text-emerald-700 dark:text-emerald-400 font-bold">{record.downtimeSaved}</span>
                           <span
                             className={`px-1.5 py-0.5 rounded font-bold ${
                               record.status.includes('SANCTIONED')
-                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/60'
                                 : record.status.includes('COMPLETED')
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/60'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
                             }`}
                           >
                             {record.status}
@@ -779,13 +779,13 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
               </div>
 
               {/* 3-Tab View Switcher (Pipeline, Form 14B Certificate, Raw JSON Payload) */}
-              <div className="flex border-b border-[#D0DFEE] text-xs font-mono font-bold">
+              <div className="flex border-b border-[#D0DFEE] dark:border-[#1c1d22] text-xs font-mono font-bold">
                 <button
                   onClick={() => setActiveDossierTab('TIMELINE')}
                   className={`px-3 py-2 border-b-2 transition-all flex items-center space-x-1.5 ${
                     activeDossierTab === 'TIMELINE'
-                      ? 'border-[#2B7FFF] text-[#2B7FFF] bg-blue-50/40'
-                      : 'border-transparent text-slate-600 hover:text-[#2B7FFF]'
+                      ? 'border-[#2B7FFF] text-[#2B7FFF] dark:text-blue-400 bg-blue-50/40 dark:bg-blue-950/40'
+                      : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-[#2B7FFF] dark:hover:text-blue-300'
                   }`}
                 >
                   <span>1.</span>
@@ -795,8 +795,8 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                   onClick={() => setActiveDossierTab('FORM14B')}
                   className={`px-3 py-2 border-b-2 transition-all flex items-center space-x-1.5 ${
                     activeDossierTab === 'FORM14B'
-                      ? 'border-[#2B7FFF] text-[#2B7FFF] bg-blue-50/40'
-                      : 'border-transparent text-slate-600 hover:text-[#2B7FFF]'
+                      ? 'border-[#2B7FFF] text-[#2B7FFF] dark:text-blue-400 bg-blue-50/40 dark:bg-blue-950/40'
+                      : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-[#2B7FFF] dark:hover:text-blue-300'
                   }`}
                 >
                   <span>2.</span>
@@ -806,8 +806,8 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                   onClick={() => setActiveDossierTab('PAYLOAD')}
                   className={`px-3 py-2 border-b-2 transition-all flex items-center space-x-1.5 ${
                     activeDossierTab === 'PAYLOAD'
-                      ? 'border-[#2B7FFF] text-[#2B7FFF] bg-blue-50/40'
-                      : 'border-transparent text-slate-600 hover:text-[#2B7FFF]'
+                      ? 'border-[#2B7FFF] text-[#2B7FFF] dark:text-blue-400 bg-blue-50/40 dark:bg-blue-950/40'
+                      : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-[#2B7FFF] dark:hover:text-blue-300'
                   }`}
                 >
                   <span>3.</span>
@@ -818,7 +818,7 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
               {/* Tab 1: 4-Step Reasoning Pipeline */}
               {activeDossierTab === 'TIMELINE' && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono text-slate-500">
+                  <div className="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400">
                     <span>Click any step to inspect telemetry details &amp; statutory rules:</span>
                     <span>4 Verification Gates</span>
                   </div>
@@ -832,8 +832,8 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                           onClick={() => setExpandedStep(isExpanded ? null : step.stepNumber)}
                           className={`border transition-all cursor-pointer ${
                             isExpanded
-                              ? 'bg-[#EBF3FC] border-[#2B7FFF] shadow-xs'
-                              : 'bg-[#F0F6FC] border-[#D0DFEE] hover:bg-[#EAF2FB]'
+                              ? 'bg-[#EBF3FC] dark:bg-[#131d2e] border-[#2B7FFF] shadow-xs'
+                              : 'bg-[#F0F6FC] dark:bg-[#0c0d12] border-[#D0DFEE] dark:border-[#1c1d22] hover:bg-[#EAF2FB] dark:hover:bg-[#121317]'
                           }`}
                           style={{ borderRadius: '8px' }}
                         >
@@ -846,34 +846,34 @@ export const AuditorWorkspace: React.FC<AuditorWorkspaceProps> = ({ currentDossi
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
-                                <strong className="text-xs text-[#0F172A] truncate">{step.title}</strong>
-                                <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                                <strong className="text-xs text-[#0F172A] dark:text-white truncate">{step.title}</strong>
+                                <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
                                   {step.timestamp.split('T')[1]?.replace('Z', ' IST') || step.timestamp}
                                 </span>
                               </div>
-                              <p className="text-slate-600 font-mono text-[11px] mt-0.5 leading-relaxed">
+                              <p className="text-slate-600 dark:text-slate-300 font-mono text-[11px] mt-0.5 leading-relaxed">
                                 {step.description}
                               </p>
                             </div>
-                            <span className="text-slate-400 text-xs font-bold shrink-0">
+                            <span className="text-slate-400 dark:text-slate-500 text-xs font-bold shrink-0">
                               {isExpanded ? '▲' : '▼'}
                             </span>
                           </div>
 
                           {/* Expanded Step Deep Dive */}
                           {isExpanded && (
-                            <div className="px-3.5 pb-3 pt-1 border-t border-[#D0DFEE]/60 text-[11px] font-mono space-y-1.5 bg-white/70">
-                              <div className="flex items-center justify-between text-slate-600">
+                            <div className="px-3.5 pb-3 pt-1 border-t border-[#D0DFEE]/60 dark:border-[#1c1d22] text-[11px] font-mono space-y-1.5 bg-white/70 dark:bg-[#08080a]/90">
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                 <span>Agent Subsystem:</span>
-                                <strong className="text-[#2B7FFF]">{step.agentName}</strong>
+                                <strong className="text-[#2B7FFF] dark:text-blue-400">{step.agentName}</strong>
                               </div>
-                              <div className="flex items-center justify-between text-slate-600">
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                 <span>Regulatory Rule Base:</span>
-                                <strong className="text-slate-800">{selectedRecord.ruleClause}</strong>
+                                <strong className="text-slate-800 dark:text-[#e2e3e9]">{selectedRecord.ruleClause}</strong>
                               </div>
-                              <div className="flex items-center justify-between text-slate-600">
+                              <div className="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                 <span>Execution Stage:</span>
-                                <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">
+                                <span className="px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 rounded font-bold text-[10px]">
                                   {step.stageName} • PASS
                                 </span>
                               </div>

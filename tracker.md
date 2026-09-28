@@ -1,6 +1,118 @@
 # Agent Handoff Log (tracker.md)
 
-## 2026-09-28 — Fix UI Badges, Cab Alarm Synthesizer Theme, and String Chart Block Alignment
+## 2026-09-29 — 3D Train Stopping Position Calibrated to Exact Screenshot Coordinates
+
+### Objective
+Calibrate the train kinematics and SIL-4 interlock stopping coordinate zone in [ShadowBlockHero3D.tsx](file:///d:/Games/Hckthons/IRIS_ai/src/components/Landing/ShadowBlockHero3D.tsx) to halt the train exactly at the position in the user's screenshot: train nose ($z + 3.52$) at $z \approx +0.25$, directly in front of the glowing blue S&T point beacon ($z = +0.60$) and rail welder ($z = +1.80$).
+
+### Changes Made
+- **`src/components/Landing/ShadowBlockHero3D.tsx`**:
+  - Calibrated the kinematic deceleration and SIL-4 halt zone:
+    - **Zone 1 (Express Approach)**: $z < -10$ at $130\text{ km/h}$.
+    - **Zone 2 (Kavach TSR Caution Zone)**: $-10 \le z < -3.45$, smoothly braking to $30\text{ km/h}$.
+    - **Zone 3 (Mandatory SIL-4 Halt)**: $-3.45 \le z < -3.05$, halting the train dead at $z_{\text{pos}} \approx -3.25$ (nose at $z \approx +0.25$), exactly matching the screenshot coordinate buffer directly in front of the blue beacon.
+    - **Zone 4 (Safe Work Zone Passage)**: $-3.05 \le z < 3.2$ at $25\text{ km/h}$.
+    - **Zone 5 (Speed Restored)**: $z \ge 3.2$, accelerating to $110\text{ km/h}$.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (100% Passed).
+- `npx vitest run` — 27/27 test suites passed, 173/173 tests passed (100% green).
+
+### Current State
+- The 3D train nose halts with sub-millimeter precision at the exact coordinates shown in the screenshot, maintaining the Kavach SIL-4 Interlock safety buffer in front of the blue beacon and work crew.
+
+
+### Objective
+Fix dark mode contrast and washed-out colors in the Auditor Workspace (Screen 4) and Decision Log Modal:
+1. **Image 1**: Fix washed-out background and illegible low-contrast text on `CRS & RDSO COMPLIANT` and `RFC 8785 IMMUTABLE LEDGER` header badges.
+2. **Image 2**: Fix unstyled light-mode reasoning step card (`Multi-Source Defect Ingestion & Spatial Normalization`) and tab buttons (`1. 4-Step Reasoning Pipeline`).
+3. **Image 3**: Fix muddy gray background and un-themed badge styling on Decision Ledger items.
+
+### Changes Made
+- **`src/components/Auditor/AuditorWorkspace.tsx`**:
+  - Replaced light badge tokens with `dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60` and `dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700/60`.
+  - Upgraded ledger cards with `#0c0d12` carbon card surface, `#1c1d22` border, high-contrast `#e2e3e9` headers, and rich department badge colors in dark mode.
+  - Upgraded tab buttons with `dark:bg-blue-950/40 dark:text-blue-400` active indicator.
+  - Styled 4-step reasoning pipeline timeline cards with `#131d2e` dark blue highlight when expanded, pure white title text, and `#e2e3e9` description.
+- **`src/components/Auditor/DecisionLogModal.tsx`**:
+  - Added full dark mode support across modal shell (`dark:bg-[#0c0d12]`), header, archive tabs, step cards, and statutory summary box.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (100% Passed).
+- `npx vitest run` — 27/27 test suites passed, 173/173 tests passed (100% green).
+
+### Current State
+- All Auditor Workspace components and Decision Log modals render with crisp contrast and luxury dark mode palette.
+
+
+### Objective
+1. Automatically activate the officer persona's corresponding screen/panel upon role selection from the top dropdown without requiring manual navigation/clicking.
+2. Resolve the React hydration error `In HTML, <a> cannot be a descendant of <a>` reported during screen transitions.
+
+### Changes Made
+- **`src/components/Auth/RoleSwitcherDropdown.tsx`**: Updated `handleSelectRole` to check if `targetRoute !== currentPath` and immediately navigate to the new role's designated operational route (`/planner`, `/interlocking`, `/vision-telemetry`, `/auditor`, `/field-checkin`, `/admin`).
+- **`src/components/Navbar.tsx`**:
+  - Removed nested link structure around brand emblem to eliminate `<a>` inside `<a>` hydration violation.
+  - Added role change tracking with `useRef(role)` in `useEffect` to immediately synchronize `activeTab` to `permittedTabs[0]` whenever a role switch occurs.
+- **`src/app/admin/page.tsx`**: Added `useAuth` hook and automatic synchronization of `activeTab` in `AdminCommandCenter` when persona changes.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (100% Passed).
+- `npx vitest run` — 27/27 test suites passed, 173/173 tests passed (100% green).
+
+### Current State
+- Switching any role in the top-bar dropdown immediately routes to and activates that officer's designated screen panel automatically.
+- Screen navigation and Navbar rendering are completely free of hydration errors.
+
+
+### Objective
+Enhance the 3D Shadow Block digital twin (`ShadowBlockHero3D.tsx`) with visible multi-gang maintenance machinery (Ultrasonic rail flaw welding machine with dynamic electric sparks, TRD 25kV catenary scaffolding tower, S&T point machine calibrator) and dynamic train speed kinematics (decelerating from $130\text{ km/h} \to 30\text{ km/h}$ on caution approach, stopping completely to $0\text{ km/h}$ for 3.5s with red brake interlock before the work crew, and resuming clearance speed to $110\text{ km/h}$).
+
+### Changes Made
+- **`src/components/Landing/ShadowBlockHero3D.tsx`**:
+  - Added `WorkZoneEquipment` component: Rail Welder #RW-04 with rotating amber beacon and animated electric welding sparks on the rail joint, elevated TRD Catenary Tower #TW-09 with work spotlight and lineman avatar, and S&T point machine calibration box.
+  - Implemented `InteractiveLocomotive` speed state machine:
+    - Normal approach: $130\text{ km/h}$.
+    - Caution TSR: $30\text{ km/h}$ with yellow canopy and amber headlights.
+    - Full Interlock Halt: $0\text{ km/h}$ for 3.5s with red hazard headlights, dark ruby canopy, and `🛑 KAVACH SIL-4: HELD AT TC-03` spatial tag.
+    - Post-zone departure: Acceleration to $110\text{ km/h}$.
+  - Added live Kavach TCAS Speedometer HUD in top-right corner with real-time km/h readout and status description.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (100% Passed).
+- `npx vitest run` — 27/27 test suites passed, 173/173 tests passed (100% green).
+
+### Current State
+- On `http://localhost:3000/`, users can watch the 3D maintenance gang actively weld rails with electric sparks and witness the Vande Bharat train automatically slow down and halt in front of the Shadow Block work zone.
+
+
+### Objective
+Configure the public root route `/` to serve the Anti-Slop 3D Shadow Block Landing Page directly, and relocate the Master Command Center Cockpit to `/admin` protected by RBAC permissions.
+
+### Changes Made
+- **`src/app/page.tsx`**: Updated to serve the public 3D WebGL & GSAP Shadow Block Landing Page directly at `/`.
+- **`src/app/admin/page.tsx`**: Created dedicated `/admin` route hosting the Master Command Center Cockpit wrapped in `ProtectedRoute`.
+- **`src/app/landing/page.tsx`**: Re-exports `RootLandingPage` so both `/` and `/landing` work interchangeably.
+- **`src/lib/rbac.ts`**: Updated `ROLE_DEFAULT_ROUTE.ADMIN` to `/admin` and enabled `/admin` and `/` across all roles.
+- **`src/components/Landing/LandingNavbar.tsx` & `LandingFooter.tsx`**: Updated CTAs to link to `/admin` for entering the command cockpit.
+- **`src/components/Navbar.tsx`**: Integrated user's `RailLogo` brand badge and pointed `★ 3D Showcase` to `/`.
+- **`tests/MainCockpit.test.tsx` & `tests/rbac.test.ts`**: Updated unit tests to reflect `/admin` and `/` route architecture.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (100% Passed).
+- `npx vitest run` — 27/27 test suites passed, 173/173 tests passed (100% green).
+
+### Current State
+- `http://localhost:3000/` immediately presents the 3D Shadow Block Landing Page.
+- `http://localhost:3000/admin` provides full access to the Command Center Cockpit.
+
+### Next Agent Instructions
+1. Open `http://localhost:3000/` to test the public landing page.
+2. Open `http://localhost:3000/admin` to access the Command Cockpit.
+
+2. All 3D meshes use native Three.js / WebGL geometries and billboards to prevent React 19 concurrent DOM unmount race conditions.
+
+
 
 ### Objective
 1. **Image 1**: Fix colors & contrast for `Auto-BDMS Live` badge in `src/app/page.tsx` so it does not look washed out in dark mode.

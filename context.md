@@ -53,6 +53,8 @@ src/
 │   ├── globals.css
 │   ├── layout.tsx                    # Root layout with AuthProvider wrapper
 │   ├── page.tsx                      # Command Center master dashboard
+│   ├── landing/                      # 3D Shadow Block WebGL & GSAP landing page
+│   │   └── page.tsx
 │   ├── login/                        # Dedicated Suspense-wrapped login & persona auth hub
 │   │   ├── page.tsx
 │   │   └── LoginClient.tsx

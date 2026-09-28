@@ -24,6 +24,13 @@ export const RoleSwitcherDropdown: React.FC = () => {
   const handleSelectRole = (newRole: AppRole) => {
     switchRole(newRole);
     setIsOpen(false);
+    if (typeof window !== 'undefined') {
+      const targetRoute = ROLE_DEFAULT_ROUTE[newRole];
+      const currentPath = window.location.pathname;
+      if (targetRoute && currentPath !== targetRoute) {
+        window.location.href = targetRoute;
+      }
+    }
   };
 
   return (

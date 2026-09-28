@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { getPermittedTabsForRole } from '@/lib/rbac';
 import { RoleSwitcherDropdown } from '@/components/Auth/RoleSwitcherDropdown';
+import { RailLogo } from '@/components/Brand/RailLogo';
 
 export type NavbarTab =
   | 'CORRIDOR_PLANNER'
@@ -136,21 +137,28 @@ export const Navbar: React.FC<NavbarProps> = ({
     return activeTab === itemTab;
   };
 
+  // Automatically sync activeTab with newly permitted tabs when role changes
+  const prevRoleRef = React.useRef(role);
+  useEffect(() => {
+    const permitted = getPermittedTabsForRole(role);
+    if (permitted.length > 0 && onTabChange) {
+      if (prevRoleRef.current !== role || !permitted.includes(activeTab)) {
+        prevRoleRef.current = role;
+        onTabChange(permitted[0]);
+      }
+    }
+  }, [role, activeTab, onTabChange]);
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#D0DFEE] px-3 sm:px-6 py-2 shadow-xs">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
         {/* Brand Title & Horizon Switcher */}
         <div className="flex items-center space-x-3">
-          <Link href="/" className="flex items-center space-x-2">
-            <div
-              className="w-7 h-7 bg-[#2B7FFF] flex items-center justify-center text-white font-black text-xs tracking-tighter shadow-sm"
-              style={{ borderRadius: '4px' }}
-            >
-              RS
-            </div>
+          <Link href="/" className="flex items-center space-x-2.5 group">
+            <RailLogo size={32} variant="badge" glow={true} />
             <div>
               <div className="flex items-center space-x-1.5">
-                <h1 className="text-sm font-bold text-[#0F172A] tracking-tight">RailSuraksha AI</h1>
+                <h1 className="text-sm font-bold text-[#0F172A] tracking-tight group-hover:text-[#2B7FFF] transition-colors">RailSuraksha AI</h1>
                 <span
                   className="text-[9px] font-mono font-semibold bg-[#E6F0FA] text-[#426188] px-1 py-0.2 border border-[#D0DFEE]"
                   style={{ borderRadius: '4px' }}
@@ -159,6 +167,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
             </div>
+          </Link>
+
+          <Link
+            href="/"
+            className="text-[9px] font-mono font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/25 px-1.5 py-0.5 border border-amber-500/30 transition-colors"
+            style={{ borderRadius: '4px' }}
+            title="View 3D Shadow Block Showcase"
+          >
+            ★ 3D Showcase
           </Link>
 
           {/* Rolling Horizon Switcher (24h / 7D / 30D) */}
