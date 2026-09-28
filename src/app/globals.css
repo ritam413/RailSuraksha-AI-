@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.theme-dark, .theme-dark *, .dark, .dark *));
+
 @layer base {
   :root {
     --canvas-base: #F0F6FC;

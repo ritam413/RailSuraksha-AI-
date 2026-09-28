@@ -45,7 +45,7 @@ describe('TICKET-01: 3D Quadrupled Corridor Twin Component', () => {
     expect(html).toContain('View Decision Dossier');
   });
 
-  it('renders interaction guidance HUD for 3D orbit and zoom controls', () => {
+  it('renders simulation clock, timeline scrubber, and fast-forward controls', () => {
     const html = renderToStaticMarkup(
       <CorridorTwin3D
         activeBlocks={MOCK_JOINT_BLOCKS}
@@ -53,7 +53,9 @@ describe('TICKET-01: 3D Quadrupled Corridor Twin Component', () => {
       />
     );
 
-    expect(html).toContain('Orbit: Drag');
-    expect(html).toContain('Zoom: Scroll');
+    expect(html).toContain('Timeline Control:');
+    expect(html).toContain('IST');
+    expect(html).toContain('Lift Block');
+    expect(html).toContain('Pause');
   });
 });

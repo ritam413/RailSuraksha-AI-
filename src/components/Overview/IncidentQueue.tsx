@@ -256,14 +256,14 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ticket, line, defect, or machine..."
-                className="w-full h-8 pl-8 pr-3 text-xs bg-[#F8FAFC] border border-[#D0DFEE] rounded-[4px] text-[#0F172A] placeholder-slate-400 focus:bg-white focus:border-[#2B7FFF] focus:outline-none transition-all"
+                className="w-full h-8 pl-8 pr-3 text-xs bg-white dark:bg-slate-800/90 border border-[#D0DFEE] dark:border-slate-700 rounded-[4px] text-[#0F172A] dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-[#2B7FFF] focus:outline-none transition-all shadow-2xs"
                 style={{ borderRadius: '4px' }}
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -274,7 +274,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as any)}
-                className="h-8 px-2.5 bg-[#F8FAFC] border border-[#D0DFEE] rounded-[4px] text-xs text-slate-700 font-medium focus:border-[#2B7FFF] focus:outline-none cursor-pointer"
+                className="h-8 px-2.5 bg-white dark:bg-slate-800 border border-[#D0DFEE] dark:border-slate-700 rounded-[4px] text-xs text-[#0F172A] dark:text-slate-200 font-medium focus:border-[#2B7FFF] focus:outline-none cursor-pointer shadow-2xs"
                 style={{ borderRadius: '4px' }}
               >
                 <option value="URGENCY_DESC">Sort: Urgency Score (High to Low)</option>
@@ -285,9 +285,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
           </div>
 
           {/* Department Filter Tabs & Priority Compound Toggle */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 pt-1">
-            {/* Department Tabs */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex flex-col gap-2.5 pt-1">
+            {/* Department Tabs Row */}
+            <div className="flex flex-row items-center gap-1.5 flex-wrap w-full">
               <button
                 type="button"
                 onClick={() => {
@@ -296,15 +296,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 }}
                 className={`px-3 py-1 text-xs font-bold font-mono transition-all rounded-[4px] flex items-center gap-1.5 cursor-pointer ${
                   activeDepartment === 'ALL'
-                    ? 'bg-[#0F172A] text-white shadow-xs'
-                    : 'bg-[#F8FAFC] text-slate-700 hover:bg-slate-200 border border-[#D0DFEE]'
+                    ? 'bg-[#2B7FFF] text-white border border-[#2B7FFF] shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-[#F0F6FC] dark:hover:bg-slate-700 border border-[#D0DFEE] dark:border-slate-700'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
                 <span>All Demands</span>
                 <span
                   className={`px-1.5 py-0.2 text-[10px] rounded-[4px] font-mono ${
-                    activeDepartment === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                    activeDepartment === 'ALL' ? 'bg-white/25 text-white' : 'bg-[#F1F5F9] dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                   }`}
                   style={{ borderRadius: '4px' }}
                 >
@@ -320,15 +320,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 }}
                 className={`px-3 py-1 text-xs font-bold font-mono transition-all rounded-[4px] flex items-center gap-1.5 cursor-pointer ${
                   activeDepartment === 'TMS_CIVIL'
-                    ? 'bg-[#991B1B] text-white shadow-xs'
-                    : 'bg-[#FEE2E2]/60 text-[#991B1B] hover:bg-[#FEE2E2] border border-[#FCA5A5]'
+                    ? 'bg-[#DC2626] dark:bg-rose-800 text-white border border-[#DC2626] dark:border-rose-800 shadow-xs'
+                    : 'bg-[#FEF2F2] dark:bg-rose-950/40 text-[#991B1B] dark:text-rose-200 hover:bg-[#FEE2E2] dark:hover:bg-rose-900/50 border border-[#FECACA] dark:border-rose-800'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
                 <span>TMS Civil</span>
                 <span
                   className={`px-1.5 py-0.2 text-[10px] rounded-[4px] font-mono ${
-                    activeDepartment === 'TMS_CIVIL' ? 'bg-white/20 text-white' : 'bg-[#FCA5A5] text-[#991B1B]'
+                    activeDepartment === 'TMS_CIVIL' ? 'bg-white/25 text-white' : 'bg-[#FEE2E2] dark:bg-rose-900/80 text-[#991B1B] dark:text-rose-200'
                   }`}
                   style={{ borderRadius: '4px' }}
                 >
@@ -344,15 +344,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 }}
                 className={`px-3 py-1 text-xs font-bold font-mono transition-all rounded-[4px] flex items-center gap-1.5 cursor-pointer ${
                   activeDepartment === 'TDMS_ELECTRICAL'
-                    ? 'bg-[#92400E] text-white shadow-xs'
-                    : 'bg-[#FEF3C7]/60 text-[#92400E] hover:bg-[#FEF3C7] border border-[#FCD34D]'
+                    ? 'bg-[#D97706] dark:bg-amber-800 text-white border border-[#D97706] dark:border-amber-800 shadow-xs'
+                    : 'bg-[#FFFBEB] dark:bg-amber-950/40 text-[#92400E] dark:text-amber-200 hover:bg-[#FEF3C7] dark:hover:bg-amber-900/50 border border-[#FDE68A] dark:border-amber-800'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
                 <span>TDMS OHE</span>
                 <span
                   className={`px-1.5 py-0.2 text-[10px] rounded-[4px] font-mono ${
-                    activeDepartment === 'TDMS_ELECTRICAL' ? 'bg-white/20 text-white' : 'bg-[#FCD34D] text-[#92400E]'
+                    activeDepartment === 'TDMS_ELECTRICAL' ? 'bg-white/25 text-white' : 'bg-[#FEF3C7] dark:bg-amber-900/80 text-[#92400E] dark:text-amber-200'
                   }`}
                   style={{ borderRadius: '4px' }}
                 >
@@ -368,15 +368,15 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 }}
                 className={`px-3 py-1 text-xs font-bold font-mono transition-all rounded-[4px] flex items-center gap-1.5 cursor-pointer ${
                   activeDepartment === 'SMMS_SIGNAL'
-                    ? 'bg-[#1E40AF] text-white shadow-xs'
-                    : 'bg-[#DBEAFE]/60 text-[#1E40AF] hover:bg-[#DBEAFE] border border-[#93C5FD]'
+                    ? 'bg-[#2563EB] dark:bg-sky-800 text-white border border-[#2563EB] dark:border-sky-800 shadow-xs'
+                    : 'bg-[#EFF6FF] dark:bg-sky-950/40 text-[#1E40AF] dark:text-sky-200 hover:bg-[#DBEAFE] dark:hover:bg-sky-900/50 border border-[#BFDBFE] dark:border-sky-800'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
                 <span>SMMS Signal</span>
                 <span
                   className={`px-1.5 py-0.2 text-[10px] rounded-[4px] font-mono ${
-                    activeDepartment === 'SMMS_SIGNAL' ? 'bg-white/20 text-white' : 'bg-[#93C5FD] text-[#1E40AF]'
+                    activeDepartment === 'SMMS_SIGNAL' ? 'bg-white/25 text-white' : 'bg-[#DBEAFE] dark:bg-sky-900/80 text-[#1E40AF] dark:text-sky-200'
                   }`}
                   style={{ borderRadius: '4px' }}
                 >
@@ -385,9 +385,9 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
               </button>
             </div>
 
-            {/* Priority Compound Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mr-1 select-none">
+            {/* Priority Compound Filter Row */}
+            <div className="flex flex-row items-center gap-1.5 pt-0.5 flex-wrap">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mr-1 select-none">
                 Priority:
               </span>
               <button
@@ -395,8 +395,8 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 onClick={() => setActivePriority('ALL')}
                 className={`px-2.5 py-1 text-xs font-bold rounded-[4px] transition-all cursor-pointer ${
                   activePriority === 'ALL'
-                    ? 'bg-[#0F172A] text-white'
-                    : 'bg-[#F8FAFC] text-slate-600 hover:bg-slate-200 border border-[#D0DFEE]'
+                    ? 'bg-[#2B7FFF] text-white border border-[#2B7FFF] shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#F0F6FC] dark:hover:bg-slate-700 border border-[#D0DFEE] dark:border-slate-700'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
@@ -408,15 +408,17 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
                 onClick={() => setActivePriority(activePriority === 'P1_CRITICAL' ? 'ALL' : 'P1_CRITICAL')}
                 className={`px-2.5 py-1 text-xs font-bold rounded-[4px] transition-all flex items-center gap-1.5 cursor-pointer ${
                   activePriority === 'P1_CRITICAL'
-                    ? 'bg-[#FEE2E2] text-[#991B1B] border border-[#FCA5A5]'
-                    : 'bg-[#F8FAFC] text-slate-600 hover:bg-slate-200 border border-[#D0DFEE]'
+                    ? 'bg-[#DC2626] dark:bg-red-800 text-white border border-[#DC2626] dark:border-red-800 shadow-xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#FEF2F2] dark:hover:bg-slate-700 border border-[#D0DFEE] dark:border-slate-700'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#DC2626] animate-pulse" />
+                <span className={`w-1.5 h-1.5 rounded-full ${activePriority === 'P1_CRITICAL' ? 'bg-white' : 'bg-red-500 animate-pulse'}`} />
                 <span>P1 Critical Only</span>
                 <span
-                  className="px-1 text-[10px] font-mono bg-[#FEE2E2] text-[#991B1B] rounded-[4px]"
+                  className={`px-1 text-[10px] font-mono rounded-[4px] ${
+                    activePriority === 'P1_CRITICAL' ? 'bg-white/25 text-white' : 'bg-[#FEE2E2] dark:bg-red-950/80 text-[#991B1B] dark:text-red-300'
+                  }`}
                   style={{ borderRadius: '4px' }}
                 >
                   {counts.p1}
@@ -429,14 +431,14 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
         {/* Co-Location Joint Block Opportunity Callout Banner */}
         {hasUnsanctionedCoLocation && (
           <div
-            className="p-3 bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] rounded-[4px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
+            className="p-3.5 bg-[#FFFBEB] dark:bg-[#78350F]/20 border border-[#FCD34D] dark:border-[#B45309] rounded-[4px] flex flex-row items-center justify-between gap-3 shadow-xs flex-wrap"
             style={{ borderRadius: '4px' }}
           >
-            <div className="flex items-center gap-2.5 text-xs">
-              <span className="text-base shrink-0">⚡</span>
-              <div>
-                <strong>Joint Bundling Opportunity:</strong> 3 Requisitions share Track Circuit{' '}
-                <strong className="font-mono bg-[#FEF3C7] px-1 py-0.5 rounded-[4px] border border-[#FCD34D]">
+            <div className="flex flex-row items-center gap-2.5 text-xs flex-1 min-w-[280px]">
+              <span className="text-lg text-amber-600 shrink-0" aria-hidden="true">⚡</span>
+              <div className="leading-relaxed text-[#92400E] dark:text-[#FDE68A]">
+                <strong className="text-[#78350F] dark:text-amber-300 font-bold">Joint Bundling Opportunity:</strong> 3 Requisitions share Track Circuit{' '}
+                <strong className="font-mono bg-[#FEF3C7] dark:bg-[#78350F]/60 text-[#78350F] dark:text-amber-200 px-1.5 py-0.5 rounded-[4px] border border-[#FCD34D] dark:border-[#B45309] whitespace-nowrap font-bold">
                   TC-03 (UP_SLOW)
                 </strong>
                 . CP-SAT bundling prevents separate possessions and saves 195 min downtime.
@@ -445,7 +447,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
             <button
               type="button"
               onClick={() => setIsJointModalOpen(true)}
-              className="px-3 py-1.5 bg-[#D97706] hover:bg-[#B45309] text-white text-xs font-bold rounded-[4px] transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+              className="px-3.5 py-1.5 bg-[#D97706] hover:bg-[#B45309] active:bg-[#92400E] text-white text-xs font-bold rounded-[4px] transition-all shadow-xs flex flex-row items-center gap-1.5 shrink-0 cursor-pointer border border-[#B45309] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2B7FFF]"
               style={{ borderRadius: '4px' }}
             >
               <span>⚡</span>
@@ -455,7 +457,7 @@ export const IncidentQueue: React.FC<IncidentQueueProps> = ({
         )}
 
         {/* Demand Rows Container */}
-        <div className="border border-[#D0DFEE] rounded-[4px] overflow-hidden bg-white divide-y divide-[#D0DFEE]" style={{ borderRadius: '4px' }}>
+        <div className="border border-[#D0DFEE] dark:border-slate-800 rounded-[4px] overflow-hidden bg-white dark:bg-[#0B132B] divide-y divide-[#D0DFEE] dark:divide-slate-800" style={{ borderRadius: '4px' }}>
           {filteredDemands.length === 0 ? (
             <div className="py-12 px-4 text-center bg-[#F0F6FC]">
               <div className="text-3xl mb-2">📭</div>
