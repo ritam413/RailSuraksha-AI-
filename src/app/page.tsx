@@ -14,7 +14,9 @@ import { DecisionLogModal } from '@/components/Auditor/DecisionLogModal';
 import { AuditorWorkspace } from '@/components/Auditor/AuditorWorkspace';
 import { DefectVisionTelemetry } from '@/components/Vision/DefectVisionTelemetry';
 import { PlatformGatewayFeed } from '@/components/PlatformGatewayFeed';
+import { GroundCheckinPortal } from '@/components/Field/GroundCheckinPortal';
 import { BlockRequisitionModal } from '@/components/Requisition/BlockRequisitionModal';
+import { useTheme } from '@/context/ThemeContext';
 import {
   DeploymentMode,
   EbdCalculationResult,
@@ -65,7 +67,6 @@ export default function CommandCenterPage() {
   const [selectedTrackId, setSelectedTrackId] = useState<string>('TC-03');
   const [selectedBlockId, setSelectedBlockId] = useState<string>('JB-2026-0926-01');
   const [actionNotice, setActionNotice] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Peripheral Analytics Drawer State
   const [analyticsTab, setAnalyticsTab] = useState<'COLLAPSED' | 'TRIAGE_DONUT' | 'DECEL_CURVE'>('TRIAGE_DONUT');
@@ -73,16 +74,8 @@ export default function CommandCenterPage() {
   // Track Circuits State (with live mutation support for sanctioning)
   const [circuits, setCircuits] = useState<TrackCircuitState[]>(MOCK_TRACK_CIRCUITS);
 
-  // Theme Persistence
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem('railsuraksha-theme');
-    setIsDarkMode(savedTheme === 'dark');
-  }, []);
-
-  useEffect(() => {
-    document.body.classList.toggle('theme-dark', isDarkMode);
-    window.localStorage.setItem('railsuraksha-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
+  // Global Theme Context
+  const { isDarkMode, toggleTheme } = useTheme();
 
   // Tactical Scenario, Weather & Sensor Pipeline State
   const [currentScenario, setCurrentScenario] = useState<TacticalScenario>(SCENARIOS.BOULDER_CRITICAL);
@@ -498,7 +491,7 @@ export default function CommandCenterPage() {
         deploymentMode={deploymentMode}
         onModeToggle={setDeploymentMode}
         isDarkMode={isDarkMode}
-        onThemeToggle={() => setIsDarkMode((value) => !value)}
+        onThemeToggle={toggleTheme}
         onRequestBlock={() => setIsRequisitionOpen(true)}
       />
 
@@ -544,8 +537,8 @@ export default function CommandCenterPage() {
                 </div>
                 <div>
                   <div className="flex items-center space-x-2">
-                    <h4 className="text-xs font-bold text-[#0F172A]">Direct Departmental Requisition Portal</h4>
-                    <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.2" style={{ borderRadius: '4px' }}>
+                    <h4 className="text-xs font-bold text-[#0F172A] dark:text-[#e2e3e9]">Direct Departmental Requisition Portal</h4>
+                    <span className="text-[9px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-400/40 dark:border-amber-500/40 px-2 py-0.5 rounded-[4px] shadow-xs">
                       Auto-BDMS Live
                     </span>
                   </div>
@@ -750,6 +743,13 @@ export default function CommandCenterPage() {
         {activeTab === 'PLATFORM_GATEWAY' && (
           <div>
             <PlatformGatewayFeed />
+          </div>
+        )}
+
+        {/* SCREEN 5: GROUND CHECK-IN & ANTI-GHOST BLOCK VERIFICATION */}
+        {activeTab === 'FIELD_CHECKIN' && (
+          <div>
+            <GroundCheckinPortal />
           </div>
         )}
       </main>

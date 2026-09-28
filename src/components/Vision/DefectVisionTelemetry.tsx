@@ -3,7 +3,8 @@ import dynamic from 'next/dynamic';
 import { Card } from '../Common/Card';
 import { WeatherCondition, DepartmentCode } from '@/types/apiContracts';
 import { calculateKavachEbd, getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
-import { getAudioContext, playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
+import { calculateEbd, executeBrakeCommand } from '@/lib/apiClient';
+import { getAudioContext, playCabEmergencyAlarm, playActionConfirmedChime, playPneumaticBrakeSound } from '@/lib/audioAlerts';
 
 const RailFlawHologram3D = dynamic(() => import('@/components/Three/RailFlawHologram3D'), {
   ssr: false,
@@ -279,21 +280,46 @@ export const DefectVisionTelemetry: React.FC = () => {
     }
   };
 
-  // Continuous Kinematic Deceleration Loop
+  // Continuous Kinematic Deceleration Loop with live FastAPI Backend EBD Trigger
   /**
-   * Reduce simulated speed by 6 km/h every 200 ms down to the scenario TSR limit.
-   * Do nothing at or below that limit; otherwise sound caution and update brake
-   * pressure and completion feedback.
-   *
-   * @throws Audio initialization errors propagated by the caution chime.
+   * Dispatches RDSO EBD calculation and brake command to FastAPI backend,
+   * synthesizes pneumatic exhaust and supervisory alert audio, and executes
+   * realistic physics-based deceleration down to the TSR ceiling.
    */
-  const handleSimulateBraking = () => {
+  const handleSimulateBraking = async () => {
     if (currentSpeed <= selectedScenario.tsrSpeedKmh) return;
 
     activeBrakingScenarioRef.current = selectedScenario.id;
     setIsDecelerating(true);
     setBrakePressure(3.8);
+    playPneumaticBrakeSound();
     playCautionChime();
+
+    // 1. Dispatch live backend API requests to /braking/calculate-ebd and /braking/execute-command
+    try {
+      const [backendEbd, cmdRes] = await Promise.all([
+        calculateEbd({
+          trainId: 'WAP-7 #30412',
+          velocityKmh: currentSpeed,
+          obstacleDistanceMeters: selectedScenario.targetDistanceMeters,
+          coefficientFriction: weatherParams.frictionCoefficient,
+          trackGradientPercent: 0.2,
+          reactionTimeSeconds: 1.2
+        }),
+        executeBrakeCommand({
+          incidentId: selectedScenario.id,
+          locoId: 'WAP-7-30412',
+          mode: 'AUTONOMOUS',
+          confirmedBy: 'LOCO_PILOT'
+        })
+      ]);
+
+      setNotification(
+        `⚡ Kavach RDSO Solenoid Command [${cmdRes.commandId}]: Req Decel ${backendEbd.requiredDecelerationMs2} m/s² | Stopping Dist: ${backendEbd.calculatedStoppingDistanceMeters}m (FastAPI 200 OK)`
+      );
+    } catch {
+      setNotification(`⚡ Kavach Local Fallback Solenoid Actuated: Decelerating to TSR ${selectedScenario.tsrSpeedKmh} km/h`);
+    }
 
     if (decelTimerRef.current) clearInterval(decelTimerRef.current);
 
@@ -617,6 +643,8 @@ export const DefectVisionTelemetry: React.FC = () => {
                   <KavachCabRun3D
                     currentSpeed={currentSpeed}
                     targetTsrSpeed={selectedScenario.tsrSpeedKmh}
+                    initialDistanceMeters={selectedScenario.targetDistanceMeters}
+                    weatherCondition={weatherCondition}
                     onBrakingComplete={() => {
                       setCurrentSpeed(selectedScenario.tsrSpeedKmh);
                       setIsDecelerating(false);
@@ -711,7 +739,7 @@ export const DefectVisionTelemetry: React.FC = () => {
           <Card
             title="3. TDMS Pantograph Cam & Joint Shadow Block Cam"
             action={
-              <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-mono font-bold border border-amber-300 rounded">
+              <span className="px-2 py-0.5 bg-amber-500/15 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 text-[10px] font-mono font-bold border border-amber-400/40 dark:border-amber-500/40 rounded">
                 DE-ENERGIZED
               </span>
             }
@@ -735,9 +763,9 @@ export const DefectVisionTelemetry: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center text-xs font-mono text-slate-600 bg-[#F0F6FC] p-2.5 border border-[#D0DFEE] rounded">
-                <span>Permit to Work: <strong className="text-[#0F172A]">PTW-TRD-0906-88</strong></span>
-                <span className="text-emerald-700 font-bold">10m Earthing Buffer Active</span>
+              <div className="flex justify-between items-center text-xs font-mono text-slate-600 dark:text-[#9194a1] bg-[#F0F6FC] dark:bg-[#121317] p-2.5 border border-[#D0DFEE] dark:border-[#1c1d22] rounded">
+                <span>Permit to Work: <strong className="text-[#0F172A] dark:text-[#e2e3e9]">PTW-TRD-0906-88</strong></span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">10m Earthing Buffer Active</span>
               </div>
             </div>
           </Card>
@@ -748,39 +776,49 @@ export const DefectVisionTelemetry: React.FC = () => {
           <Card
             title="4. RDSO Cab Alarm Synthesizer"
             action={
-              <span className="px-2 py-0.5 bg-[#E6F0FA] text-[#2B7FFF] text-[10px] font-mono font-bold border border-[#D0DFEE] rounded">
+              <span className="px-2 py-0.5 bg-[#E6F0FA] dark:bg-blue-950/50 text-[#2B7FFF] dark:text-blue-400 text-[10px] font-mono font-bold border border-[#D0DFEE] dark:border-blue-500/30 rounded">
                 WEB AUDIO API
               </span>
             }
           >
             <div className="space-y-4">
-              <p className="text-xs text-slate-600 font-mono">
+              <p className="text-xs text-slate-600 dark:text-[#9194a1] font-mono">
                 Authentic RDSO-calibrated locomotive acoustic warning chimes:
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   onClick={playCautionChime}
-                  className="p-3.5 bg-amber-50/70 hover:bg-amber-100 border border-amber-300 text-left transition-all shadow-xs"
+                  className="p-3.5 bg-amber-500/10 hover:bg-amber-500/20 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 border border-amber-400/40 dark:border-amber-500/40 text-left transition-all shadow-xs cursor-pointer group"
                   style={{ borderRadius: '8px' }}
                 >
-                  <div className="font-bold text-xs text-amber-950 font-mono">🔔 1200 Hz Caution Chime</div>
-                  <div className="text-[10px] text-amber-800 font-mono mt-1">300ms Sine Tone (TSR Approach)</div>
+                  <div className="font-bold text-xs text-amber-900 dark:text-amber-300 font-mono flex items-center gap-1.5">
+                    <span>🔔</span>
+                    <span>1200 Hz Caution Chime</span>
+                  </div>
+                  <div className="text-[10px] text-amber-700 dark:text-amber-400/80 font-mono mt-1">
+                    300ms Sine Tone (TSR Approach)
+                  </div>
                 </button>
 
                 <button
                   onClick={playEmergencyChime}
-                  className="p-3.5 bg-red-50/70 hover:bg-red-100 border border-red-300 text-left transition-all shadow-xs"
+                  className="p-3.5 bg-rose-500/10 hover:bg-rose-500/20 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 border border-rose-400/40 dark:border-rose-500/40 text-left transition-all shadow-xs cursor-pointer group"
                   style={{ borderRadius: '8px' }}
                 >
-                  <div className="font-bold text-xs text-red-950 font-mono">🚨 800 Hz Dual Alarm</div>
-                  <div className="text-[10px] text-red-800 font-mono mt-1">Emergency Brake Warning</div>
+                  <div className="font-bold text-xs text-rose-900 dark:text-rose-300 font-mono flex items-center gap-1.5">
+                    <span>🚨</span>
+                    <span>800 Hz Dual Alarm</span>
+                  </div>
+                  <div className="text-[10px] text-rose-700 dark:text-rose-400/80 font-mono mt-1">
+                    Emergency Brake Warning
+                  </div>
                 </button>
               </div>
 
-              <div className="pt-2 border-t border-[#D0DFEE] flex items-center justify-between text-xs font-mono text-slate-500">
-                <span>Synthesizer: <strong className="text-emerald-700">Online &amp; Calibrated</strong></span>
-                <span className="text-[10px] text-slate-400">RDSO/SPN/196 Ver 4.0</span>
+              <div className="pt-2 border-t border-[#D0DFEE] dark:border-[#1c1d22] flex items-center justify-between text-xs font-mono text-slate-500 dark:text-[#9194a1]">
+                <span>Synthesizer: <strong className="text-emerald-700 dark:text-emerald-400">Online &amp; Calibrated</strong></span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">RDSO/SPN/196 Ver 4.0</span>
               </div>
             </div>
           </Card>

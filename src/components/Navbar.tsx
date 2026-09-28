@@ -2,9 +2,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { DeploymentMode, HorizonTier } from '@/types/apiContracts';
 import { isAudioMuted, toggleAudioMute, subscribeAudioMute } from '@/lib/audioAlerts';
 import { checkBackendHealth } from '@/lib/apiClient';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { getPermittedTabsForRole } from '@/lib/rbac';
+import { RoleSwitcherDropdown } from '@/components/Auth/RoleSwitcherDropdown';
 
 export type NavbarTab =
   | 'CORRIDOR_PLANNER'
@@ -12,18 +18,19 @@ export type NavbarTab =
   | 'LOCO_CAB'
   | 'VISION_TELEMETRY'
   | 'AUDITOR_WORKSPACE'
+  | 'FIELD_CHECKIN'
   | 'PLATFORM_GATEWAY'
   | 'OVERVIEW';
 
 interface NavbarProps {
-  activeTab: NavbarTab;
-  onTabChange: (tab: NavbarTab) => void;
+  activeTab?: NavbarTab;
+  onTabChange?: (tab: NavbarTab) => void;
   horizon?: HorizonTier;
   onHorizonChange?: (horizon: HorizonTier) => void;
   deploymentMode: DeploymentMode;
   onModeToggle: (mode: DeploymentMode) => void;
-  isDarkMode: boolean;
-  onThemeToggle: () => void;
+  isDarkMode?: boolean;
+  onThemeToggle?: () => void;
   onRequestBlock?: () => void;
 }
 
@@ -33,13 +40,21 @@ const HORIZONS: { tier: HorizonTier; label: string }[] = [
   { tier: 'STRATEGIC_30D', label: '30D' }
 ];
 
+const NAV_ITEMS: { tab: NavbarTab; label: string; href: string }[] = [
+  { tab: 'CORRIDOR_PLANNER', label: '1. Corridor Planner', href: '/planner' },
+  { tab: 'INTERLOCKING', label: '2. Interlocking Map', href: '/interlocking' },
+  { tab: 'VISION_TELEMETRY', label: '3. Defect Vision & Telemetry', href: '/vision-telemetry' },
+  { tab: 'AUDITOR_WORKSPACE', label: '4. Auditor Workspace', href: '/auditor' },
+  { tab: 'FIELD_CHECKIN', label: '5. Field Check-In', href: '/field-checkin' }
+];
+
 /**
  * Render controlled view, horizon, theme, and deployment controls with an IST
  * clock and backend health indicator. Poll health every eight seconds and share
  * the global audio mute state; show block requisition access when a callback exists.
  */
 export const Navbar: React.FC<NavbarProps> = ({
-  activeTab,
+  activeTab = 'CORRIDOR_PLANNER',
   onTabChange,
   horizon = 'TACTICAL_24H',
   onHorizonChange,
@@ -52,6 +67,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [currentTime, setCurrentTime] = useState<string>('');
   const [backendOnline, setBackendOnline] = useState<boolean>(false);
   const [muted, setMuted] = useState<boolean>(false);
+  const pathname = usePathname();
+  const { role } = useAuth();
+  const { isDarkMode: globalDarkMode, toggleTheme: globalToggleTheme } = useTheme();
+
+  const effectiveDarkMode = isDarkMode !== undefined ? isDarkMode : globalDarkMode;
+  const handleThemeToggle = () => {
+    if (onThemeToggle) {
+      onThemeToggle();
+    } else {
+      globalToggleTheme();
+    }
+  };
 
   useEffect(() => {
     setMuted(isAudioMuted());
@@ -91,17 +118,30 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const isCorridorPlannerActive = activeTab === 'CORRIDOR_PLANNER' || activeTab === 'OVERVIEW';
-  const isVisionActive = activeTab === 'LOCO_CAB' || activeTab === 'VISION_TELEMETRY';
-  const isAuditorActive = activeTab === 'AUDITOR_WORKSPACE';
-  const isInterlockingActive = activeTab === 'INTERLOCKING';
+  const permittedTabs = getPermittedTabsForRole(role);
+  const visibleNavItems = NAV_ITEMS.filter((item) => permittedTabs.includes(item.tab));
+
+  const isTabActive = (itemTab: NavbarTab, itemHref: string) => {
+    const currentPath = pathname || '';
+    if (currentPath === itemHref || (currentPath && currentPath.startsWith(`${itemHref}/`))) {
+      return true;
+    }
+    if (itemTab === 'CORRIDOR_PLANNER' && (activeTab === 'CORRIDOR_PLANNER' || activeTab === 'OVERVIEW')) {
+      return currentPath === '' || currentPath === '/' || currentPath === '/planner' || !currentPath.startsWith('/');
+    }
+    if (itemTab === 'INTERLOCKING' && activeTab === 'INTERLOCKING') return true;
+    if (itemTab === 'VISION_TELEMETRY' && (activeTab === 'LOCO_CAB' || activeTab === 'VISION_TELEMETRY')) return true;
+    if (itemTab === 'AUDITOR_WORKSPACE' && activeTab === 'AUDITOR_WORKSPACE') return true;
+    if (itemTab === 'FIELD_CHECKIN' && activeTab === 'FIELD_CHECKIN') return true;
+    return activeTab === itemTab;
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#D0DFEE] px-3 sm:px-6 py-2 shadow-xs">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
         {/* Brand Title & Horizon Switcher */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <div
               className="w-7 h-7 bg-[#2B7FFF] flex items-center justify-center text-white font-black text-xs tracking-tighter shadow-sm"
               style={{ borderRadius: '4px' }}
@@ -119,7 +159,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* Rolling Horizon Switcher (24h / 7D / 30D) */}
           <div className="flex items-center space-x-0.5 bg-[#F0F6FC] p-0.5 border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
@@ -141,55 +181,29 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Tactical 4-Screen Switcher (Matching Screen 1 - 4 Mockups) */}
+        {/* Dynamic RBAC Tactical Screen Switcher */}
         <nav className="flex items-center space-x-1 bg-[#F0F6FC] p-1 border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
-          <button
-            onClick={() => onTabChange('CORRIDOR_PLANNER')}
-            className={`px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
-              isCorridorPlannerActive
-                ? 'bg-[#2B7FFF] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#0F172A] hover:bg-white/70'
-            }`}
-            style={{ borderRadius: '4px' }}
-          >
-            1. Corridor Planner
-          </button>
-          <button
-            onClick={() => onTabChange('INTERLOCKING')}
-            className={`px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
-              isInterlockingActive
-                ? 'bg-[#2B7FFF] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#0F172A] hover:bg-white/70'
-            }`}
-            style={{ borderRadius: '4px' }}
-          >
-            2. Interlocking Map
-          </button>
-          <button
-            onClick={() => onTabChange('VISION_TELEMETRY')}
-            className={`px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
-              isVisionActive
-                ? 'bg-[#2B7FFF] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#0F172A] hover:bg-white/70'
-            }`}
-            style={{ borderRadius: '4px' }}
-          >
-            3. Defect Vision &amp; Telemetry
-          </button>
-          <button
-            onClick={() => onTabChange('AUDITOR_WORKSPACE')}
-            className={`px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
-              isAuditorActive
-                ? 'bg-[#2B7FFF] text-white shadow-xs'
-                : 'text-slate-600 hover:text-[#0F172A] hover:bg-white/70'
-            }`}
-            style={{ borderRadius: '4px' }}
-          >
-            4. Auditor Workspace
-          </button>
+          {visibleNavItems.map((item) => {
+            const active = isTabActive(item.tab, item.href);
+            return (
+              <Link
+                key={item.tab}
+                href={item.href}
+                onClick={() => onTabChange && onTabChange(item.tab)}
+                className={`px-2.5 sm:px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all ${
+                  active
+                    ? 'bg-[#2B7FFF] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-[#0F172A] hover:bg-white/70'
+                }`}
+                style={{ borderRadius: '4px' }}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Telemetry Clock & Mode Toggle */}
+        {/* Telemetry Clock, Role Dropdown & Mode Toggle */}
         <div className="flex items-center space-x-2">
           <div className="hidden lg:flex items-center space-x-1.5 text-right border-r border-slate-200 px-1.5 pr-2.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -208,15 +222,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center space-x-1.5">
+            {/* 1-Click Role Switcher */}
+            <RoleSwitcherDropdown />
+
+            {/* Theme Toggle */}
             <button
-              onClick={onThemeToggle}
-              aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
-              aria-pressed={isDarkMode}
-              className="theme-toggle relative inline-flex h-6 w-12 items-center rounded-full border border-[#D0DFEE] bg-[#F0F6FC] p-0.5 transition-colors duration-500"
-              title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+              onClick={handleThemeToggle}
+              aria-label={`Switch to ${effectiveDarkMode ? 'light' : 'dark'} mode`}
+              aria-pressed={effectiveDarkMode}
+              className="theme-toggle relative inline-flex h-6 w-12 items-center rounded-full border border-[#D0DFEE] bg-[#F0F6FC] p-0.5 transition-colors duration-500 cursor-pointer"
+              title={`Switch to ${effectiveDarkMode ? 'light' : 'dark'} mode`}
             >
-              <span className={`theme-toggle-knob flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#2B7FFF] text-[9px] text-white shadow-sm transition-transform duration-500 ${isDarkMode ? 'translate-x-[22px]' : 'translate-x-0'}`}>
-                {isDarkMode ? '☾' : '☀'}
+              <span className={`theme-toggle-knob flex h-4.5 w-4.5 items-center justify-center rounded-full bg-[#2B7FFF] text-[9px] text-white shadow-sm transition-transform duration-500 ${effectiveDarkMode ? 'translate-x-[22px]' : 'translate-x-0'}`}>
+                {effectiveDarkMode ? '☾' : '☀'}
               </span>
             </button>
 

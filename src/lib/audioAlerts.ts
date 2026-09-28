@@ -140,3 +140,64 @@ export function playActionConfirmedChime(): void {
     console.warn('Audio confirmation playback suppressed:', err);
   }
 }
+
+/**
+ * Locomotive Pneumatic Air Brake Exhaust Discharge & Kavach TCAS Alert
+ */
+export function playPneumaticBrakeSound(): void {
+  if (isMuted) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const now = ctx.currentTime;
+    
+    // 1. Synthesize air exhaust hiss with noise buffer
+    const bufferSize = ctx.sampleRate * 0.8;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+
+    const whiteNoise = ctx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1800, now);
+    filter.frequency.exponentialRampToValueAtTime(600, now + 0.8);
+    filter.Q.setValueAtTime(3.0, now);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.08, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+    whiteNoise.connect(filter);
+    filter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+
+    whiteNoise.start(now);
+    whiteNoise.stop(now + 0.8);
+
+    // 2. Dual-tone Kavach electronic supervisory chime
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.setValueAtTime(950, now + 0.15);
+    osc.frequency.setValueAtTime(1200, now + 0.3);
+
+    oscGain.gain.setValueAtTime(0.06, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.5);
+  } catch (err) {
+    console.warn('Pneumatic brake audio suppressed:', err);
+  }
+}
+

@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useTransition, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Billboard, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { JointBlockSchedule, TrainScheduleSlot } from '@/types/apiContracts';
 
@@ -116,56 +116,38 @@ function MovingTrain({
         <meshBasicMaterial color={isBraking ? '#FBBF24' : '#E0F2FE'} />
       </mesh>
 
-      {/* Floating Spatial HUD Train Label */}
-      <Html
-        position={[0, 1.4, 0]}
-        center
-        distanceFactor={26}
-        zIndexRange={[100, 0]}
-        className="pointer-events-none select-none"
-      >
-        <div className="flex flex-col items-center">
-          <div
-            className={`px-2.5 py-0.5 rounded-[4px] backdrop-blur-md border text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-xl transition-all duration-300 ${
-              isBraking
-                ? 'bg-rose-950/90 border-rose-500/60 text-rose-200 shadow-rose-950/50'
-                : 'bg-slate-950/85 border-slate-700/60 text-slate-100 shadow-black/60'
-            }`}
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                isBraking
-                  ? 'bg-rose-500 animate-ping'
-                  : 'bg-emerald-400 shadow-[0_0_6px_#34D399]'
-              }`}
-            />
-            <span className="text-white font-semibold">{train.name}</span>
-            <span className="text-slate-500 font-normal">|</span>
-            <span
-              className={`text-[9px] font-mono ${
-                isBraking
-                  ? train.id === 'T2'
-                    ? 'text-rose-400 font-bold'
-                    : 'text-amber-300 font-bold'
-                  : 'text-emerald-300'
-              }`}
-            >
-              {isBraking
-                ? train.id === 'T2'
-                  ? '🛑 TCAS HOLD'
-                  : '⚠️ TSR 25 km/h'
-                : '110 km/h'}
-            </span>
-          </div>
-          {/* Subtle downward stem indicator */}
-          <div
-            className={`w-[1px] h-2 transition-colors ${
-              isBraking ? 'bg-rose-500/60' : 'bg-slate-600/60'
-            }`}
+      {/* Floating Spatial HUD Train Label (Native WebGL Billboard Text) */}
+      <Billboard position={[0, 1.4, 0]}>
+        {/* Badge Background Plate */}
+        <mesh position={[0, 0, -0.02]}>
+          <planeGeometry args={[3.2, 0.46]} />
+          <meshBasicMaterial
+            color={isBraking ? '#450a0a' : '#020617'}
+            transparent
+            opacity={0.88}
           />
-        </div>
-      </Html>
+        </mesh>
+        {/* Badge Outline */}
+        <lineSegments position={[0, 0, -0.01]}>
+          <edgesGeometry args={[new THREE.PlaneGeometry(3.2, 0.46)]} />
+          <lineBasicMaterial color={isBraking ? '#f43f5e' : '#38bdf8'} transparent opacity={0.7} />
+        </lineSegments>
+        {/* Status Indicator Dot */}
+        <mesh position={[-1.35, 0, 0]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshBasicMaterial color={isBraking ? '#ef4444' : '#10b981'} />
+        </mesh>
+        {/* Train Name & Speed Text */}
+        <Text
+          position={[0.1, 0, 0]}
+          fontSize={0.16}
+          color={isBraking ? (train.id === 'T2' ? '#fca5a5' : '#fde047') : '#ffffff'}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {`${train.name} | ${isBraking ? (train.id === 'T2' ? 'TCAS HOLD' : 'TSR 25 km/h') : '110 km/h'}`}
+        </Text>
+      </Billboard>
     </group>
   );
 }

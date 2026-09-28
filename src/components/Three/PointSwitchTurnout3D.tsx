@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useTransition, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Billboard, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 export type SignalAspectType = 'CLEAR' | 'CAUTION' | 'ATTENTION' | 'DANGER';
@@ -318,30 +318,35 @@ function SwitchTurnoutScene({
           <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
         </mesh>
 
-        {/* Floating Spatial HUD Train Label */}
+        {/* Floating Spatial HUD Train Label (Native WebGL Billboard Text) */}
         {isSimulatingTrain && (
-          <Html
-            position={[0, 1.7, 0]}
-            center
-            distanceFactor={22}
-            zIndexRange={[100, 0]}
-            className="pointer-events-none select-none"
-          >
-            <div className="flex flex-col items-center">
-              <div
-                className="px-2.5 py-0.5 rounded-[4px] backdrop-blur-md bg-slate-950/90 border border-cyan-500/50 text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-xl text-slate-100"
-                style={{ whiteSpace: 'nowrap' }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#38BDF8] animate-pulse" />
-                <span className="text-white font-semibold">WAP-7 #30412 (12345 Vande Bharat)</span>
-                <span className="text-slate-500 font-normal">|</span>
-                <span className="text-cyan-300 font-mono text-[9px]">
-                  {switchRoute === 'MAINLINE' ? 'MAINLINE (NORMAL)' : 'TURNOUT (PF 18)'}
-                </span>
-              </div>
-              <div className="w-[1px] h-2 bg-cyan-500/50" />
-            </div>
-          </Html>
+          <Billboard position={[0, 1.7, 0]}>
+            {/* Badge Background Plate */}
+            <mesh position={[0, 0, -0.02]}>
+              <planeGeometry args={[3.4, 0.46]} />
+              <meshBasicMaterial color="#020617" transparent opacity={0.9} />
+            </mesh>
+            {/* Badge Outline */}
+            <lineSegments position={[0, 0, -0.01]}>
+              <edgesGeometry args={[new THREE.PlaneGeometry(3.4, 0.46)]} />
+              <lineBasicMaterial color="#06b6d4" transparent opacity={0.7} />
+            </lineSegments>
+            {/* Status Indicator Dot */}
+            <mesh position={[-1.45, 0, 0]}>
+              <sphereGeometry args={[0.06, 8, 8]} />
+              <meshBasicMaterial color="#38bdf8" />
+            </mesh>
+            {/* Train Name & Route Text */}
+            <Text
+              position={[0.08, 0, 0]}
+              fontSize={0.14}
+              color="#e0f2fe"
+              anchorX="center"
+              anchorY="middle"
+            >
+              {`WAP-7 #30412 | ${switchRoute === 'MAINLINE' ? 'MAINLINE (NORMAL)' : 'TURNOUT (PF 18)'}`}
+            </Text>
+          </Billboard>
         )}
       </group>
     </group>
@@ -400,7 +405,7 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
             </span>
             <span className="text-slate-500 hidden sm:inline">|</span>
             <span className="text-slate-400 text-[11px] hidden sm:inline">
-              DADAR JUNCTION (1:12 TURNOUT)
+              DADAR JUNCTION {switchId} (1:12 TURNOUT)
             </span>
           </div>
         </div>
@@ -408,7 +413,7 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
         <div className="flex items-center gap-2 font-mono text-[11px] flex-wrap">
           {isLockedOut && (
             <span className="bg-red-950/90 border border-red-500/50 text-red-300 font-bold px-2 py-0.5 rounded-[4px] flex items-center gap-1 shadow-sm animate-pulse">
-              ⚠️ Form S&T/T-351 Lockout
+              ⚠️ Form S&T/T-351 Lockout Active
             </span>
           )}
           <span className="bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-[4px]">

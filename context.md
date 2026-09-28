@@ -17,16 +17,28 @@ It transforms decentralized, manual maintenance scheduling into a data-driven, c
 ## 4. Architecture & Tech Stack
 - **Architecture Style:** Hexagonal (Ports & Adapters) with externalized policy configuration.
 - **Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **Visualization & Charting:** Recharts (`ResponsiveContainer`, `AreaChart`, `ComposedChart`, `PieChart`, `ReferenceLine`)
-- **Styling:** Tailwind CSS v4 with Light-Blue Mintlify Design Tokens:
-  - Base Canvas (Surface 0): `#F0F6FC`
-  - Card/Panel Surface (Surface 1): `#FFFFFF` (1px border `#D0DFEE`)
-  - Elevated Tabs/Inputs (Surface 2): `#E6F0FA`
-  - Primary Accent: `#2B7FFF` (Signal Blue)
-  - Atmospheric Accent: `#426188` (Twilight Blue)
-  - Typography Primary: `#0F172A` (Ink Slate)
-  - Radii: 4px button/input, 16px card, 24px container (strictly 0 pill buttons)
-- **State Management & Agent Flow:** Modular pure TypeScript agents in `src/lib/agents/` communicating with React UI components.
+- **Typography Engine:**
+  - **Display / Editorial Serifs:** `Ivy Presto` / `Cormorant Garamond` (`--font-display` / `.font-display`) for hero titles and major section headings ($\ge 28\text{px}$) with hairline serifs and subtle positive tracking.
+  - **UI Sans:** `Inter` (`--font-sans` / `.font-sans`) for operational data, telemetry badges, tables, and nav links.
+- **Visualization & Charting:** Recharts (`ResponsiveContainer`, `AreaChart`, `ComposedChart`, `PieChart`, `ReferenceLine`) & Three.js WebGL 3D digital twins
+- **Styling & Design Tokens:** Tailwind CSS v4 with dual-mode luxury color token system:
+  - **Light Mode (Mintlify Clean Base):**
+    - Canvas: `#F0F6FC`
+    - Card: `#FFFFFF` (1px border `#D0DFEE`)
+    - Elevated: `#E6F0FA`
+    - Primary Accent: `#2B7FFF` (Signal Blue)
+    - Ink Slate Text: `#0F172A`
+  - **Dark Mode (Slash Luxury Obsidian System):**
+    - Canvas (Obsidian): `#08080a`
+    - Card Surface (Onyx): `#040406`
+    - Elevated Panels (Carbon): `#121317`
+    - Hairline Borders (Graphite / Slate / Smoke): `#1c1d22` / `#2e3038` / `#464853`
+    - Body Text (Bone / Silver / Fog / Ash): `#e2e3e9` / `#c7c9d1` / `#9194a1` / `#5e616e`
+    - High-Emphasis Heading / Active Fill: `#ffffff` (Paper White)
+    - Warm Curated Accent: `#cc9166` (Copper)
+    - Financial & Telemetry Accent: `#ae9357` (Gilded Gradient)
+  - **Radii:** 4px button/input, 16px card, 24px container (strictly 0 pill buttons).
+- **State Management & Agent Flow:** Modular pure TypeScript agents in `src/lib/agents/` communicating with React UI components via atomic `useSyncExternalStore` hooks.
 - **Contracts & Data:** Shared interface contracts in `src/types/apiContracts.ts` and static mock data generator in `src/lib/mockData.ts`.
 
 ## 5. Directory Structure
@@ -39,10 +51,32 @@ data/                                 # Grounded & scraped Indian Railways open 
 src/
 ├── app/
 │   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx                      # Main Command Center page
+│   ├── layout.tsx                    # Root layout with AuthProvider wrapper
+│   ├── page.tsx                      # Command Center master dashboard
+│   ├── login/                        # Dedicated Suspense-wrapped login & persona auth hub
+│   │   ├── page.tsx
+│   │   └── LoginClient.tsx
+│   ├── unauthorized/                 # Statutory RDSO access denial screen
+│   │   └── page.tsx
+│   ├── planner/                      # Screen 1: Corridor Planner & Joint Block Optimizer (CPTM)
+│   │   └── page.tsx
+│   ├── interlocking/                 # Screen 2: Section Interlocking & Signal Controller (Controller)
+│   │   └── page.tsx
+│   ├── vision-telemetry/             # Screen 3: Loco Cab Forward Vision & TCAS Telemetry (Loco Pilot)
+│   │   └── page.tsx
+│   ├── auditor/                      # Screen 4: Statutory Safety Auditor & CRS Form 14B (Auditor)
+│   │   └── page.tsx
+│   └── field-checkin/                # Screen 5: Ground Crew Execution & Anti-Ghost Verification (SSE Field)
+│       └── page.tsx
+├── context/
+│   └── AuthContext.tsx               # React 19 useSyncExternalStore RBAC auth engine
 ├── components/
-│   ├── Navbar.tsx                    # Top navigation & Advisory/Autonomous switcher
+│   ├── Navbar.tsx                    # Top navigation with dynamic RBAC tab filtering
+│   ├── Auth/
+│   │   ├── ProtectedRoute.tsx        # Client-side RDSO statutory route guard
+│   │   └── RoleSwitcherDropdown.tsx  # 1-click persona switcher dropdown
+│   ├── Field/
+│   │   └── GroundCheckinPortal.tsx   # GPS Geofence, YOLOv11 PPE, 25kV OHE validation
 │   ├── LocoCameraFeed.tsx            # Forward loco cab video & hazard overlay
 │   ├── AgentPipelineCanvas.tsx       # 4-stage Kavach execution pipeline visualizer
 │   ├── PlatformGatewayFeed.tsx       # View 3 Platform CCTV crowd surge monitor
@@ -62,7 +96,8 @@ src/
 │   └── Requisition/
 │       └── BlockRequisitionModal.tsx # Direct TDMS/SMMS/TMS online block requisition portal
 ├── lib/
-│   ├── apiClient.ts                  # Type-safe API client connecting to FastAPI port 8000
+│   ├── rbac.ts                       # RBAC permission matrix, officer personas, route matchers
+│   ├── apiClient.ts                  # Type-safe API client with X-User-Role / X-Employee-ID headers
 │   ├── audioAlerts.ts                # Web Audio API synthesizer for RDSO cab alarms & chimes
 │   ├── agents/
 │   │   ├── kavachBrakingAgent.ts     # RDSO Emergency Braking Distance physics (with weather friction factors)
@@ -73,7 +108,7 @@ src/
 │   ├── physics/                      # Physics calculation helpers
 │   └── vision/                       # Computer vision inference helpers
 └── types/
-    └── apiContracts.ts               # Shared TypeScript interfaces & types (weather, sensor angles, contracts)
+    └── apiContracts.ts               # Shared TypeScript interfaces & types (AppRole, UserProfile, contracts)
 ```
 
 ## 6. Key Rules & Constraints
