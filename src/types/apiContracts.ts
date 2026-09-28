@@ -14,6 +14,26 @@ export type CircuitOperationalStatus = 'CLEAR' | 'OCCUPIED' | 'MAINTENANCE_SLOTT
 export type SignalAspect = 'RED' | 'YELLOW' | 'DOUBLE_YELLOW' | 'GREEN';
 export type TrainClassification = 'PREMIUM_PASSENGER' | 'EXPRESS' | 'SUBURBAN' | 'FREIGHT';
 
+export type AppRole =
+  | 'CORRIDOR_PLANNER'
+  | 'SECTION_CONTROLLER'
+  | 'LOCO_PILOT'
+  | 'SAFETY_AUDITOR'
+  | 'FIELD_WORKER'
+  | 'ADMIN';
+
+export interface UserProfile {
+  id: string;
+  employeeId: string;
+  fullName: string;
+  designation: string;
+  role: AppRole;
+  department: string;
+  division: string;
+  stationOrSection: string;
+  badgeCode: string;
+}
+
 // 2. Configurable Divisional Policy Profile
 export interface DivisionalPolicyProfile {
   divisionId: string;

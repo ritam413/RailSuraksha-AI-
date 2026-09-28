@@ -225,32 +225,32 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
       }}
     >
       <div
-        className="bg-white border border-[#D0DFEE] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white dark:bg-[#0c0d12] border border-[#D0DFEE] dark:border-[#1c1d22] w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"
         style={{ borderRadius: '24px' }}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-[#D0DFEE] flex items-center justify-between bg-[#F0F6FC]">
+        <div className="p-5 border-b border-[#D0DFEE] dark:border-[#1c1d22] flex items-center justify-between bg-[#F0F6FC] dark:bg-[#121317]">
           <div>
             <div className="flex items-center space-x-2.5">
               <span className="text-xl">📋</span>
-              <h2 id="modal-headline" className="text-base font-bold text-[#0F172A] tracking-tight">
+              <h2 id="modal-headline" className="text-base font-bold text-[#0F172A] dark:text-[#e2e3e9] tracking-tight">
                 RDSO Explainable Decision Dossier & Compliance Auditor
               </h2>
               <span
-                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"
+                className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60"
                 style={{ borderRadius: '4px' }}
               >
                 RDSO/SPN/196 CERTIFIED
               </span>
             </div>
-            <p className="text-xs text-slate-600 font-mono mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-0.5">
               Dossier #{activeDossier.dossierId} | Block #{activeDossier.blockId} ({activeDossier.sanctionedBy})
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="w-8 h-8 bg-slate-200 text-slate-600 font-bold hover:bg-slate-300 active:scale-95 flex items-center justify-center text-sm transition-all"
+            className="w-8 h-8 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 flex items-center justify-center text-sm transition-all cursor-pointer"
             style={{ borderRadius: '4px' }}
           >
             ✕
@@ -258,19 +258,19 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
         </div>
 
         {/* Dossier Archive Selector Tab Strip */}
-        <div className="bg-white px-5 py-2.5 border-b border-[#D0DFEE] flex items-center justify-between gap-2 overflow-x-auto">
+        <div className="bg-white dark:bg-[#0c0d12] px-5 py-2.5 border-b border-[#D0DFEE] dark:border-[#1c1d22] flex items-center justify-between gap-2 overflow-x-auto">
           <div className="flex items-center space-x-1.5">
-            <span className="text-[11px] font-bold text-slate-600 uppercase font-mono tracking-wider">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase font-mono tracking-wider">
               Dossier Archive:
             </span>
             {ARCHIVE_BLOCKS.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleSwitchArchive(item)}
-                className={`px-2.5 py-1 text-xs font-mono font-semibold border transition-all ${
+                className={`px-2.5 py-1 text-xs font-mono font-semibold border transition-all cursor-pointer ${
                   selectedArchiveId === item.id
                     ? 'bg-[#2B7FFF] text-white border-[#2B7FFF] shadow-xs'
-                    : 'bg-[#F0F6FC] text-slate-700 border-[#D0DFEE] hover:bg-white'
+                    : 'bg-[#F0F6FC] dark:bg-[#121317] text-slate-700 dark:text-slate-300 border-[#D0DFEE] dark:border-[#1c1d22] hover:bg-white dark:hover:bg-[#1a1c24]'
                 }`}
                 style={{ borderRadius: '4px' }}
               >
@@ -280,11 +280,11 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
           </div>
 
           {/* View Tab Switcher */}
-          <div className="flex space-x-1 p-0.5 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '4px' }}>
+          <div className="flex space-x-1 p-0.5 bg-[#F0F6FC] dark:bg-[#121317] border border-[#D0DFEE] dark:border-[#1c1d22]" style={{ borderRadius: '4px' }}>
             <button
               onClick={() => setActiveTab('TIMELINE')}
-              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all ${
-                activeTab === 'TIMELINE' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all cursor-pointer ${
+                activeTab === 'TIMELINE' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               style={{ borderRadius: '4px' }}
             >
@@ -292,8 +292,8 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('FORM_14B')}
-              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all ${
-                activeTab === 'FORM_14B' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all cursor-pointer ${
+                activeTab === 'FORM_14B' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               style={{ borderRadius: '4px' }}
             >
@@ -301,8 +301,8 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('RAW_JSON')}
-              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all ${
-                activeTab === 'RAW_JSON' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-2.5 py-1 text-xs font-semibold font-mono transition-all cursor-pointer ${
+                activeTab === 'RAW_JSON' ? 'bg-[#2B7FFF] text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               style={{ borderRadius: '4px' }}
             >
@@ -365,12 +365,12 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
           {/* TAB 1: 4-Step Chronological Audit Timeline */}
           {activeTab === 'TIMELINE' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-1 border-b border-[#D0DFEE]">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono">
+              <div className="flex items-center justify-between pb-1 border-b border-[#D0DFEE] dark:border-[#1c1d22]">
+                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-mono">
                   Chronological AI Optimization & Sanction Sequence
                 </h3>
-                <span className="text-[11px] font-mono text-slate-500">
-                  Corridor Headway Saved: <strong className="text-emerald-700">85 mins (38.4%)</strong>
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  Corridor Headway Saved: <strong className="text-emerald-700 dark:text-emerald-400">85 mins (38.4%)</strong>
                 </span>
               </div>
 
@@ -387,18 +387,18 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                         {step.stepNumber}
                       </div>
                       {step.stepNumber < activeDossier.chronologicalTimeline.length && (
-                        <div className="w-0.5 flex-1 bg-[#D0DFEE] my-1" />
+                        <div className="w-0.5 flex-1 bg-[#D0DFEE] dark:bg-[#1c1d22] my-1" />
                       )}
                     </div>
 
                     {/* Step Card */}
                     <div
-                      className="flex-1 bg-[#F0F6FC] border border-[#D0DFEE] p-4 shadow-2xs transition-all hover:bg-[#EAF2FB]"
+                      className="flex-1 bg-[#F0F6FC] dark:bg-[#0c0d12] border border-[#D0DFEE] dark:border-[#1c1d22] p-4 shadow-2xs transition-all hover:bg-[#EAF2FB] dark:hover:bg-[#121317]"
                       style={{ borderRadius: '12px' }}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-sm font-bold text-[#0F172A]">{step.title}</h4>
-                        <span className="text-[10px] font-mono text-slate-500 font-medium">
+                        <h4 className="text-sm font-bold text-[#0F172A] dark:text-white">{step.title}</h4>
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-medium">
                           {step.timestamp}
                         </span>
                       </div>
@@ -409,12 +409,12 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
                         >
                           {step.agentName}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                           Stage: {step.stageName}
                         </span>
                       </div>
                       <p
-                        className="text-xs text-slate-800 leading-relaxed font-mono bg-white/80 p-2.5 border border-[#D0DFEE]"
+                        className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-mono bg-white/80 dark:bg-[#121317] p-2.5 border border-[#D0DFEE] dark:border-[#1c1d22]"
                         style={{ borderRadius: '4px' }}
                       >
                         {step.description}
@@ -426,28 +426,28 @@ export const DecisionLogModal: React.FC<DecisionLogModalProps> = ({
 
               {/* Statutory Forms Summary Box */}
               <div
-                className="p-4 bg-white border border-[#D0DFEE] font-mono text-xs text-slate-700 shadow-2xs"
+                className="p-4 bg-white dark:bg-[#0c0d12] border border-[#D0DFEE] dark:border-[#1c1d22] font-mono text-xs text-slate-700 dark:text-slate-300 shadow-2xs"
                 style={{ borderRadius: '12px' }}
               >
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200">
-                  <div className="font-bold text-[#0F172A]">STATUTORY REGULATORY PERMITS & SANCTIONS</div>
-                  <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-bold border border-emerald-300">
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200 dark:border-[#1c1d22]">
+                  <div className="font-bold text-[#0F172A] dark:text-[#e2e3e9]">STATUTORY REGULATORY PERMITS & SANCTIONS</div>
+                  <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded font-bold border border-emerald-300 dark:border-emerald-700/60">
                     SANCTIONED & LOCKED
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
-                  <div className="p-2 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '6px' }}>
-                    <div className="text-slate-500 text-[10px]">FORM S&T/T-351:</div>
-                    <div className="font-bold text-[#0F172A] mt-0.5">{activeDossier.statutoryForms.formST351LockoutNumber}</div>
-                    <div className="text-[10px] text-slate-600 mt-0.5">Signal S-12 Clamped RED</div>
+                  <div className="p-2 bg-[#F0F6FC] dark:bg-[#121317] border border-[#D0DFEE] dark:border-[#1c1d22]" style={{ borderRadius: '6px' }}>
+                    <div className="text-slate-500 dark:text-slate-400 text-[10px]">FORM S&T/T-351:</div>
+                    <div className="font-bold text-[#0F172A] dark:text-white mt-0.5">{activeDossier.statutoryForms.formST351LockoutNumber}</div>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Signal S-12 Clamped RED</div>
                   </div>
-                  <div className="p-2 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '6px' }}>
-                    <div className="text-slate-500 text-[10px]">FORM T/409 CAUTION ORDER:</div>
-                    <div className="font-bold text-[#0F172A] mt-0.5">{activeDossier.statutoryForms.formT409CautionOrderNumber}</div>
-                    <div className="text-[10px] text-slate-600 mt-0.5">Kavach TSR 30 km/h Enforced</div>
+                  <div className="p-2 bg-[#F0F6FC] dark:bg-[#121317] border border-[#D0DFEE] dark:border-[#1c1d22]" style={{ borderRadius: '6px' }}>
+                    <div className="text-slate-500 dark:text-slate-400 text-[10px]">FORM T/409 CAUTION ORDER:</div>
+                    <div className="font-bold text-[#0F172A] dark:text-white mt-0.5">{activeDossier.statutoryForms.formT409CautionOrderNumber}</div>
+                    <div className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Kavach TSR 30 km/h Enforced</div>
                   </div>
-                  <div className="p-2 bg-[#F0F6FC] border border-[#D0DFEE]" style={{ borderRadius: '6px' }}>
-                    <div className="text-slate-500 text-[10px]">RDSO FORM 14B CERTIFICATE:</div>
+                  <div className="p-2 bg-[#F0F6FC] dark:bg-[#121317] border border-[#D0DFEE] dark:border-[#1c1d22]" style={{ borderRadius: '6px' }}>
+                    <div className="text-slate-500 dark:text-slate-400 text-[10px]">RDSO FORM 14B CERTIFICATE:</div>
                     <div className="font-bold text-[#0F172A] mt-0.5">VERIFIED TAMPER-FREE</div>
                     <div className="text-[10px] text-slate-600 mt-0.5">SHA-256 Digest Confirmed</div>
                   </div>

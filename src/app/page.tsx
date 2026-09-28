@@ -1,378 +1,169 @@
 // src/app/page.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Navbar } from '@/components/Navbar';
-import { KpiStrip } from '@/components/Overview/KpiStrip';
-import { InterlockingMap } from '@/components/Overview/InterlockingMap';
-import { IncidentQueue } from '@/components/Overview/IncidentQueue';
-import { LocoCameraFeed, SCENARIOS, TacticalScenario } from '@/components/LocoCameraFeed';
-import { AgentPipelineCanvas } from '@/components/AgentPipelineCanvas';
-import { DecisionLogModal } from '@/components/Auditor/DecisionLogModal';
-import { PlatformGatewayFeed } from '@/components/PlatformGatewayFeed';
-import { DeploymentMode, EbdCalculationResult, IncidentRecord, ExplainableDecisionLog, WeatherCondition, TacticalCameraAngle } from '@/types/apiContracts';
-import { calculateEbd, reviewIncidentAction } from '@/lib/apiClient';
-import { calculateKavachEbd, getWeatherFrictionParams } from '@/lib/agents/kavachBrakingAgent';
-import { buildExplainableDecisionLog } from '@/lib/agents/explainableLogger';
-import { MOCK_DECISION_LOG } from '@/lib/mockData';
-import { playCabEmergencyAlarm, playActionConfirmedChime } from '@/lib/audioAlerts';
+import React, { useRef } from 'react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { LandingNavbar } from '@/components/Landing/LandingNavbar';
+import { LandingFooter } from '@/components/Landing/LandingFooter';
+import { ShadowBlockComparison } from '@/components/Landing/ShadowBlockComparison';
+import { MultiDeptSynergyMatrix } from '@/components/Landing/MultiDeptSynergyMatrix';
 
-export default function CommandCenterPage() {
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'LOCO_CAB' | 'PLATFORM_GATEWAY'>('OVERVIEW');
-  const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('ADVISORY');
-  const [isDecisionLogOpen, setIsDecisionLogOpen] = useState(false);
-  const [currentDecisionLog, setCurrentDecisionLog] = useState<ExplainableDecisionLog>(MOCK_DECISION_LOG);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string>('RS-2048');
-  const [selectedTrackId, setSelectedTrackId] = useState<string>('BLK-101');
-  const [actionNotice, setActionNotice] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem('railsuraksha-theme');
-    setIsDarkMode(savedTheme === 'dark');
-  }, []);
+// Dynamically import 3D Hero to prevent SSR WebGL hydration issues
+const ShadowBlockHero3D = dynamic(() => import('@/components/Landing/ShadowBlockHero3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[540px] lg:h-[620px] bg-[#08080a] rounded-[24px] border border-[#1c1d22] flex flex-col items-center justify-center text-cyan-400 font-mono text-xs gap-3">
+      <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+      <span>Initializing WebGL 3D Corridor Digital Twin...</span>
+    </div>
+  ),
+});
 
-  useEffect(() => {
-    document.body.classList.toggle('theme-dark', isDarkMode);
-    window.localStorage.setItem('railsuraksha-theme', isDarkMode ? 'dark' : 'light');
-  }, [isDarkMode]);
+export default function RootLandingPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Tactical Scenario, Weather & Sensor Pipeline State
-  const [currentScenario, setCurrentScenario] = useState<TacticalScenario>(SCENARIOS.BOULDER_CRITICAL);
-  const [weatherCondition, setWeatherCondition] = useState<WeatherCondition>('DRY');
-  const [cameraAngle, setCameraAngle] = useState<TacticalCameraAngle>('FORWARD_CAB');
-  const [activeStage, setActiveStage] = useState<number>(0);
-  const [isPipelineExecuting, setIsPipelineExecuting] = useState(false);
-  const [isAdvisoryApproved, setIsAdvisoryApproved] = useState(false);
-  const [brakeState, setBrakeState] = useState<'CLEAR' | 'EMERGENCY_SOLENOID_ACTUATED'>('CLEAR');
-  const [currentSpeedKmh, setCurrentSpeedKmh] = useState<number>(SCENARIOS.BOULDER_CRITICAL.initialSpeedKmh);
-  const [brakePressureBar, setBrakePressureBar] = useState<number>(0.0);
-  const [ebdResult, setEbdResult] = useState<EbdCalculationResult | null>(null);
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-  // Deceleration Animation Interval Ref
-  const decelIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Clear interval on unmount
-  useEffect(() => {
-    return () => {
-      if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-    };
-  }, []);
-
-  // Handle Scenario Selection
-  const handleSelectScenario = (scenario: TacticalScenario) => {
-    if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-    setCurrentScenario(scenario);
-    setActiveStage(0);
-    setIsPipelineExecuting(false);
-    setIsAdvisoryApproved(false);
-    setBrakeState('CLEAR');
-    setCurrentSpeedKmh(scenario.initialSpeedKmh);
-    setBrakePressureBar(0.0);
-    setEbdResult(null);
-  };
-
-  // Reset Simulation State
-  const handleResetSimulation = () => {
-    if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-    setActiveStage(0);
-    setIsPipelineExecuting(false);
-    setIsAdvisoryApproved(false);
-    setBrakeState('CLEAR');
-    setCurrentSpeedKmh(currentScenario.initialSpeedKmh);
-    setBrakePressureBar(0.0);
-    setEbdResult(null);
-  };
-
-  // Trigger Deceleration Kinematic Animation
-  const startDecelerationSequence = () => {
-    setBrakeState('EMERGENCY_SOLENOID_ACTUATED');
-    setBrakePressureBar(5.0);
-    playCabEmergencyAlarm(1.5);
-
-    if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-
-    decelIntervalRef.current = setInterval(() => {
-      setCurrentSpeedKmh((prev) => {
-        if (prev <= 0) {
-          if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-          return 0;
-        }
-        const next = Math.max(0, prev - 12);
-        if (next === 0) {
-          if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-        }
-        return next;
-      });
-    }, 150);
-  };
-
-  // Execute 4-Stage Kavach Pipeline
-  const handleRunPipeline = () => {
-    if (decelIntervalRef.current) clearInterval(decelIntervalRef.current);
-    setIsPipelineExecuting(true);
-    setIsAdvisoryApproved(false);
-    setBrakeState('CLEAR');
-    setCurrentSpeedKmh(currentScenario.initialSpeedKmh);
-    setBrakePressureBar(0.0);
-
-    // Sound cab alarm on hazard start
-    playCabEmergencyAlarm(0.8);
-
-    // Stage 1: YOLOv11 Vision Hazard Detection
-    setActiveStage(1);
-
-    // Stage 2: Telemetry Aggregation (after 400ms)
-    setTimeout(async () => {
-      setActiveStage(2);
-
-      // Stage 3: RDSO Physics Engine Computation (with weather friction factors)
-      setTimeout(async () => {
-        const weatherParams = getWeatherFrictionParams(weatherCondition);
-        let result: EbdCalculationResult;
-        try {
-          result = await calculateEbd({
-            trainId: currentScenario.trainId,
-            velocityKmh: currentScenario.initialSpeedKmh,
-            obstacleDistanceMeters: currentScenario.distanceMeters,
-            massTonnes: 1400,
-            coefficientFriction: weatherParams.frictionCoefficient,
-            trackGradientPercent: 0.2,
-            reactionTimeSeconds: 1.2 * weatherParams.reactionTimeMultiplier,
-          });
-        } catch {
-          result = calculateKavachEbd({
-            trainId: currentScenario.trainId,
-            velocityKmh: currentScenario.initialSpeedKmh,
-            obstacleDistanceMeters: currentScenario.distanceMeters,
-            weatherCondition: weatherCondition,
-            gradientPercent: 0.002,
-          });
-        }
-        setEbdResult(result);
-        setActiveStage(3);
-
-        // Generate dynamic decision log
-        const log = buildExplainableDecisionLog(
-          currentScenario.id === 'BOULDER_CRITICAL' ? 'RS-2048' : currentScenario.id === 'CATTLE_WARNING' ? 'RS-2051' : 'RS-2050',
-          currentScenario.trainId,
-          'Section 14B — Up Main Line',
-          deploymentMode,
-          currentScenario.hazardClass,
-          currentScenario.distanceMeters,
-          result.calculatedStoppingDistanceMeters
+      tl.from('.hero-badge', {
+        y: 15,
+        opacity: 0,
+        duration: 0.6,
+      })
+        .from(
+          '.hero-title',
+          {
+            y: 25,
+            opacity: 0,
+            duration: 0.8,
+          },
+          '-=0.3'
+        )
+        .from(
+          '.hero-subtext',
+          {
+            y: 20,
+            opacity: 0,
+            duration: 0.6,
+          },
+          '-=0.4'
+        )
+        .from(
+          '.hero-cta',
+          {
+            y: 15,
+            opacity: 0,
+            duration: 0.5,
+          },
+          '-=0.3'
+        )
+        .from(
+          '.hero-3d-box',
+          {
+            scale: 0.96,
+            opacity: 0,
+            duration: 1.0,
+            ease: 'expo.out',
+          },
+          '-=0.5'
         );
-        setCurrentDecisionLog(log);
-
-        // Stage 4: Actuation / Advisory Operator Gate (after 500ms)
-        setTimeout(() => {
-          setActiveStage(4);
-
-          if (deploymentMode === 'AUTONOMOUS') {
-            // Instant Autonomous Actuation
-            startDecelerationSequence();
-            setTimeout(() => {
-              setActiveStage(5);
-              setIsPipelineExecuting(false);
-              setTimeout(() => {
-                setIsDecisionLogOpen(true);
-              }, 1200);
-            }, 1000);
-          } else {
-            // Advisory Mode pauses at Stage 4 for operator click
-            setIsPipelineExecuting(false);
-          }
-        }, 500);
-      }, 500);
-    }, 400);
-  };
-
-  // Advisory Mode: Operator approves action at Stage 4
-  const handleApproveAdvisoryAction = () => {
-    playActionConfirmedChime();
-    setIsAdvisoryApproved(true);
-    startDecelerationSequence();
-    setTimeout(() => {
-      setActiveStage(5);
-      setTimeout(() => {
-        setIsDecisionLogOpen(true);
-      }, 1000);
-    }, 800);
-  };
-
-  // Incident Queue Selection Handler -> Switches view to appropriate feed
-  const handleSelectIncident = (incident: IncidentRecord) => {
-    setSelectedIncidentId(incident.incidentId);
-
-    if (incident.cameraType === 'LOCO_CAB') {
-      if (incident.boundingBoxes[0]?.class === 'BOULDER') {
-        handleSelectScenario(SCENARIOS.BOULDER_CRITICAL);
-      } else if (incident.boundingBoxes[0]?.class === 'CATTLE') {
-        handleSelectScenario(SCENARIOS.CATTLE_WARNING);
-      } else {
-        handleSelectScenario(SCENARIOS.FRACTURE_CRITICAL);
-      }
-      setActiveTab('LOCO_CAB');
-    } else if (incident.cameraType === 'PLATFORM_GATEWAY') {
-      setActiveTab('PLATFORM_GATEWAY');
-    }
-
-    const log = buildExplainableDecisionLog(
-      incident.incidentId,
-      incident.incidentId === 'RS-2048' ? '12345 (Vande Bharat)' : incident.incidentId === 'RS-2049' ? '12137 (Punjab Mail)' : '22691 (Rajdhani)',
-      incident.incidentId === 'RS-2049' ? 'CSMT Platform 17/18 Bottleneck' : 'Section 14B Up Main Line',
-      deploymentMode,
-      incident.boundingBoxes[0]?.class || 'BOULDER',
-      incident.boundingBoxes[0]?.estimatedDistanceMeters || 340,
-      410
-    );
-    setCurrentDecisionLog(log);
-  };
-
-  // Incident Queue Action Approval
-  const handleApproveIncidentAction = async (incidentId: string) => {
-    playActionConfirmedChime();
-    setSelectedIncidentId(incidentId);
-    setActionNotice(`Safety Action for Incident #${incidentId} approved by Section Controller OP-402.`);
-
-    // Dispatch approval to backend API (or fallback)
-    try {
-      await reviewIncidentAction(incidentId, 'APPROVE', 'OP-402');
-    } catch {
-      // Handled gracefully in client
-    }
-
-    const log = buildExplainableDecisionLog(
-      incidentId,
-      incidentId === 'RS-2048' ? '12345 (Vande Bharat)' : incidentId === 'RS-2049' ? '12137 (Punjab Mail)' : '22691 (Rajdhani)',
-      incidentId === 'RS-2049' ? 'CSMT Platform 17/18 Bottleneck' : 'Section 14B Up Main Line',
-      deploymentMode,
-      incidentId === 'RS-2049' ? 'CROWD_SURGE' : incidentId === 'RS-2050' ? 'RAIL_FRACTURE' : 'BOULDER',
-      incidentId === 'RS-2049' ? 15 : 340,
-      410
-    );
-    setCurrentDecisionLog(log);
-
-    setTimeout(() => {
-      setIsDecisionLogOpen(true);
-    }, 400);
-
-    setTimeout(() => {
-      setActionNotice(null);
-    }, 5000);
-  };
-
-  // Interlocking Diagram Track / Signal Interaction
-  const handleTrackSelect = (circuitId: string) => {
-    setSelectedTrackId(circuitId);
-    if (circuitId === 'BLK-104' || circuitId === 'BLK-105') {
-      setActiveTab('PLATFORM_GATEWAY');
-    } else if (circuitId === 'BLK-101') {
-      handleSelectScenario(SCENARIOS.BOULDER_CRITICAL);
-      setActiveTab('LOCO_CAB');
-    } else if (circuitId === 'BLK-103') {
-      handleSelectScenario(SCENARIOS.CATTLE_WARNING);
-      setActiveTab('LOCO_CAB');
-    }
-  };
+    },
+    { scope: containerRef }
+  );
 
   return (
-    <div className="min-h-screen bg-[#F0F6FC] flex flex-col">
-      {/* Global Navigation Header */}
-      <Navbar
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        deploymentMode={deploymentMode}
-        onModeToggle={setDeploymentMode}
-        isDarkMode={isDarkMode}
-        onThemeToggle={() => setIsDarkMode((value) => !value)}
-      />
+    <div ref={containerRef} className="min-h-screen bg-[#08080a] text-[#e2e3e9] selection:bg-blue-500/30">
+      {/* Sleek Top Navigation */}
+      <LandingNavbar />
 
-      {/* Action Notification Toast Banner */}
-      {actionNotice && (
-        <div className="max-w-7xl mx-auto w-full px-6 pt-3">
-          <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-lg flex items-center justify-between text-xs font-mono shadow-xs" style={{ borderRadius: '8px' }}>
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{actionNotice}</span>
-            </div>
-            <button
-              onClick={() => setActionNotice(null)}
-              className="text-emerald-700 hover:text-emerald-900 font-bold"
+      {/* Hero Section */}
+      <section className="relative pt-8 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-4xl mx-auto mb-10">
+          {/* Eyebrow */}
+          <div className="hero-badge inline-flex items-center gap-2 px-3 py-1 rounded-[6px] bg-[#121317] border border-[#1c1d22] text-[11px] font-mono text-amber-400 mb-5">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span>SIH-26027 • Autonomous Corridor Maintenance Intelligence</span>
+          </div>
+
+          {/* Headline (Max 2 lines, display font) */}
+          <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-display font-semibold tracking-tight text-[#e2e3e9] leading-[1.1]">
+            Autonomous Shadow Block Engine for Indian Railways
+          </h1>
+
+          {/* Subtext (<= 20 words for anti-slop punchiness) */}
+          <p className="hero-subtext text-base sm:text-lg text-[#9194a1] mt-4 max-w-xl mx-auto leading-relaxed">
+            Eliminate track maintenance congestion by bundling multi-department works into zero-delay corridor shadow windows.
+          </p>
+
+          {/* CTAs */}
+          <div className="hero-cta flex flex-wrap items-center justify-center gap-4 mt-7">
+            <Link
+              href="/admin"
+              className="px-6 py-3 rounded-[6px] bg-[#2B7FFF] hover:bg-[#2563EB] text-white text-xs font-mono font-semibold transition-all shadow-[0_0_20px_rgba(43,127,255,0.4)] active:scale-[0.98]"
             >
-              ✕
-            </button>
+              Enter Command Cockpit (/admin) →
+            </Link>
+            <Link
+              href="/planner"
+              className="px-6 py-3 rounded-[6px] bg-[#121317] hover:bg-[#1c1d22] text-[#e2e3e9] text-xs font-mono font-semibold border border-[#1c1d22] hover:border-[#2e3038] transition-all"
+            >
+              Open Corridor String Chart
+            </Link>
           </div>
         </div>
-      )}
 
-      {/* Main Command Center Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6">
-        {/* VIEW 1: OVERVIEW SIGNALING MAP */}
-        {activeTab === 'OVERVIEW' && (
-          <div>
-            <KpiStrip />
-            <InterlockingMap
-              onTrackSelect={handleTrackSelect}
-              selectedTrackId={selectedTrackId}
-            />
-            <IncidentQueue
-              selectedIncidentId={selectedIncidentId}
-              onSelectIncident={handleSelectIncident}
-              onApproveAction={handleApproveIncidentAction}
-            />
+        {/* 3D WebGL Hero Digital Twin Container */}
+        <div id="digital-twin" className="hero-3d-box mt-4">
+          <ShadowBlockHero3D />
+        </div>
+      </section>
+
+      {/* Interactive Shadow Block Comparison Simulator */}
+      <div id="shadow-block">
+        <ShadowBlockComparison />
+      </div>
+
+      {/* Multi-Department Gang Synergy Matrix */}
+      <div id="synergy-matrix">
+        <MultiDeptSynergyMatrix />
+      </div>
+
+      {/* System Architecture & SIL-4 Guardrails Banner */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="p-8 sm:p-12 rounded-[20px] bg-gradient-to-b from-[#121317] to-[#040406] border border-[#1c1d22] flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#ae9357] mb-2">
+              Mission-Critical Operational Security
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-display font-medium text-[#e2e3e9]">
+              Cryptographically Sealed & Kavach Interlocked
+            </h3>
+            <p className="text-sm text-[#9194a1] mt-2">
+              Every maintenance window requires multi-signature biometric consensus between the Station Master, Section Controller,
+              and Field Gang Leads before track circuits transition to protective lockout.
+            </p>
           </div>
-        )}
 
-        {/* VIEW 2: LOCO-CAB FORWARD VISION & KAVACH BRAKING ENGINE */}
-        {activeTab === 'LOCO_CAB' && (
-          <div>
-            <LocoCameraFeed
-              currentScenario={currentScenario}
-              onSelectScenario={handleSelectScenario}
-              onTriggerBraking={handleRunPipeline}
-              onResetSimulation={handleResetSimulation}
-              brakeState={brakeState}
-              isExecuting={isPipelineExecuting}
-              currentSpeedKmh={currentSpeedKmh}
-              brakePressureBar={brakePressureBar}
-              deploymentMode={deploymentMode}
-              activeStage={activeStage}
-              weatherCondition={weatherCondition}
-              onWeatherChange={setWeatherCondition}
-              cameraAngle={cameraAngle}
-              onCameraAngleChange={setCameraAngle}
-            />
+          <Link
+            href="/auditor"
+            className="px-6 py-3 rounded-[6px] bg-[#1c1d22] hover:bg-[#2e3038] text-[#e2e3e9] border border-[#2e3038] text-xs font-mono font-semibold whitespace-nowrap transition-all"
+          >
+            View Cryptographic Audit Ledger →
+          </Link>
+        </div>
+      </section>
 
-            <AgentPipelineCanvas
-              activeStage={activeStage}
-              isExecuting={isPipelineExecuting}
-              deploymentMode={deploymentMode}
-              ebdResult={ebdResult}
-              currentScenario={currentScenario}
-              isAdvisoryApproved={isAdvisoryApproved}
-              onApproveAdvisoryAction={handleApproveAdvisoryAction}
-              onOpenDecisionLog={() => setIsDecisionLogOpen(true)}
-              onReset={handleResetSimulation}
-              onRunPipeline={handleRunPipeline}
-            />
-          </div>
-        )}
-
-        {/* VIEW 3: PLATFORM GATEWAY CCTV & SECTION DISPATCH */}
-        {activeTab === 'PLATFORM_GATEWAY' && (
-          <div>
-            <PlatformGatewayFeed />
-          </div>
-        )}
-      </main>
-
-      {/* Auditor Decision Log Drawer Modal */}
-      <DecisionLogModal
-        isOpen={isDecisionLogOpen}
-        onClose={() => setIsDecisionLogOpen(false)}
-        log={currentDecisionLog}
-      />
+      {/* Footer */}
+      <LandingFooter />
     </div>
   );
 }

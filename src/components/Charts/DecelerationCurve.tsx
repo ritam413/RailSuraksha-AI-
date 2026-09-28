@@ -238,7 +238,7 @@ export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       >
         {isMounted ? (
-          <ResponsiveContainer width={width ?? '100%'} height="100%">
+          <ResponsiveContainer width={(width as number | `${number}%`) ?? '100%'} height="100%">
             <ComposedChart data={chartData} margin={{ top: 15, right: 25, bottom: 20, left: 10 }}>
               <defs>
                 <linearGradient id="ebdGradient" x1="0" y1="0" x2="0" y2="1">
@@ -376,7 +376,6 @@ export const DecelerationCurve: React.FC<DecelerationCurveProps> = ({
                   fill="#10B981"
                   stroke="#FFFFFF"
                   strokeWidth={2}
-                  isFront={true}
                 />
               )}
             </ComposedChart>
