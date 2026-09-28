@@ -1,5 +1,26 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-28 — Next.js 16 Production Build & Recharts TypeScript Fix
+
+### Objective
+Resolve TypeScript build errors that failed during Vercel deployment (`npm run build` / Next.js type check) in `DecelerationCurve.tsx` and `TriageDonut.tsx`.
+
+### Changes Made
+- [`src/components/Charts/DecelerationCurve.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Charts/DecelerationCurve.tsx):
+  - Cast `width` prop to `number | `${number}%`` for `ResponsiveContainer` compatibility.
+  - Removed unsupported `isFront={true}` prop on `ReferenceDot`.
+- [`src/components/Charts/TriageDonut.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Charts/TriageDonut.tsx):
+  - Cast `width` prop to `number | `${number}%`` for `ResponsiveContainer` compatibility.
+  - Adjusted `Pie.onClick` handler to safely extract `data?.department || data?.payload?.department` conforming to Recharts `PieSectorDataItem` callback signature.
+
+### Verification
+- `npx tsc --noEmit` — 0 errors (Passed).
+- `npm run build` — Optimized production bundle generated cleanly (Passed).
+- `npx vitest run` — 20/20 test files passed, 146/146 tests passed (100%).
+
+### Current State
+Next.js production build is 100% clean and ready for Vercel deployment.
+
 ## 2026-09-28 — RBAC Decoupled Endpoints Implementation Plan Saved
 
 ### Objective

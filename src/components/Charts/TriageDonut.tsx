@@ -210,7 +210,7 @@ export const TriageDonut: React.FC<TriageDonutProps> = ({
               <p className="text-[12px] font-semibold text-[#64748B] mt-3">No Active Demands in Queue</p>
             </div>
           ) : (
-            <ResponsiveContainer width={width ?? '100%'} height="100%">
+            <ResponsiveContainer width={(width as number | `${number}%`) ?? '100%'} height="100%">
               <PieChart>
                 <Tooltip
                   content={({ active, payload }) => {
@@ -246,7 +246,10 @@ export const TriageDonut: React.FC<TriageDonutProps> = ({
                   outerRadius={outerRadius}
                   paddingAngle={3}
                   isAnimationActive={false}
-                  onClick={(data: DepartmentSliceData) => handleDepartmentClick(data.department)}
+                  onClick={(data: any) => {
+                    const dept = data?.department || data?.payload?.department;
+                    if (dept) handleDepartmentClick(dept);
+                  }}
                   onMouseEnter={(_, index) => setHoveredSliceIndex(index)}
                   onMouseLeave={() => setHoveredSliceIndex(null)}
                   cursor="pointer"
