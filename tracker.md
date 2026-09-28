@@ -1,5 +1,47 @@
 # Agent Handoff Log (tracker.md)
 
+## 2026-09-28 — 3D Turnout Continuous Path Kinematics & Train Direction Alignment
+
+### Objective
+Resolve the awkward sideways turning and abrupt motion of the 3D train when navigating the point switch turnout. Implement realistic speed deceleration near the direction switcher, a continuous 1:12 transition easement curve, and an authentic railway locomotive cab with exact tangent heading and track superelevation cant.
+
+### Changes Made
+- [`src/components/Three/PointSwitchTurnout3D.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Three/PointSwitchTurnout3D.tsx):
+  - **Mathematical 1:12 Turnout Path Curve**: Created `getTurnoutPath(z)` implementing a parabolic transition curve from $z = -5$ to $z = 5$ that smoothly connects to the 1:12 tangent line ($\alpha = 0.14\text{ rad}$) into Platform 18.
+  - **Kinematic Speed Deceleration Controller**: When the train approaches the switch ($z \in [-18, -2]$) on the `TURNOUT` route, speed smoothly decelerates from cruising speed ($22\text{ m/s}$) down to caution speed ($7\text{ m/s}$) to safely negotiate the switch points, before accelerating back up as it clears the blades.
+  - **Exact Heading Alignment**: Synced `rotation.y = path.angle` and subtle track cant `rotation.z = -path.angle * 0.12` so the train steers smoothly along the curved rails rather than skewing sideways.
+  - **Segmented Dual Turnout Rails & Sleepers**: Rendered both left and right turnout rails along the exact mathematical curve with dynamic width sleepers.
+  - **Detailed Railway Locomotive Cab**: Replaced the flat box with an aerodynamic locomotive cab featuring sloped windshield, high-beam xenon headlights, pantograph, and steel flanged wheels aligned at standard $1.6\text{m}$ gauge.
+
+### Verification
+- `npm run build` — Compiled successfully with zero TypeScript / Next.js errors in 2.1s.
+- 60 FPS Three.js animation verified.
+
+### Current State
+3D Turnout simulation exhibits smooth deceleration, continuous curve steering, and authentic locomotive kinematics.
+
+## 2026-09-28 — 3D Spatial Train Telemetry Badges & Grounded Point Switch HUD
+
+### Objective
+1. Render sleek, taste-driven floating spatial 3D HUD labels attached above moving trains in [`CorridorTwin3D.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Three/CorridorTwin3D.tsx) and passing trains in [`PointSwitchTurnout3D.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Three/PointSwitchTurnout3D.tsx).
+2. Ground the floating middle-viewport telemetry banner in `PointSwitchTurnout3D.tsx` into the top telemetry ribbon and bottom Mission Control dock, removing awkward screen obstruction.
+
+### Changes Made
+- [`src/components/Three/CorridorTwin3D.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Three/CorridorTwin3D.tsx):
+  - Attached `<Html center position={[0, 1.4, 0]}>` HUD label to each moving train capsule with downward stem indicator, train name, live speed/braking state (`110 km/h`, `🛑 TCAS HOLD`, `⚠️ TSR 25 km/h`), and status beacon.
+- [`src/components/Three/PointSwitchTurnout3D.tsx`](file:///d:/Games/Hckthons/IRIS_ai/src/components/Three/PointSwitchTurnout3D.tsx):
+  - Removed detached middle-canvas floating telemetry box.
+  - Integrated location `DADAR JUNCTION (1:12 TURNOUT)` and `⚠️ Form S&T/T-351 Lockout` directly into the Top HUD ribbon.
+  - Grounded active route status (`ENGAGED: MAINLINE (NORMAL) / PLATFORM 18 (REVERSE)`) into the Bottom Mission Control HUD dock next to route switch buttons.
+  - Added spatial `<Html>` badge to the simulated train bogie when passing through the turnout.
+
+### Verification
+- `npm run build` — Compiled successfully with zero TypeScript / Next.js errors (100%).
+- Real-time React Three Fiber canvas render verified.
+
+### Current State
+3D Twin views have clean, unobstructed WebGL canvases with grounded HUD docks and synchronized spatial train badges.
+
 ## 2026-09-28 — Next.js 16 Production Build & Recharts TypeScript Fix
 
 ### Objective

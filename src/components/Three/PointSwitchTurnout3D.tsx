@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useTransition, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 export type SignalAspectType = 'CLEAR' | 'CAUTION' | 'ATTENTION' | 'DANGER';
@@ -15,6 +15,28 @@ export interface PointSwitchTurnout3DProps {
   switchRoute?: SwitchRouteType;
   onToggleRoute?: (route: 'MAINLINE' | 'TURNOUT') => void;
   isLockedOut?: boolean;
+}
+
+// Turnout mathematical path curve (Standard 1:12 Indian Railways Turnout geometry)
+function getTurnoutPath(z: number): { x: number; angle: number } {
+  if (z <= -5.0) {
+    return { x: 0, angle: 0 };
+  }
+  const deltaZ = z - (-5.0);
+  if (deltaZ <= 10.0) {
+    // Parabolic transition easement
+    const curvature = 0.14 / 10.0;
+    const x = 0.5 * curvature * deltaZ * deltaZ;
+    const slope = curvature * deltaZ;
+    const angle = Math.atan(slope);
+    return { x, angle };
+  } else {
+    // Tangent straight diverging line along 1:12 angle (0.14 rad)
+    const xTransitionEnd = 0.5 * 0.14 * 10.0; // 0.7m
+    const remainingZ = deltaZ - 10.0;
+    const x = xTransitionEnd + remainingZ * Math.tan(0.14);
+    return { x, angle: 0.14 };
+  }
 }
 
 function SwitchTurnoutScene({
@@ -35,11 +57,11 @@ function SwitchTurnoutScene({
   const targetX = isReverse ? 0.45 : 0;
   const currentXRef = useRef(0);
 
-  // 60 FPS hardware accelerated tie-rod stroke interpolation
+  // 60 FPS hardware accelerated tie-rod stroke & train kinematics
   useFrame((_, delta) => {
     // Lerp tie rod stroke (115mm physical mechanical throw)
     currentXRef.current += (targetX - currentXRef.current) * Math.min(delta * 8, 1);
-    
+
     if (tieRodRef.current) {
       tieRodRef.current.position.x = -1.2 + currentXRef.current;
     }
@@ -47,22 +69,42 @@ function SwitchTurnoutScene({
       switchBladeRef.current.position.x = currentXRef.current * 0.8;
     }
 
-    // Train Passing Simulation
+    // Train Passing Simulation with Kinematic Slowdown & Continuous Turn Alignment
     if (trainBogieRef.current) {
       if (isSimulatingTrain) {
-        bogieZRef.current += delta * 20;
-        if (bogieZRef.current > 25) {
-          bogieZRef.current = -25;
-        }
-        trainBogieRef.current.position.z = bogieZRef.current;
-        // If reverse, steer bogie along turnout curve
-        if (isReverse && bogieZRef.current > -5) {
-          trainBogieRef.current.position.x = (bogieZRef.current + 5) * 0.15;
-          trainBogieRef.current.rotation.y = -0.15;
+        // Dynamic Kinematic Speed Profile:
+        // When approaching the direction switcher (z from -18 to -3),
+        // if route is TURNOUT, decelerate smoothly from cruise speed (22 m/s) down to 7 m/s caution speed.
+        // As it negotiates and exits the turnout blades (z > 2), accelerate smoothly back up!
+        let currentSpeed = 22;
+        if (isReverse) {
+          if (bogieZRef.current >= -18 && bogieZRef.current <= -2) {
+            // Decelerating / Slowing down near direction switcher
+            const progress = (bogieZRef.current - (-18)) / 16;
+            currentSpeed = 22 - 15 * Math.sin(progress * Math.PI * 0.5); // drops smoothly down to 7 m/s
+          } else if (bogieZRef.current > -2 && bogieZRef.current <= 8) {
+            // Navigating the switch curve at caution TSR speed
+            currentSpeed = 7 + (bogieZRef.current - (-2)) * 0.7; // smoothly climbs 7 -> 14 m/s
+          } else if (bogieZRef.current > 8) {
+            // Clear into Platform 18
+            currentSpeed = 16;
+          }
         } else {
-          trainBogieRef.current.position.x = 0;
-          trainBogieRef.current.rotation.y = 0;
+          // Mainline path: smooth cruising speed
+          currentSpeed = 20;
         }
+
+        bogieZRef.current += delta * currentSpeed;
+        if (bogieZRef.current > 26) {
+          bogieZRef.current = -26;
+        }
+
+        const path = isReverse ? getTurnoutPath(bogieZRef.current) : { x: 0, angle: 0 };
+        trainBogieRef.current.position.z = bogieZRef.current;
+        trainBogieRef.current.position.x = path.x;
+        trainBogieRef.current.rotation.y = path.angle;
+        // Realistic subtle superelevation / cant lean when on curve
+        trainBogieRef.current.rotation.z = isReverse && path.angle > 0 ? -path.angle * 0.12 : 0;
       } else {
         trainBogieRef.current.position.z = -35;
       }
@@ -71,11 +113,15 @@ function SwitchTurnoutScene({
 
   return (
     <group>
-      {/* 1. Sleepers (Timber & Concrete Turnout Sleepers) */}
-      {Array.from({ length: 30 }).map((_, i) => {
-        const z = (i - 15) * 1.5;
-        const sleeperWidth = z > -5 ? 2.2 + (z + 5) * 0.08 : 2.2;
-        const sleeperX = z > -5 ? (z + 5) * 0.04 : 0;
+      {/* 1. Sleepers (Timber & Concrete Turnout Sleepers with Variable Spread) */}
+      {Array.from({ length: 34 }).map((_, i) => {
+        const z = (i - 17) * 1.4;
+        const path = getTurnoutPath(z);
+        const minX = -0.8;
+        const maxX = Math.max(0.8, path.x + 0.8);
+        const sleeperWidth = maxX - minX + 0.6;
+        const sleeperX = (minX + maxX) / 2;
+
         return (
           <mesh key={i} position={[sleeperX, 0.04, z]}>
             <boxGeometry args={[sleeperWidth, 0.08, 0.35]} />
@@ -86,23 +132,47 @@ function SwitchTurnoutScene({
 
       {/* 2. Mainline Left Rail */}
       <mesh position={[-0.8, 0.14, 0]}>
-        <boxGeometry args={[0.09, 0.14, 45]} />
+        <boxGeometry args={[0.09, 0.14, 48]} />
         <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.25} />
       </mesh>
 
       {/* 3. Mainline Right Rail */}
       <mesh position={[0.8, 0.14, 0]}>
-        <boxGeometry args={[0.09, 0.14, 45]} />
+        <boxGeometry args={[0.09, 0.14, 48]} />
         <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.25} />
       </mesh>
 
-      {/* 4. Turnout Diverging Right Rail (Platform 18 curve) */}
-      <group position={[0.8, 0.14, -5]} rotation={[0, -0.14, 0]}>
-        <mesh position={[1.5, 0, 12]}>
-          <boxGeometry args={[0.09, 0.14, 25]} />
-          <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.25} />
-        </mesh>
-      </group>
+      {/* 4. Turnout Diverging Rails (Segmented Left & Right Rail Pair for Platform 18) */}
+      {Array.from({ length: 16 }).map((_, idx) => {
+        const z0 = -5.0 + idx * 1.875;
+        const z1 = z0 + 1.875;
+        const p0 = getTurnoutPath(z0);
+        const p1 = getTurnoutPath(z1);
+        const midZ = (z0 + z1) / 2;
+        const midX = (p0.x + p1.x) / 2;
+        const segAngle = Math.atan2(p1.x - p0.x, z1 - z0);
+        const segLength = Math.hypot(p1.x - p0.x, z1 - z0) + 0.05;
+
+        const leftX = midX - 0.8 * Math.cos(segAngle);
+        const leftZ = midZ + 0.8 * Math.sin(segAngle);
+        const rightX = midX + 0.8 * Math.cos(segAngle);
+        const rightZ = midZ - 0.8 * Math.sin(segAngle);
+
+        return (
+          <group key={idx}>
+            {/* Left Diverging Rail */}
+            <mesh position={[leftX, 0.14, leftZ]} rotation={[0, segAngle, 0]}>
+              <boxGeometry args={[0.09, 0.14, segLength]} />
+              <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.25} />
+            </mesh>
+            {/* Right Diverging Rail */}
+            <mesh position={[rightX, 0.14, rightZ]} rotation={[0, segAngle, 0]}>
+              <boxGeometry args={[0.09, 0.14, segLength]} />
+              <meshStandardMaterial color="#1E293B" metalness={0.8} roughness={0.25} />
+            </mesh>
+          </group>
+        );
+      })}
 
       {/* 5. Moving Switch Tongue Blade Rail */}
       <group ref={switchBladeRef} position={[0, 0.14, -4]}>
@@ -180,31 +250,99 @@ function SwitchTurnoutScene({
         </mesh>
       </group>
 
-      {/* 8. Simulating Train Wheelset Bogie */}
+      {/* 8. Aerodynamic Locomotive Cab & Wheelset Bogie */}
       <group ref={trainBogieRef} position={[0, 0.45, -35]}>
-        {/* Bogie Frame */}
-        <mesh>
-          <boxGeometry args={[1.5, 0.2, 3.5]} />
-          <meshStandardMaterial color="#0284C7" metalness={0.7} />
+        {/* Locomotive Main Body Chassis */}
+        <mesh position={[0, 0.45, 0]} castShadow>
+          <boxGeometry args={[1.55, 0.75, 4.4]} />
+          <meshStandardMaterial color="#0284C7" metalness={0.7} roughness={0.3} />
         </mesh>
-        {/* Left Wheels */}
-        <mesh position={[-0.8, -0.15, -1]} rotation={[Math.PI / 2, 0, 0]}>
+
+        {/* Aerodynamic Tapered Front Nose */}
+        <mesh position={[0, 0.35, 2.3]} rotation={[0.22, 0, 0]}>
+          <boxGeometry args={[1.52, 0.65, 0.8]} />
+          <meshStandardMaterial color="#0369A1" metalness={0.8} roughness={0.2} />
+        </mesh>
+
+        {/* Front Sloped Driver Windshield */}
+        <mesh position={[0, 0.65, 2.05]} rotation={[0.4, 0, 0]}>
+          <boxGeometry args={[1.35, 0.38, 0.1]} />
+          <meshStandardMaterial color="#0F172A" roughness={0.1} metalness={0.9} />
+        </mesh>
+
+        {/* High-Beam Dual LED Headlights */}
+        <mesh position={[-0.45, 0.32, 2.65]}>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={3} />
+        </mesh>
+        <mesh position={[0.45, 0.32, 2.65]}>
+          <sphereGeometry args={[0.09, 12, 12]} />
+          <meshStandardMaterial color="#FEF08A" emissive="#FEF08A" emissiveIntensity={3} />
+        </mesh>
+
+        {/* Roof Catenary Pantograph Frame */}
+        <group position={[0, 0.88, -0.8]}>
+          <mesh position={[0, 0.18, 0]}>
+            <boxGeometry args={[0.8, 0.04, 1.2]} />
+            <meshStandardMaterial color="#475569" metalness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.32, 0]}>
+            <cylinderGeometry args={[0.02, 0.02, 0.3]} />
+            <meshStandardMaterial color="#E2E8F0" metalness={0.9} />
+          </mesh>
+        </group>
+
+        {/* Underbody Bogie Sub-frame */}
+        <mesh position={[0, -0.05, 0]}>
+          <boxGeometry args={[1.4, 0.18, 3.8]} />
+          <meshStandardMaterial color="#0F172A" metalness={0.8} />
+        </mesh>
+
+        {/* Left Wheels (Aligned precisely at x = -0.8) */}
+        <mesh position={[-0.8, -0.15, -1.2]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.28, 0.28, 0.08]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
         </mesh>
-        <mesh position={[-0.8, -0.15, 1]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh position={[-0.8, -0.15, 1.2]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.28, 0.28, 0.08]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
         </mesh>
-        {/* Right Wheels */}
-        <mesh position={[0.8, -0.15, -1]} rotation={[Math.PI / 2, 0, 0]}>
+
+        {/* Right Wheels (Aligned precisely at x = +0.8) */}
+        <mesh position={[0.8, -0.15, -1.2]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.28, 0.28, 0.08]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
         </mesh>
-        <mesh position={[0.8, -0.15, 1]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh position={[0.8, -0.15, 1.2]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.28, 0.28, 0.08]} />
           <meshStandardMaterial color="#E2E8F0" metalness={0.9} roughness={0.2} />
         </mesh>
+
+        {/* Floating Spatial HUD Train Label */}
+        {isSimulatingTrain && (
+          <Html
+            position={[0, 1.7, 0]}
+            center
+            distanceFactor={22}
+            zIndexRange={[100, 0]}
+            className="pointer-events-none select-none"
+          >
+            <div className="flex flex-col items-center">
+              <div
+                className="px-2.5 py-0.5 rounded-[4px] backdrop-blur-md bg-slate-950/90 border border-cyan-500/50 text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-xl text-slate-100"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#38BDF8] animate-pulse" />
+                <span className="text-white font-semibold">WAP-7 #30412 (12345 Vande Bharat)</span>
+                <span className="text-slate-500 font-normal">|</span>
+                <span className="text-cyan-300 font-mono text-[9px]">
+                  {switchRoute === 'MAINLINE' ? 'MAINLINE (NORMAL)' : 'TURNOUT (PF 18)'}
+                </span>
+              </div>
+              <div className="w-[1px] h-2 bg-cyan-500/50" />
+            </div>
+          </Html>
+        )}
       </group>
     </group>
   );
@@ -254,13 +392,25 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
     >
       {/* Top HUD Telemetry Banner */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 p-3 bg-[#0F172A]/90 backdrop-blur-md border-b border-cyan-500/20 text-xs">
-        <div className="flex items-center gap-2 font-mono">
+        <div className="flex items-center gap-2.5 font-mono">
           <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_#38BDF8]" />
-          <span className="text-cyan-300 font-bold tracking-wide">
-            🔀 3D YARD POINT SWITCH TURNOUT ({switchId}) & 4-ASPECT SIGNAL TWIN
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-cyan-300 font-bold tracking-wide">
+              🔀 3D YARD POINT SWITCH TURNOUT ({switchId})
+            </span>
+            <span className="text-slate-500 hidden sm:inline">|</span>
+            <span className="text-slate-400 text-[11px] hidden sm:inline">
+              DADAR JUNCTION (1:12 TURNOUT)
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-3 font-mono text-[11px]">
+
+        <div className="flex items-center gap-2 font-mono text-[11px] flex-wrap">
+          {isLockedOut && (
+            <span className="bg-red-950/90 border border-red-500/50 text-red-300 font-bold px-2 py-0.5 rounded-[4px] flex items-center gap-1 shadow-sm animate-pulse">
+              ⚠️ Form S&T/T-351 Lockout
+            </span>
+          )}
           <span className="bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-[4px]">
             115mm MECHANICAL STROKE
           </span>
@@ -278,7 +428,7 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
         </div>
       </div>
 
-      {/* 3D WebGL Canvas Layer */}
+      {/* 3D WebGL Canvas Layer (Clean & Unobstructed) */}
       <div className="absolute inset-0 z-0">
         {isClient ? (
           <Canvas
@@ -315,26 +465,10 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
         )}
       </div>
 
-      {/* Floating Spatial HUD Banner */}
-      <div className="relative z-10 pointer-events-none p-3">
-        <div className="inline-flex items-center gap-3 bg-slate-900/85 backdrop-blur border border-cyan-500/30 px-3 py-1.5 rounded-[4px] text-xs font-mono">
-          <span className="text-cyan-300 font-semibold">DADAR JUNCTION {switchId} (1:12 TURNOUT)</span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-300">
-            ROUTE: <strong className="text-white">{internalRoute === 'MAINLINE' ? 'MAINLINE (NORMAL)' : 'PLATFORM 18 (REVERSE)'}</strong>
-          </span>
-          {isLockedOut && (
-            <>
-              <span className="text-slate-500">|</span>
-              <span className="text-red-400 font-semibold">⚠️ Form S&T/T-351 Lockout Active</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom Mission Control HUD & Route Switch Buttons */}
+      {/* Bottom Mission Control HUD & Route Switch Buttons (Grounded) */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 p-3 bg-[#0F172A]/90 backdrop-blur-md border-t border-cyan-500/20 text-xs">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-slate-400 font-mono text-[11px] hidden sm:inline">SET ROUTE:</span>
           <button
             onClick={() => handleRouteToggle('MAINLINE')}
             className={`font-mono text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -355,6 +489,15 @@ export const PointSwitchTurnout3D: React.FC<PointSwitchTurnout3DProps> = ({
           >
             🟡 PLATFORM 18 (REVERSE)
           </button>
+
+          <div className="h-4 w-[1px] bg-slate-700 hidden md:block mx-1" />
+
+          <div className="hidden md:flex items-center gap-1.5 font-mono text-[11px] bg-slate-900/80 border border-slate-700/50 px-2.5 py-1 rounded-[4px]">
+            <span className="text-slate-400">ENGAGED:</span>
+            <span className="text-cyan-300 font-bold">
+              {internalRoute === 'MAINLINE' ? 'MAINLINE (NORMAL)' : 'PLATFORM 18 (REVERSE)'}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

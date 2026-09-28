@@ -115,6 +115,57 @@ function MovingTrain({
         <sphereGeometry args={[0.08, 8, 8]} />
         <meshBasicMaterial color={isBraking ? '#FBBF24' : '#E0F2FE'} />
       </mesh>
+
+      {/* Floating Spatial HUD Train Label */}
+      <Html
+        position={[0, 1.4, 0]}
+        center
+        distanceFactor={26}
+        zIndexRange={[100, 0]}
+        className="pointer-events-none select-none"
+      >
+        <div className="flex flex-col items-center">
+          <div
+            className={`px-2.5 py-0.5 rounded-[4px] backdrop-blur-md border text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-xl transition-all duration-300 ${
+              isBraking
+                ? 'bg-rose-950/90 border-rose-500/60 text-rose-200 shadow-rose-950/50'
+                : 'bg-slate-950/85 border-slate-700/60 text-slate-100 shadow-black/60'
+            }`}
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                isBraking
+                  ? 'bg-rose-500 animate-ping'
+                  : 'bg-emerald-400 shadow-[0_0_6px_#34D399]'
+              }`}
+            />
+            <span className="text-white font-semibold">{train.name}</span>
+            <span className="text-slate-500 font-normal">|</span>
+            <span
+              className={`text-[9px] font-mono ${
+                isBraking
+                  ? train.id === 'T2'
+                    ? 'text-rose-400 font-bold'
+                    : 'text-amber-300 font-bold'
+                  : 'text-emerald-300'
+              }`}
+            >
+              {isBraking
+                ? train.id === 'T2'
+                  ? '🛑 TCAS HOLD'
+                  : '⚠️ TSR 25 km/h'
+                : '110 km/h'}
+            </span>
+          </div>
+          {/* Subtle downward stem indicator */}
+          <div
+            className={`w-[1px] h-2 transition-colors ${
+              isBraking ? 'bg-rose-500/60' : 'bg-slate-600/60'
+            }`}
+          />
+        </div>
+      </Html>
     </group>
   );
 }
